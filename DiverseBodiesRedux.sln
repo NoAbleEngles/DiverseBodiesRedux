@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36109.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DiverseBodiesRedux", "DiverseBodiesRedux\DiverseBodiesRedux.vcxproj", "{602E0C01-819A-4E3D-9269-4897162739C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Debug|x64.ActiveCfg = Debug|x64
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Debug|x64.Build.0 = Debug|x64
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Debug|x86.ActiveCfg = Debug|Win32
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Debug|x86.Build.0 = Debug|Win32
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Release|x64.ActiveCfg = Release|x64
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Release|x64.Build.0 = Release|x64
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Release|x86.ActiveCfg = Release|Win32
+		{602E0C01-819A-4E3D-9269-4897162739C6}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FBBA3092-30EB-48E5-A9AB-71C592DD0E81}
+	EndGlobalSection
+EndGlobal

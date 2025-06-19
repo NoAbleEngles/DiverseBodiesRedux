@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{602e0c01-819a-4e3d-9269-4897162739c6}</ProjectGuid>
+    <RootNamespace>DiverseBodiesRedux</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32;_WINDOWS;NDEBUG;_UNICODE;BOOST_STL_INTERFACES_DISABLE_CONCEPTS;WINVER=0x0601;_WIN32_WINNT=0x0601;FMT_SHARED;SPDLOG_SHARED_LIB;SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(BOOST);C:\cpp\CommonLibF4\CommonLibF4\include;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\include;.\Sources</AdditionalIncludeDirectories>
+      <TreatWarningAsError>true</TreatWarningAsError>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <UseStandardPreprocessor>true</UseStandardPreprocessor>
+      <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
+      <DisableSpecificWarnings>4200;4201;4324;4251;4275</DisableSpecificWarnings>
+      <UseFullPaths>false</UseFullPaths>
+      <AdditionalOptions>%(AdditionalOptions) /utf-8 /Ob3</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(BOOSTLIBS);C:\cpp\CommonLibF4\build\CommonLibF4\Release;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;fmt.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\API.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\F4SE.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Impl\PCH.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Impl\WinAPI.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Interfaces.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Logger.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Trampoline.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Version.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Actor.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\ActorValueInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\AITimeStamp.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Archive2.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Atomic.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSBaseAliases.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSBodyPartDefs.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterMorph.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterTint.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCreatedObjectManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSDefaultObjectManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSDynamicPersistenceManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSEntryPoint.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSHeadPart.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSInventoryInterface.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSInventoryItem.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSMod.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSPrimitive.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSSaveLoad.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSStoryEventManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSStoryManagerTreeForm.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSSynchronizedAnimationManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSTextureSet.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\bhkCharacterController.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSBound.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSBTreeFile.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSContainer.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSExtraData.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFadeNode.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFixedString.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSGraphics.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSHavok.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSInputDeviceManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSInputEventReceiver.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSInputEventSingleUser.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSInputEventUser.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSLock.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSMemStorage.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSMTAManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSPointerHandle.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSPreCulledObjects.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSResource.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSResourceNiBinaryStream.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSResource\BSResourceEnums.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSResource\LooseFileStreamBase.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSResource\Stream.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSResource\StreamBase.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScaleformManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScriptUtil.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Array.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\ArrayWrapper.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\CompiledScriptLoader.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\ErrorLogger.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\ICachedErrorMessage.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IClientVM.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IComplexType.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IFunction.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IHandleReaderWriter.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\ILoader.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IMemoryPagePolicy.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\AttachedScript.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\CodeTasklet.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\EventRelay.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\FunctionMessage.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\IFuncCallQuery.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\RawFuncCallQuery.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\ReadableStringTable.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\ReadableTypeTable.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\ScriptFunction.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\SuspendedStack.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\VDescTable.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\VirtualMachine.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\WritableStringTable.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Internal\WritableTypeTable.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IObjectHandlePolicy.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IObjectProcessor.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IProfilePolicy.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\ISavePatcherInterface.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IStackCallbackFunctor.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IStackCallbackSaveInterface.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IVirtualMachine.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IVMDebugInterface.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IVMObjectBindInterface.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\IVMSaveLoadInterface.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\LinkerProcessor.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\LogEvent.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\MergedBoundScript.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\NF_util\NativeFunctionBase.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Object.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\ObjectBindPolicy.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\ObjectTypeInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\PackedInstructionStream.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\PropertyGroupInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\PropertyTypeInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\SimpleAllocMemoryPagePolicy.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Stack.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\StackFrame.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\StatsEvent.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Struct.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\StructTypeInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\TypeInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSScript\Variable.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSSemaphore.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSShader.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSSoundHandle.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSSpring.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSStorage.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSStringPool.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSStringT.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSSystemFile.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSSystemFileStreamer.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSSystemUtility.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTArray.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTBTree.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTEvent.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTextureSet.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTextureStreamer.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTFreeList.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTHashMap.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTimer.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTInterpolator.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTList.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTMessageQueue.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTObjectArena.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTOptional.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTPoint.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTPointerAndFlags.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTSingleton.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTSmallIndexScatterTable.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTSmartPointer.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTTuple.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Calendar.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\CELLJobs.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\CombatFormulas.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Console.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\ControlMap.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\CRC.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Events.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\FavoritesManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\FormComponents.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\FormFactory.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\FormUtil.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\GamePlayFormulas.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\GameScript.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\HUDModes.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\IMenu.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\IMovementInterface.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\InputDevice.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\InputEvent.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Interface3D.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Inventory3DManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\InventoryUserUIUtils.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\ItemCrafted.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\MagicItems.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Main.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\MemoryManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\MenuControls.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\MenuCursor.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\MessageMenuManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Movement.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\NavMesh.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\NavMeshInfoMap.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\PipboyInventoryUtils.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\PipboyManager.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\PlayerCharacter.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\PlayerControls.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\PowerArmor.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\PowerUtils.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\ProcessLists.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Projectiles.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Script.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\SCRIPT_OUTPUT.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\SDirectory2.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\SendHUDMessage.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Settings.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\SplineUtils.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\SWFToCodeFunctionHandler.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESBoundAnimObjects.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESBoundObjects.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESCamera.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESCombatStyle.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESCondition.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESDataHandler.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESFaction.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESFile.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESForms.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESObjectREFRs.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESPackages.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESRace.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESWaterForm.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\TESWorldSpace.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\UI.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\UIMessage.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\UIMessageQueue.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\UIShaderFXInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\UserEvents.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\VATS.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Workshop.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Fallout.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkArray.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkBaseObject.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkBaseTypes.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkBlockStream.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkHandle.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkLifoAllocator.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkMemoryAllocator.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkMemoryRouter.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkMemorySystem.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpAllHitsCollector.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpBodyId.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpCharacterContext.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpCharacterState.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpCharacterSurfaceInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpClosestUniqueBodyIdHitCollector.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpCollisionQueryCollector.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpCollisionResult.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpMaterialId.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpShape.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hknpUniqueBodyIdHitCollector.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkReferencedObject.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkRefPtr.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkSimdFloat.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Havok\hkVector4.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\msvc\functional.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\msvc\memory.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\msvc\typeinfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiAlphaProperty.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiAVObject.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiBinaryStream.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiBound.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiCamera.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiCollisionObject.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiColor.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiController.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiExtraData.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiFile.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiFlags.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiFrustum.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiMatrix3.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiMemStream.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiNode.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiObject.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiObjectNET.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiPoint2.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiPoint3.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiPoint4.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiProperty.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiQuaternion.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiRect.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiRefObject.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiRTTI.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiShadeProperty.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiSmartPointer.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiStream.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTArray.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTCollection.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTDefaultAllocator.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTexture.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTimeController.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTLargeArray.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTList.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTListBase.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTMap.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTMapBase.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTPointerAllocator.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTPointerListBase.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTPointerMap.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NetImmerse\NiTransform.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\NiRTTI_IDs.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\RTTI.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\RTTI_IDs.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_AS3.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_ASMovieRootBase.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_ASString.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_Loader.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_Log.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_Player.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_Resource.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\GFx\GFx_Types.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_Allocator.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_AllocInfo.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_Array.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_Atomic.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_List.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_Log.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_Memory.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_MemoryHeap.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_RefCount.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_Stats.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_SysAlloc.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_System.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Kernel\SF_Threads.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Color.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Constants.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Containers.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Context.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Matrix2x4.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Matrix3x4.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Matrix4x4.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_ThreadCommandQueue.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_TreeNode.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Types2D.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Viewport.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\VTABLE_IDs.h" />
+    <ClInclude Include="Sources\globals.h" />
+    <ClInclude Include="Sources\Ini\Ini.h" />
+    <ClInclude Include="Sources\LooksMenu\FixedString.h" />
+    <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
+    <ClInclude Include="Sources\OverlaysValidator\OverlaysValidator.h" />
+    <ClInclude Include="Sources\PCH.h" />
+    <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
+    <ClInclude Include="Sources\Preset\Details\Conditions.h" />
+    <ClInclude Include="Sources\Preset\Details\Overlay.h" />
+    <ClInclude Include="Sources\Preset\Preset.h" />
+    <ClInclude Include="Sources\PugiXML\pugiconfig.hpp" />
+    <ClInclude Include="Sources\PugiXML\pugixml.hpp" />
+    <ClInclude Include="Sources\Utils\RandomGenerator.h" />
+    <ClInclude Include="Sources\Utils\utility.h" />
+    <ClInclude Include="Sources\Version.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\Ini\Ini.cpp" />
+    <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp" />
+    <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\OverlaysValidator\OverlaysValidator.cpp" />
+    <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
+    <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
+    <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
+    <ClCompile Include="Sources\Preset\Details\Conditions.cpp" />
+    <ClCompile Include="Sources\Preset\Details\Overlay.cpp" />
+    <ClCompile Include="Sources\Preset\Preset.cpp" />
+    <ClCompile Include="Sources\PugiXML\pugixml.cpp" />
+    <ClCompile Include="Sources\Utils\RandomGenerator.cpp" />
+    <ClCompile Include="Sources\Utils\utility.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
