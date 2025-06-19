@@ -1,11 +1,14 @@
 #include "PresetsManager.h"
 #include "Ini/ini.h"
 
-extern ini::map g_ini;
+namespace globals {
+    extern ini::map* g_ini;
+}
+
 
 PresetsManager::PresetsManager() {
     // Парсим BODYMORPHS из папок, указанных в ini-файле 
-    auto folders_string = g_ini.at<std::string>("PATH/sBodymorphsFolders", "");
+    auto folders_string = globals::g_ini->at<std::string>("PATH/sBodymorphsFolders", "");
     if (folders_string.empty()) {
         logger::error("No bodymorphs folders defined in ini.");
         return;
@@ -17,7 +20,7 @@ PresetsManager::PresetsManager() {
     }
 
     // Парсим BODYHAIRS из папок, указанных в ini-файле
-    folders_string = g_ini.at<std::string>("PATH/sBodyhairsFolders", "");
+    folders_string = globals::g_ini->at<std::string>("PATH/sBodyhairsFolders", "");
     if (folders_string.empty()) {
         logger::error("No bodyhairs folders defined in ini.");
         return;
@@ -35,18 +38,75 @@ PresetsManager& PresetsManager::get() {
 }
 
 void PresetsManager::validatePresets() {
-    std::set<std::shared_ptr<Preset>> validPresets;
-
+    // Копируем пресеты под мьютексом
+    std::vector<std::shared_ptr<Preset>> presetsCopy;
     {
         std::lock_guard lock(m_presetsMutex);
-        // Копируем валидные пресеты во временный сет
-        for (const auto& preset : m_presets) {
-            if (preset && preset->isValid()) {
+        presetsCopy.assign(m_presets.begin(), m_presets.end());
+    }
+
+    // Для каждого пресета запускаем асинхронную проверку
+    std::vector<std::pair<std::shared_ptr<Preset>, std::future<bool>>> futures;
+    for (const auto& preset : presetsCopy) {
+        if (preset) {
+            futures.emplace_back(preset, preset->isValidAsync());
+        }
+    }
+
+    // Запускаем отдельный detached thread для сбора результатов и обновления коллекции
+    std::thread([this, futures = std::move(futures)]() mutable {
+        std::set<std::shared_ptr<Preset>> validPresets;
+        for (auto& [preset, fut] : futures) {
+            if (fut.valid() && fut.get()) {
                 validPresets.insert(preset);
             }
         }
-        // Обмениваем содержимое
-        m_presets.swap(validPresets);
-    }
-    // validPresets теперь содержит "старые" (невалидные) пресеты, которые будут уничтожены вне lock'а
+        // Обновляем коллекцию под мьютексом
+        {
+            std::lock_guard lock(m_presetsMutex);
+            m_presets.swap(validPresets);
+            m_presetsValidated = true;
+        }
+        // Уведомляем всех подписчиков о завершении валидации
+        {
+            std::lock_guard lock(m_callbacksMutex);
+
+            // Сначала вызываем все колбэки
+            for (const auto& [id, cb, once] : m_validationCallbacks) {
+                if (cb) cb();
+            }
+
+            // Затем удаляем одноразовые подписки
+            m_validationCallbacks.erase(
+                std::remove_if(
+                    m_validationCallbacks.begin(), m_validationCallbacks.end(),
+                    [](const CallbackEntry& entry) { return entry.oneShot; }
+                ),
+                m_validationCallbacks.end()
+            );
+        }
+        // validPresets уничтожается вне lock'а
+        }).detach();
+}
+
+bool PresetsManager::isReady() {
+    return m_presetsValidated;
+}
+
+PresetsManager::CallbackId PresetsManager::subscribeOnValidated(const std::function<void()>& callback, bool oneTimeShot) {
+    std::lock_guard lock(m_callbacksMutex);
+    CallbackId id = m_nextCallbackId++;
+    m_validationCallbacks.push_back({ id, callback , oneTimeShot });
+    return id;
+}
+
+bool PresetsManager::unsubscribeFromValidated(CallbackId id) {
+    std::lock_guard lock(m_callbacksMutex);
+    m_validationCallbacks.erase(
+        std::remove_if(
+            m_validationCallbacks.begin(), m_validationCallbacks.end(),
+            [id](const CallbackEntry& entry) { return entry.id == id; }
+        ),
+        m_validationCallbacks.end()
+    );
 }

@@ -2,6 +2,7 @@
 #include "PugiXML/pugixml.hpp"
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include "Ini/ini.h"
+#include "ValidateOverlay/ValidateOverlay.h"
 #include "globals.h"
 
 
@@ -174,8 +175,16 @@ std::string BodymorphsPreset::id() const noexcept
 	return Preset::id();
 }
 
-bool BodymorphsPreset::isValid() const noexcept {
-	return !empty() && !m_morphs.empty() && !m_conditions.empty();
+std::future<bool> BodymorphsPreset::isValidAsync() const noexcept {
+	// Копируем необходимые данные для потокобезопасности
+	bool isEmpty = empty();
+	bool hasMorphs = !m_morphs.empty();
+	bool hasConds = !m_conditions.empty();
+
+	// Возвращаем future, который выполнит проверку асинхронно
+	return std::async(std::launch::async, [isEmpty, hasMorphs, hasConds]() {
+		return !isEmpty && hasMorphs && hasConds;
+		});
 }
 
 // @brief загружает пресет из файла. Обнуляет ранее загруженные данные, чтобы избежать конфликтов. 

@@ -459,7 +459,6 @@
     <ClInclude Include="Sources\Ini\Ini.h" />
     <ClInclude Include="Sources\LooksMenu\FixedString.h" />
     <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
-    <ClInclude Include="Sources\OverlaysValidator\OverlaysValidator.h" />
     <ClInclude Include="Sources\PCH.h" />
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
@@ -469,13 +468,13 @@
     <ClInclude Include="Sources\PugiXML\pugixml.hpp" />
     <ClInclude Include="Sources\Utils\RandomGenerator.h" />
     <ClInclude Include="Sources\Utils\utility.h" />
+    <ClInclude Include="Sources\ValidateOverlay\ValidateOverlay.h" />
     <ClInclude Include="Sources\Version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Ini\Ini.cpp" />
     <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp" />
     <ClCompile Include="Sources\main.cpp" />
-    <ClCompile Include="Sources\OverlaysValidator\OverlaysValidator.cpp" />
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
@@ -485,6 +484,7 @@
     <ClCompile Include="Sources\PugiXML\pugixml.cpp" />
     <ClCompile Include="Sources\Utils\RandomGenerator.cpp" />
     <ClCompile Include="Sources\Utils\utility.cpp" />
+    <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -8,6 +8,8 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <future>
+#include <ValidateOverlay/ValidateOverlay.h>
 
  /**
  * @brief Типы тел для пресетов.
@@ -143,10 +145,10 @@ public:
 	virtual std::string id() const noexcept = 0;
 
 	/**
-	 * @brief Узнать является ли пресет валидным (не пустой, доступны ресурсы на которые пресет ссылается)
+	 * @brief Узнать является ли пресет валидным (не пустой, доступны ресурсы на которые пресет ссылается). Ассинхронный метод.
 	 * @return булево значение, true если пресет валиден.
 	 */
-	virtual bool isValid() const noexcept;
+	virtual std::future<bool> isValidAsync() const noexcept;
 
 protected:
 	/**
@@ -267,8 +269,8 @@ public:
 	/// @copydoc Preset::name
 	std::string id() const noexcept override;
 
-	/// @copydoc Preset::isValid
-	bool isValid() const noexcept override;
+	/// @copydoc Preset::isValidAsync
+	std::future<bool> isValidAsync() const noexcept override;
 
 private:
 
@@ -377,8 +379,8 @@ public:
 	/// @copydoc Preset::name
 	std::string id() const noexcept override;
 
-	/// @copydoc Preset::isValid
-	bool isValid() const noexcept override;
+	/// @copydoc Preset::isValidAsync
+	std::future<bool> isValidAsync() const noexcept override;
 
 private:
 
@@ -392,8 +394,9 @@ private:
 	bool loadFromFile(const std::string& presetFile) override;
 
 	/**
-	 * @brief Поиск UID по стрингу, необходимо для удаления наложений.
+	 * @brief Валидация оверлеев.
 	 */
+	ValidateOverlay& validate = ValidateOverlay::validateOverlay();
 };
 
 /**

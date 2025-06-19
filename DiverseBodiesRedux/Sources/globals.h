@@ -1,6 +1,9 @@
-#pragma once
+#ifndef GLOBALS_H
+	#define GLOBALS_H
+
 #include <F4SE/F4SE.h>
 #include <RE/Fallout.h>
+#include "Ini/ini.h"
 
 namespace logger = F4SE::log;
 
@@ -64,22 +67,53 @@ namespace ids
 
 namespace globals
 {
-	RE::BGSKeyword* kwd_diversed;
-	RE::BGSKeyword* kwd_excluded;
-	RE::BGSKeyword* isPowerArmorFrame;
+	inline ini::map* g_ini = nullptr;
 
-	RE::BGSListForm* flst_excluded_npc;
-	RE::BGSListForm* flst_qualifying_race;
+	inline RE::BGSKeyword* kwd_diversed;
+	inline RE::BGSKeyword* kwd_excluded;
+	inline RE::BGSKeyword* isPowerArmorFrame;
 
-	RE::BGSMessage* msg_DB_WrongFile;
-	RE::BGSMessage* msg_DB_WrongFileActor;
+	inline RE::BGSListForm* flst_excluded_npc;
+	inline RE::BGSListForm* flst_qualifying_race;
 
-	RE::BGSPerk* perk_diverse;
-	RE::AlchemyItem* alch_change_morphs_potion;
+	inline RE::BGSMessage* msg_DB_WrongFile;
+	inline RE::BGSMessage* msg_DB_WrongFileActor;
+
+	inline RE::BGSPerk* perk_diverse;
+	inline RE::AlchemyItem* alch_change_morphs_potion;
 
 	using namespace ids;
 
-	inline void initConsts() {
+	inline bool readIni()
+	{
+		namespace fs = std::filesystem;
+
+		fs::path iniPath = fs::current_path() / "Data" / "MCM" / "Settings" / "DiverseBodiesRedux.ini";
+		if (!fs::exists(iniPath)) {
+			fs::path alternativeIni = fs::current_path() / "Data" / "MCM" / "Config" / "DiverseBodiesRedux" / "settings.ini";
+			if (!fs::exists(alternativeIni)) {
+				logger::info("Configuration INI file not found: {} or {}", iniPath.string(), alternativeIni.string());
+				return false;
+			}
+			// Ensure the target directory exists
+			fs::create_directories(iniPath.parent_path());
+			// Copy alternative INI to the expected location
+			try {
+				fs::copy_file(alternativeIni, iniPath, fs::copy_options::overwrite_existing);
+				logger::info("Copied default config from {} to {}", alternativeIni.string(), iniPath.string());
+			}
+			catch (const std::exception& e) {
+				logger::info("Failed to copy config file: {}", e.what());
+				return false;
+			}
+		}
+
+		g_ini = new ini::map(iniPath.string());
+		return true;
+	}
+
+	inline void initForms() {
+
 		kwd_diversed = getPtr<RE::BGSKeyword*>(formid_kwd_diversed, plugin_name);
 		logger::info("kwd_diversed: {}", kwd_diversed ? "found" : "not found");
 
@@ -110,3 +144,5 @@ namespace globals
 		logger::info("Consts initialized successfully.");
 	}
 }
+
+#endif // !GLOBALS_H

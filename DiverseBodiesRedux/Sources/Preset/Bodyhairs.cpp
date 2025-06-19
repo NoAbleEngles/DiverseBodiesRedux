@@ -3,6 +3,7 @@
 #include "Preset.h"
 #include <PugiXML/pugixml.hpp>
 
+
 BodyhairsPreset::BodyhairsPreset() :
 	Preset(std::string{}, PresetType::BODYHAIRS) {}
 
@@ -179,8 +180,40 @@ std::string BodyhairsPreset::id() const noexcept
 	return Preset::id();
 }
 
-bool BodyhairsPreset::isValid() const noexcept {
+std::future<bool> BodyhairsPreset::isValidAsync() const noexcept {
+	// Если пресет пустой — сразу false
+	if (empty()) {
+		return std::async(std::launch::deferred, [] { return false; });
+	}
 
+	// Копируем id оверлеев для потокобезопасности
+	std::vector<std::string> overlayIds;
+	overlayIds.reserve(m_overlays.size());
+	for (const auto& overlay : m_overlays) {
+		overlayIds.push_back(overlay.id());
+	}
+
+	// Для каждого id запускаем асинхронную валидацию
+	std::vector<std::future<bool>> futures;
+	futures.reserve(overlayIds.size());
+	for (const auto& id : overlayIds) {
+		futures.push_back(validate(id));
+	}
+
+	// Возвращаем общий future, который завершится, когда все проверки завершатся
+	return std::async(std::launch::async, [futures = std::move(futures), overlayIds, this]() mutable {
+		bool anyValid = false;
+		for (size_t i = 0; i < futures.size(); ++i) {
+			// Ждём завершения каждой проверки, но не блокируем основной поток, т.к. isValidAsync сам асинхронный
+			if (futures[i].get()) {
+				anyValid = true;
+			}
+		}
+		if (!anyValid) {
+			logger::error("BodyhairsPreset is not valid: no valid overlays found.");
+		}
+		return anyValid;
+		});
 }
 
 bool BodyhairsPreset::loadFromFile(const std::string& presetFile)

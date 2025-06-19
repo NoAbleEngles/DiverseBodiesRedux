@@ -88,7 +88,7 @@
     <Filter Include="DiverseBodies\PresetsManager">
       <UniqueIdentifier>{b5856623-b994-4936-8e64-9642120b7b5a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DiverseBodies\OverlaysValidator">
+    <Filter Include="DiverseBodies\ValidateOverlay">
       <UniqueIdentifier>{b0ad3710-59d0-4e70-ba9e-420cf5e95c38}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -1074,8 +1074,8 @@
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h">
       <Filter>DiverseBodies\PresetsManager</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\OverlaysValidator\OverlaysValidator.h">
-      <Filter>DiverseBodies\OverlaysValidator</Filter>
+    <ClInclude Include="Sources\ValidateOverlay\ValidateOverlay.h">
+      <Filter>DiverseBodies\ValidateOverlay</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1115,8 +1115,8 @@
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp">
       <Filter>DiverseBodies\PresetsManager</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\OverlaysValidator\OverlaysValidator.cpp">
-      <Filter>DiverseBodies\OverlaysValidator</Filter>
+    <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp">
+      <Filter>DiverseBodies\ValidateOverlay</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

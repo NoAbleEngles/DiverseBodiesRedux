@@ -1,5 +1,12 @@
 #include "PCH.h"
+#include "globals.h"
 #include "Ini/Ini.h"
+#include "PresetsManager/PresetsManager.h"
+#include <filesystem>
+
+void MessageHandler(F4SE::MessagingInterface::Message* a_msg);
+void initAfterGameWasStarted();
+void initAfterGameDataWasLoaded();
 
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a_f4se, F4SE::PluginInfo* a_info)
 {
@@ -25,7 +32,8 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
 #endif
 
 	spdlog::set_default_logger(std::move(log));
-	spdlog::set_pattern("%g(%#): [%^%l%$] %v"s);
+	//spdlog::set_pattern("%g(%#): [%^%l%$] %v"s);
+	spdlog::set_pattern("[%m/%d/%Y - %T] [%^%l%$] %v"s);
 
 	logger::info("{} v{}", Version::Name, Version::Version);
 
@@ -50,8 +58,71 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Query(const F4SE::QueryInterface* a
 extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f4se)
 {
 	F4SE::Init(a_f4se);
+	if (!globals::readIni()) {
+		logger::critical("Failed to read ini file... closing plugin.");
+		return false;
+	}
 
-	logger::info("hello world!");
+	const auto serialization = F4SE::GetSerializationInterface();
+	if (!serialization) {
+		logger::critical("Failed to get F4SE serialization interface, marking as incompatible.");
+		return false;
+	}
+	else {
+		serialization->SetUniqueID(Version::UID);
+		//serialization->SetRevertCallback();
+		//serialization->SetSaveCallback(dbr_manager::ActorsManager::Serialize);
+		//serialization->SetLoadCallback(dbr_manager::ActorsManager::Deserialize);
+		logger::info("Registered with F4SE serialization interface.");
+	}
+
+	const auto messaging = F4SE::GetMessagingInterface();
+	if (!messaging || !messaging->RegisterListener(MessageHandler)) {
+		logger::info("Failed to get F4SE messaging interface, marking as incompatible.");
+		return false;
+	}
+	else {
+		logger::info("Registered with F4SE messaging interface.");
+		logger::info("Starting...");
+		initAfterGameWasStarted();
+	}
 
 	return true;
+}
+
+void MessageHandler(F4SE::MessagingInterface::Message* a_msg)
+{
+	if (!a_msg) {
+		return;
+	}
+	switch (a_msg->type) {
+	case F4SE::MessagingInterface::kGameDataReady:
+	{
+		initAfterGameDataWasLoaded();
+		break;
+	}
+	case F4SE::MessagingInterface::kPreLoadGame:
+	{
+		break;
+	}
+	case F4SE::MessagingInterface::kPreSaveGame:
+	{
+		break;
+	}
+	/*case F4SE::MessagingInterface::kPostLoadGame:
+		{
+			global::add_potion();
+			break;
+		}*/
+	}
+}
+
+void initAfterGameWasStarted() {
+
+}
+
+void initAfterGameDataWasLoaded() {
+	globals::initForms();
+	PresetsManager::get().validatePresets();
+	logger::info("DiverseBodiesRedux loaded successfully.");
 }
