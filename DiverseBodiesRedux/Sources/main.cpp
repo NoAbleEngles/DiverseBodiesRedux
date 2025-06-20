@@ -103,6 +103,7 @@ void MessageHandler(F4SE::MessagingInterface::Message* a_msg)
 	}
 	case F4SE::MessagingInterface::kPreLoadGame:
 	{
+		
 		break;
 	}
 	case F4SE::MessagingInterface::kPreSaveGame:
@@ -123,6 +124,6 @@ void initAfterGameWasStarted() {
 
 void initAfterGameDataWasLoaded() {
 	globals::initForms();
-	PresetsManager::get().validatePresets();
+	PresetsManager::get().validatePresets(); 
 	logger::info("DiverseBodiesRedux loaded successfully.");
 }

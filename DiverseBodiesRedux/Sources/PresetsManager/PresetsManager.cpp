@@ -110,3 +110,17 @@ bool PresetsManager::unsubscribeFromValidated(CallbackId id) {
         m_validationCallbacks.end()
     );
 }
+
+inline std::shared_ptr<Preset> PresetsManager::getPreset(const std::string& id) const noexcept {
+    auto it = std::find_if(m_presets.begin(), m_presets.end(),
+        [&id](const std::shared_ptr<Preset>& preset) {
+            return preset && preset->id() == id;
+	});
+	return (it != m_presets.end()) ? *it : nullptr;
+}
+
+
+
+std::shared_ptr<Preset> PresetsManager::operator[](const std::string& id) const noexcept {
+    return getPreset(id);
+}

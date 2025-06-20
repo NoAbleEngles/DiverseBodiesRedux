@@ -91,6 +91,12 @@
     <Filter Include="DiverseBodies\ValidateOverlay">
       <UniqueIdentifier>{b0ad3710-59d0-4e70-ba9e-420cf5e95c38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DiverseBodies\ActorsManager">
+      <UniqueIdentifier>{5b0e7a38-99e2-4a8e-9774-fd9d5fd3c8c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\ActorsManager\Details">
+      <UniqueIdentifier>{f63a9026-a81e-43e7-8c65-1917c82723e4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\API.h">
@@ -1077,6 +1083,18 @@
     <ClInclude Include="Sources\ValidateOverlay\ValidateOverlay.h">
       <Filter>DiverseBodies\ValidateOverlay</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\ActorsManager\ActorsManager.h">
+      <Filter>DiverseBodies\ActorsManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ActorsManager\Details\ActrorsPresetHashEquals.hpp">
+      <Filter>DiverseBodies\ActorsManager\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ActorsManager\Details\ThreadSafeWaitingActors.hpp">
+      <Filter>DiverseBodies\ActorsManager\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\Details\PresetsRandimizer.h">
+      <Filter>DiverseBodies\Preset\Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1118,5 +1136,14 @@
     <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp">
       <Filter>DiverseBodies\ValidateOverlay</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp">
+      <Filter>DiverseBodies\ActorsManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\Details\PresetsRandimizer.cpp">
+      <Filter>DiverseBodies\Preset\Details</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Sources\zlib\lib\zlibstatic.lib" />
   </ItemGroup>
 </Project>

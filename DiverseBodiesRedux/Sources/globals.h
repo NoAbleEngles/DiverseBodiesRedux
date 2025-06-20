@@ -63,6 +63,12 @@ namespace ids
 
 	//potion
 	constexpr uint32_t formid_alch_change_morphs_potion = 0x5;
+
+	//races
+	constexpr uint32_t formid_race_HumanRace = 0x13746;
+	constexpr uint32_t formid_race_GhoulRace = 0xEAFB6;
+	constexpr uint32_t formid_race_SynthGen2Race = 0x10BD65;
+
 }
 
 namespace globals
@@ -81,6 +87,10 @@ namespace globals
 
 	inline RE::BGSPerk* perk_diverse;
 	inline RE::AlchemyItem* alch_change_morphs_potion;
+
+	/*inline RE::TESRace* race_Human;
+	inline RE::TESRace* race_Ghoul;
+	inline RE::TESRace* race_Synth;*/
 
 	using namespace ids;
 
@@ -141,8 +151,76 @@ namespace globals
 		alch_change_morphs_potion = getPtr<RE::AlchemyItem*>(formid_alch_change_morphs_potion, plugin_name);
 		logger::info("alch_change_morphs_potion: {}", alch_change_morphs_potion ? "found" : "not found");
 
-		logger::info("Consts initialized successfully.");
+		/*race_Human = getPtr<RE::TESRace*>(formid_race_HumanRace);
+		logger::info("race_Human: {}", alch_change_morphs_potion ? "found" : "not found");
+
+		race_Ghoul = getPtr<RE::TESRace*>(formid_race_GhoulRace);
+		logger::info("race_Ghoul: {}", alch_change_morphs_potion ? "found" : "not found");
+
+		race_Synth = getPtr<RE::TESRace*>(formid_race_SynthGen2Race);
+		logger::info("race_Synth: {}", alch_change_morphs_potion ? "found" : "not found");*/
+
+		logger::info("Globals initialized.");
 	}
 }
 
+namespace functions {
+	inline RE::TESNPC* getFaceTESNPC(RE::TESNPC* npc) {
+		while (npc->faceNPC)
+			npc = npc->faceNPC;
+		return npc;
+	}
+
+	inline RE::TESNPC* getLeveledTESNPC(RE::TESNPC* npc)
+	{
+		while (npc) {
+			const auto& templateFlags = npc->actorData.templateUseFlags;
+			const bool useTemplate = (templateFlags & RE::TESActorBaseData::TemplateFlags::kFlagTraits) != 0;
+
+			if (!useTemplate || !npc->templateForms)
+				break;
+
+			auto nextNPC = RE::fallout_cast<RE::TESNPC*>(*npc->templateForms);
+			if (!nextNPC)
+				break;
+
+			npc = nextNPC;
+		}
+		return npc;
+	}
+
+	inline void removeChargenConditions(RE::TESNPC* npc)
+	{
+		if (npc) {
+			npc = getFaceTESNPC(npc);
+			if (npc && npc->formType == RE::ENUM_FORM_ID::kNPC_) {
+				auto hparts = npc->GetHeadParts();
+				for (auto& hp : hparts) {
+					if (hp && hp->chargenConditions && hp->chargenConditions.head)
+						hp->chargenConditions.head = nullptr;
+				}
+			}
+		}
+	}
+
+	inline void remove_chargen_from_all_tesnpc(RE::TESNPC* npc)
+	{
+		if (npc) {
+			npc->actorData.actorBaseFlags |= RE::TESActorBase::ACTOR_BASE_DATA_FLAGS::kFlagIsCharGenFacePreset;
+			removeChargenConditions(npc);
+			if (npc->faceNPC && npc->faceNPC->formType == RE::ENUM_FORM_ID::kNPC_) {
+				remove_chargen_from_all_tesnpc(npc->faceNPC);
+			}
+
+			auto& templateFlags = npc->actorData.templateUseFlags;
+			if (((templateFlags & RE::TESActorBaseData::TemplateFlags::kFlagTraits) != 0) && npc->templateForms) {
+				npc = reinterpret_cast<RE::TESNPC*>(*npc->templateForms);
+				if (npc && npc->formType == RE::ENUM_FORM_ID::kNPC_) {
+					remove_chargen_from_all_tesnpc(npc);
+				}
+			}
+		}
+	}
+}
 #endif // !GLOBALS_H
+

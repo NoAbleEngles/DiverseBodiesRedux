@@ -118,7 +118,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32;_WINDOWS;NDEBUG;_UNICODE;BOOST_STL_INTERFACES_DISABLE_CONCEPTS;WINVER=0x0601;_WIN32_WINNT=0x0601;FMT_SHARED;SPDLOG_SHARED_LIB;SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(BOOST);C:\cpp\CommonLibF4\CommonLibF4\include;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\include;.\Sources</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\include;$(BOOST);C:\cpp\CommonLibF4\CommonLibF4\include;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\include;.\Sources</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -132,7 +132,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(BOOSTLIBS);C:\cpp\CommonLibF4\build\CommonLibF4\Release;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;fmt.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zlib.lib;libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;fmt.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
@@ -455,6 +455,9 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Types2D.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Viewport.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\VTABLE_IDs.h" />
+    <ClInclude Include="Sources\ActorsManager\ActorsManager.h" />
+    <ClInclude Include="Sources\ActorsManager\Details\ActrorsPresetHashEquals.hpp" />
+    <ClInclude Include="Sources\ActorsManager\Details\ThreadSafeWaitingActors.hpp" />
     <ClInclude Include="Sources\globals.h" />
     <ClInclude Include="Sources\Ini\Ini.h" />
     <ClInclude Include="Sources\LooksMenu\FixedString.h" />
@@ -463,6 +466,7 @@
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
+    <ClInclude Include="Sources\Preset\Details\PresetsRandimizer.h" />
     <ClInclude Include="Sources\Preset\Preset.h" />
     <ClInclude Include="Sources\PugiXML\pugiconfig.hpp" />
     <ClInclude Include="Sources\PugiXML\pugixml.hpp" />
@@ -472,6 +476,7 @@
     <ClInclude Include="Sources\Version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp" />
     <ClCompile Include="Sources\Ini\Ini.cpp" />
     <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp" />
     <ClCompile Include="Sources\main.cpp" />
@@ -480,11 +485,15 @@
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
     <ClCompile Include="Sources\Preset\Details\Conditions.cpp" />
     <ClCompile Include="Sources\Preset\Details\Overlay.cpp" />
+    <ClCompile Include="Sources\Preset\Details\PresetsRandimizer.cpp" />
     <ClCompile Include="Sources\Preset\Preset.cpp" />
     <ClCompile Include="Sources\PugiXML\pugixml.cpp" />
     <ClCompile Include="Sources\Utils\RandomGenerator.cpp" />
     <ClCompile Include="Sources\Utils\utility.cpp" />
     <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Sources\zlib\lib\zlibstatic.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
