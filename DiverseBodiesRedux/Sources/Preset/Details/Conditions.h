@@ -9,9 +9,27 @@
 #include "RE/Fallout.h"
 
 #include <boost/json.hpp>
+#include "PresetEnums.h"
 
 using namespace boost::json;
 namespace logger = F4SE::log;
+
+/**
+ * @brief Флаги уровня совпадения условий для объекта Actor.
+ * Используется для определения степени соответствия объекта Actor заданным условиям.
+ * NONE - не совпадает ни с одним условием, KEYWORDS - совпадает по ключевым словам,
+ * FACTIONS - совпадает по фракциям, FULL - полное совпадение (например, по formID или editorID). KEYWORDS и FACTIONS добавляются как флаги к результату. has и hasNot имеют один флаг для каждого из них, но проваленная проверка hasNot всё равно вернёт NONE, даже если есть совпадение по has.
+ */
+enum class CoincidenceLevel : int {
+	NONE = 0, // Не совпадает ни с одним условием  
+	KEYWORDS = 1 << 0,
+	FACTIONS = 1 << 1,
+	FULL = static_cast<int>(0x7FFFFFFF) // Полное совпадение, например, по formID или editorID  
+};
+
+CoincidenceLevel operator|(CoincidenceLevel a, CoincidenceLevel b) noexcept;
+CoincidenceLevel& operator|=(CoincidenceLevel& a, CoincidenceLevel b) noexcept;
+bool operator<(CoincidenceLevel lhs, CoincidenceLevel rhs) noexcept;
 
 /**
  * @brief Класс для хранения и проверки условий, применяемых к объекту Actor.
@@ -59,9 +77,14 @@ public:
 	/**
      * @brief Проверяет, удовлетворяет ли actor условиям.
      * @param actor Указатель на объект Actor.
-     * @return true, если actor удовлетворяет условиям.
+	 * @param bodytype Указатель на переменную для типа тела (если не nullptr, то будет сравнение по типу тела).
+	 * @return 0, если actor не удовлетворяет любому из условий. Совпадение по условиям возвращает уровень совпадения :
+	 * Максимальный уровень совпадения - 10, если совпадает по formID, или editorID.
+	 * наличие/отсутствие кейворда считается более точным совпадением, чем наличие/отсутствие фракции, поэтому за наличие/отсутствие кейворда начисляется 3 очка.
+	 * наличие/отсутствие во фракции начисляет 2 очка.
+	 * Иными словами - если не указан точно
      */
-	bool check(const RE::Actor* actor) const noexcept;
+	CoincidenceLevel check(const RE::Actor* actor)  const noexcept;
 
 	/**
      * @brief Проверяет на пустоту.

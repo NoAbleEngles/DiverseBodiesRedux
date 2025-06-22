@@ -97,7 +97,7 @@ bool BodyhairsPreset::isCondtionsEmpty() const noexcept
 	return Preset::m_conditions.empty();
 }
 
-bool BodyhairsPreset::check(RE::Actor* actor) const noexcept
+CoincidenceLevel BodyhairsPreset::check(const RE::Actor* actor) const noexcept
 {
 	return Preset::check(actor);  // Проверяем базовые условия из Preset
 }
@@ -114,7 +114,7 @@ bool BodyhairsPreset::apply(RE::Actor* actor) const
 		return false;
 	}
 
-	if (!check(actor)) {
+	if (check(actor) == CoincidenceLevel::NONE) {
 		logger::info("BodyhairsPreset Apply check failed for actor: {:#x}", actor->formID);
 		return false;
 	}

@@ -9,28 +9,8 @@
 #include <type_traits>
 #include <unordered_map>
 #include <future>
-#include <ValidateOverlay/ValidateOverlay.h>
-
- /**
- * @brief Типы тел для пресетов.
- */
-	enum class BodyType : char {
-		NONE,  ///< Не определено
-		FAT,   ///< Полный
-		SLIM,  ///< Худой
-		SEXY,  ///< Стандартный/сексуальный
-		ATHL   ///< Атлетичный
-	};
-
-/**
- * @brief Типы пресетов.
- */
-enum class PresetType : char
-{
-	NONE,			///< Не определено
-	BODYMORPHS,		///< Пресет морфов тела
-	BODYHAIRS		///< Пресет наложений волосы на тело
-};
+#include "Details/PresetEnums.h"
+#include "ValidateOverlay/ValidateOverlay.h"
 
 /**
  * @brief Абстрактный базовый класс для всех пресетов.
@@ -109,9 +89,9 @@ public:
 	/**
 	 * @brief Проверить валиден ли пресет для актёра.
 	 * @param actor Указатель на актера.
-	 * @return true, если успешно.
+	 * @return возвращает CoincidenceLevel - enum отражающий уровень совпадения. 0 (NONE) - не соответствует условиям, ABSOLUTE - совпадение по formId или editorId. Проваленная проверка пола всегда вернёт NONE, не продолжая других проверок. Совпадение по FormId или EditorID всегда вернут true, не доходя до прочих проверок. KEYWORDS и FACTIONS имеют по одному флагу для has и hasNot, но проваленная проверка hasNot всё равно вернёт NONE, даже если есть совпадение по has.
 	 */
-	virtual bool check(RE::Actor* actor) const noexcept;
+	virtual CoincidenceLevel check(const RE::Actor* actor) const noexcept;
 
 	/**
 	 * @brief Применить пресет к актеру.
@@ -249,7 +229,7 @@ public:
 	bool operator<(const BodymorphsPreset& other) const noexcept;
 
 	/// @copydoc Preset::check
-	bool check(RE::Actor* actor) const noexcept override;
+	CoincidenceLevel check(const RE::Actor* actor) const noexcept override;
 
 	/// @copydoc Preset::isCondtionsEmpty
 	bool isCondtionsEmpty() const noexcept override;
@@ -359,7 +339,7 @@ public:
 	bool operator<(const BodyhairsPreset& other) const noexcept;
 
 	/// @copydoc Preset::check
-	bool check(RE::Actor* actor) const noexcept override;
+	CoincidenceLevel check(const RE::Actor* actor) const noexcept override;
 
 	/// @copydoc Preset::isCondtionsEmpty
 	bool isCondtionsEmpty() const noexcept override;

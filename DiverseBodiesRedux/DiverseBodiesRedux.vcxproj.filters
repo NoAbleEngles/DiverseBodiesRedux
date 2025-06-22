@@ -97,6 +97,51 @@
     <Filter Include="DiverseBodies\ActorsManager\Details">
       <UniqueIdentifier>{f63a9026-a81e-43e7-8c65-1917c82723e4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CommonLib\SRC">
+      <UniqueIdentifier>{f3f65fca-320c-4f96-a702-ae18dbc961e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\F4SE">
+      <UniqueIdentifier>{840c7107-3fcc-4a01-809c-1a9b2eb253fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE">
+      <UniqueIdentifier>{e3f6f6a2-08da-495e-9a01-1537b87ce374}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\REL">
+      <UniqueIdentifier>{8b21f4d4-9a54-4a62-873b-02b8a1e3dc72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\F4SE\Impl">
+      <UniqueIdentifier>{22c0ebab-189b-4e6b-aa28-4c9305ddf893}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE\Bethesda">
+      <UniqueIdentifier>{c9226700-f598-4284-b5e5-ec376133a3ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE\NetImmerse">
+      <UniqueIdentifier>{816aec8c-a146-45ce-8c9a-045a154283c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE\Scaleform">
+      <UniqueIdentifier>{12355eff-bfac-4c1b-992d-d0fb55613100}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE\Bethesda\BSResource">
+      <UniqueIdentifier>{a0a9cb17-66eb-415b-a928-ad5494df045b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE\Bethesda\BSScript">
+      <UniqueIdentifier>{809a257e-3554-4847-ba94-1fe47c87a44f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE\Bethesda\BSScript\Internal">
+      <UniqueIdentifier>{efd3c42e-73fb-427a-a876-09f5d7d9d25f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CommonLib\SRC\RE\Scaleform\GFx">
+      <UniqueIdentifier>{2cddd40d-f449-48de-b6e9-4c414700a634}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\detourXS">
+      <UniqueIdentifier>{e3383c44-4bbd-4b90-83b5-55fcdbb85bc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\Hooks">
+      <UniqueIdentifier>{7048f278-a4ab-461d-9177-c5c84f53c3b9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\Patches">
+      <UniqueIdentifier>{662d9610-7211-4da8-b00f-e3413753ef81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\API.h">
@@ -1062,7 +1107,7 @@
     <ClInclude Include="Sources\Preset\Details\Overlay.h">
       <Filter>DiverseBodies\Preset\Details</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Utils\RandomGenerator.h">
+    <ClInclude Include="Sources\Utils\RandomGenerator.hpp">
       <Filter>DiverseBodies\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Utils\utility.h">
@@ -1086,14 +1131,32 @@
     <ClInclude Include="Sources\ActorsManager\ActorsManager.h">
       <Filter>DiverseBodies\ActorsManager</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\ActorsManager\Details\ActrorsPresetHashEquals.hpp">
+    <ClInclude Include="Sources\ActorsManager\Details\ActorsPresetHashEquals.hpp">
       <Filter>DiverseBodies\ActorsManager\Details</Filter>
     </ClInclude>
     <ClInclude Include="Sources\ActorsManager\Details\ThreadSafeWaitingActors.hpp">
       <Filter>DiverseBodies\ActorsManager\Details</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Preset\Details\PresetsRandimizer.h">
+    <ClInclude Include="Sources\ActorsManager\Details\PresetsGenerator.hpp">
+      <Filter>DiverseBodies\ActorsManager\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\Details\PresetEnums.h">
       <Filter>DiverseBodies\Preset\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\REL\Relocation.h">
+      <Filter>CommonLib\REL</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\LooksMenu\LooksMenuHooks.hpp">
+      <Filter>DiverseBodies\LooksMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\detourxs\detourxs.h">
+      <Filter>DiverseBodies\detourXS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Hooks\Hooks.h">
+      <Filter>DiverseBodies\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Patches\Patches.hpp">
+      <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1121,9 +1184,6 @@
     <ClCompile Include="Sources\Preset\Details\Overlay.cpp">
       <Filter>DiverseBodies\Preset\Details</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Utils\RandomGenerator.cpp">
-      <Filter>DiverseBodies\Utils</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Utils\utility.cpp">
       <Filter>DiverseBodies\Utils</Filter>
     </ClCompile>
@@ -1139,11 +1199,133 @@
     <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp">
       <Filter>DiverseBodies\ActorsManager</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Preset\Details\PresetsRandimizer.cpp">
-      <Filter>DiverseBodies\Preset\Details</Filter>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\API.cpp">
+      <Filter>CommonLib\SRC\F4SE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Interfaces.cpp">
+      <Filter>CommonLib\SRC\F4SE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Logger.cpp">
+      <Filter>CommonLib\SRC\F4SE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Trampoline.cpp">
+      <Filter>CommonLib\SRC\F4SE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Impl\PCH.cpp">
+      <Filter>CommonLib\SRC\F4SE\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Impl\WinAPI.cpp">
+      <Filter>CommonLib\SRC\F4SE\Impl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Fallout.cpp">
+      <Filter>CommonLib\SRC\RE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\Actor.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSInventoryItem.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSExtraData.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResourceNiBinaryStream.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScaleformManager.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\Calendar.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\CRC.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\FormComponents.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\MenuCursor.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\TESBoundAnimObjects.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\TESForms.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\TESObjectREFRs.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource\Stream.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSResource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource\StreamBase.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSResource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Array.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Object.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\ObjectTypeInfo.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\PackedInstructionStream.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\StackFrame.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Struct.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\StructTypeInfo.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\TypeInfo.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Variable.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Internal\VirtualMachine.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda\BSScript\Internal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiAVObject.cpp">
+      <Filter>CommonLib\SRC\RE\NetImmerse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiBinaryStream.cpp">
+      <Filter>CommonLib\SRC\RE\NetImmerse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiObjectNET.cpp">
+      <Filter>CommonLib\SRC\RE\NetImmerse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiRect.cpp">
+      <Filter>CommonLib\SRC\RE\NetImmerse</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Scaleform\GFx\GFx_Player.cpp">
+      <Filter>CommonLib\SRC\RE\Scaleform\GFx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\REL\Relocation.cpp">
+      <Filter>CommonLib\SRC\REL</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\detourxs\detourxs.cpp">
+      <Filter>DiverseBodies\detourXS</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Hooks\Hooks.cpp">
+      <Filter>DiverseBodies\Hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="Sources\zlib\lib\zlibstatic.lib" />
+    <Library Include="..\..\CommonLibF4\build\CommonLibF4\Release\CommonLibF4.lib" />
+    <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib" />
   </ItemGroup>
 </Project>

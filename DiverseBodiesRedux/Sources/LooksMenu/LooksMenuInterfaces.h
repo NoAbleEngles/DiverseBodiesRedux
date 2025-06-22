@@ -20,6 +20,12 @@ namespace logger = F4SE::log;
 #	define LOOKSMENU_1_6_20_CHECKSUM 0x59F7081
 #endif  // !LOOKSMENU_1_6_20_CHECKSUM
 
+class OverlayInterface;
+typedef uint32_t UniqueID;
+
+namespace looksMenuHooks {
+	bool HookedRemoveOverlay(OverlayInterface* overlayInterface, RE::Actor* actor, bool isFemale, UniqueID uid);
+};
 
 enum LMVersion
 {
@@ -61,8 +67,6 @@ public:
 	virtual bool ApplyMorphsToShape(RE::Actor* actor, const std::shared_ptr<uint8_t>& morphableShape);
 	virtual bool UpdateMorphs(RE::Actor* actor);
 };
-
-typedef uint32_t UniqueID;
 
 class OverlayInterface : public RE::BSTEventSink<RE::TESObjectLoadedEvent>, public RE::BSTEventSink<RE::TESLoadGameEvent>
 {
@@ -201,6 +205,7 @@ protected:
 	std::unordered_map<UniqueID, OverlayDataPtr> m_dataMap;
 	UniqueID m_highestUID;
 	std::unordered_map<F4EEFixedString, OverlayTemplatePtr> m_overlayTemplates[2];
+	friend bool looksMenuHooks::HookedRemoveOverlay(OverlayInterface* overlayInterface, RE::Actor* actor, bool isFemale, UniqueID uid);
 };
 
 uint64_t checksum(const std::string& filename);

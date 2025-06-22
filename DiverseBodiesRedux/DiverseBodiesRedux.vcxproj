@@ -119,20 +119,21 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <AdditionalIncludeDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\include;$(BOOST);C:\cpp\CommonLibF4\CommonLibF4\include;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\include;.\Sources</AdditionalIncludeDirectories>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <UseStandardPreprocessor>true</UseStandardPreprocessor>
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
-      <DisableSpecificWarnings>4200;4201;4324;4251;4275</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4200;4201;4324;4251;4275;4996;4100</DisableSpecificWarnings>
       <UseFullPaths>false</UseFullPaths>
       <AdditionalOptions>%(AdditionalOptions) /utf-8 /Ob3</AdditionalOptions>
+      <ForcedIncludeFiles>cstdint;cstddef</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(BOOSTLIBS);C:\cpp\CommonLibF4\build\CommonLibF4\Release;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>zlib.lib;libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;fmt.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\detourxs\lib;$(BOOSTLIBS);C:\cpp\CommonLibF4\build\CommonLibF4\Release;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\lib;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>LDE64x64.lib;zlibstatic.lib;libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;fmt.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
@@ -150,6 +151,7 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Logger.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Trampoline.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\Version.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\REL\Relocation.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\Actor.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\ActorValueInfo.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\AITimeStamp.h" />
@@ -456,27 +458,73 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Viewport.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\VTABLE_IDs.h" />
     <ClInclude Include="Sources\ActorsManager\ActorsManager.h" />
-    <ClInclude Include="Sources\ActorsManager\Details\ActrorsPresetHashEquals.hpp" />
+    <ClInclude Include="Sources\ActorsManager\Details\ActorsPresetHashEquals.hpp" />
+    <ClInclude Include="Sources\ActorsManager\Details\PresetsGenerator.hpp" />
     <ClInclude Include="Sources\ActorsManager\Details\ThreadSafeWaitingActors.hpp" />
+    <ClInclude Include="Sources\detourxs\detourxs.h" />
     <ClInclude Include="Sources\globals.h" />
+    <ClInclude Include="Sources\Hooks\Hooks.h" />
     <ClInclude Include="Sources\Ini\Ini.h" />
     <ClInclude Include="Sources\LooksMenu\FixedString.h" />
+    <ClInclude Include="Sources\LooksMenu\LooksMenuHooks.hpp" />
     <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
+    <ClInclude Include="Sources\Patches\Patches.hpp" />
     <ClInclude Include="Sources\PCH.h" />
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
-    <ClInclude Include="Sources\Preset\Details\PresetsRandimizer.h" />
+    <ClInclude Include="Sources\Preset\Details\PresetEnums.h" />
     <ClInclude Include="Sources\Preset\Preset.h" />
     <ClInclude Include="Sources\PugiXML\pugiconfig.hpp" />
     <ClInclude Include="Sources\PugiXML\pugixml.hpp" />
-    <ClInclude Include="Sources\Utils\RandomGenerator.h" />
+    <ClInclude Include="Sources\Utils\RandomGenerator.hpp" />
     <ClInclude Include="Sources\Utils\utility.h" />
     <ClInclude Include="Sources\ValidateOverlay\ValidateOverlay.h" />
     <ClInclude Include="Sources\Version.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\API.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Impl\PCH.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Impl\WinAPI.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Interfaces.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Logger.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Trampoline.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\REL\Relocation.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\Actor.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSInventoryItem.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResourceNiBinaryStream.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource\Stream.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource\StreamBase.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScaleformManager.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Array.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Internal\VirtualMachine.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Object.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\ObjectTypeInfo.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\PackedInstructionStream.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\StackFrame.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Struct.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\StructTypeInfo.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\TypeInfo.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Variable.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\Calendar.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\CRC.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\FormComponents.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\MenuCursor.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\TESBoundAnimObjects.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\TESForms.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\TESObjectREFRs.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Fallout.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiAVObject.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiBinaryStream.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiObjectNET.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiRect.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Scaleform\GFx\GFx_Player.cpp" />
     <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp" />
+    <ClCompile Include="Sources\detourxs\detourxs.cpp" />
+    <ClCompile Include="Sources\Hooks\Hooks.cpp" />
     <ClCompile Include="Sources\Ini\Ini.cpp" />
     <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp" />
     <ClCompile Include="Sources\main.cpp" />
@@ -485,14 +533,14 @@
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
     <ClCompile Include="Sources\Preset\Details\Conditions.cpp" />
     <ClCompile Include="Sources\Preset\Details\Overlay.cpp" />
-    <ClCompile Include="Sources\Preset\Details\PresetsRandimizer.cpp" />
     <ClCompile Include="Sources\Preset\Preset.cpp" />
     <ClCompile Include="Sources\PugiXML\pugixml.cpp" />
-    <ClCompile Include="Sources\Utils\RandomGenerator.cpp" />
     <ClCompile Include="Sources\Utils\utility.cpp" />
     <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="..\..\CommonLibF4\build\CommonLibF4\Release\CommonLibF4.lib" />
+    <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib" />
     <Library Include="Sources\zlib\lib\zlibstatic.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

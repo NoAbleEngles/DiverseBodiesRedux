@@ -101,9 +101,9 @@ bool BodymorphsPreset::isCondtionsEmpty() const noexcept {
 }
 
 // @brief Проверяет, применим ли пресет к актеру. Возвращает true, если пол актера соответствует условиям пресета и есть морфы для применения.
-bool BodymorphsPreset::check(RE::Actor* actor) const noexcept
+CoincidenceLevel BodymorphsPreset::check(const RE::Actor* actor) const noexcept
 {
-	return Preset::check(actor);  // Проверяем базовые условия из Preset
+	return m_conditions.check(actor);  // Проверяем базовые условия из Preset
 }
 
 // @brief Применяет пресет к актеру, устанавливая морфы тела. Перед применением удаляет ранее применённые морфы тела, чтобы избежать конфликтов.
@@ -119,7 +119,7 @@ bool BodymorphsPreset::apply(RE::Actor* actor) const
 		return false;
 	}
 
-	if (!check(actor)) {
+	if (check(actor) == CoincidenceLevel::NONE) {
 		logger::info("BodyMorphs Apply check failed for actor: {:#x}", actor->formID);
 		return false;
 	}
