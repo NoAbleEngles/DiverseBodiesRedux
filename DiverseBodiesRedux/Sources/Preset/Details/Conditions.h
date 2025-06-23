@@ -22,14 +22,31 @@ namespace logger = F4SE::log;
  */
 enum class CoincidenceLevel : int {
 	NONE = 0, // Не совпадает ни с одним условием  
-	KEYWORDS = 1 << 0,
-	FACTIONS = 1 << 1,
+	GENDER = 1 << 0,
+	KEYWORDS = 1 << 1,
+	FACTIONS = 1 << 2,
 	FULL = static_cast<int>(0x7FFFFFFF) // Полное совпадение, например, по formID или editorID  
 };
 
 CoincidenceLevel operator|(CoincidenceLevel a, CoincidenceLevel b) noexcept;
 CoincidenceLevel& operator|=(CoincidenceLevel& a, CoincidenceLevel b) noexcept;
 bool operator<(CoincidenceLevel lhs, CoincidenceLevel rhs) noexcept;
+
+enum class Filter : int {
+	None = 0,				// Нет фильтра
+	Gender = 1 << 0,		// Пол
+	HasKeyword = 1 << 1,	// Имеет ключевое слово
+	HasNotKeyword = 1 << 2, // Не имеет ключевого слова
+	InFaction = 1 << 3,		// В фракции
+	NotInFaction = 1 << 4,  // Не в фракции
+	EditorID = 1 << 5,		// По editorID
+	FormID = 1 << 6			// По formID
+};
+
+Filter operator|(Filter a, Filter b) noexcept;
+Filter& operator|=(Filter& a, Filter b) noexcept;
+Filter operator&(Filter a, Filter b) noexcept;
+Filter& operator&=(Filter& a, Filter b) noexcept;
 
 /**
  * @brief Класс для хранения и проверки условий, применяемых к объекту Actor.
@@ -77,14 +94,15 @@ public:
 	/**
      * @brief Проверяет, удовлетворяет ли actor условиям.
      * @param actor Указатель на объект Actor.
-	 * @param bodytype Указатель на переменную для типа тела (если не nullptr, то будет сравнение по типу тела).
+	 * @param filter параметр для указания, какие условия проверять. По умолчанию проверяются все условия.
 	 * @return 0, если actor не удовлетворяет любому из условий. Совпадение по условиям возвращает уровень совпадения :
 	 * Максимальный уровень совпадения - 10, если совпадает по formID, или editorID.
 	 * наличие/отсутствие кейворда считается более точным совпадением, чем наличие/отсутствие фракции, поэтому за наличие/отсутствие кейворда начисляется 3 очка.
 	 * наличие/отсутствие во фракции начисляет 2 очка.
 	 * Иными словами - если не указан точно
      */
-	CoincidenceLevel check(const RE::Actor* actor)  const noexcept;
+	CoincidenceLevel check(const RE::Actor* actor, Filter filter
+		= Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::FormID | Filter::EditorID)  const noexcept;
 
 	/**
      * @brief Проверяет на пустоту.

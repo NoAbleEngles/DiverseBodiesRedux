@@ -119,6 +119,12 @@ public:
 	virtual void clear() noexcept;
 
 	/**
+	 * @brief Клонировать пресет.
+	 * @return Указатель на новый пресет, созданный на основе текущего.
+	 */
+	virtual Preset* clone() const = 0;
+
+	/**
 	 * @brief Получить имя пресета.
 	 * @return Имя пресета.
 	 */
@@ -246,6 +252,9 @@ public:
 	/// @copydoc Preset::clear
 	void clear() noexcept override;
 
+	/// @copydoc Preset::clone
+	BodymorphsPreset* clone() const override;
+
 	/// @copydoc Preset::name
 	std::string id() const noexcept override;
 
@@ -355,6 +364,9 @@ public:
 
 	/// @copydoc Preset::clear
 	void clear() noexcept override;
+
+	/// @copydoc Preset::clone
+	BodyhairsPreset* clone() const override;
 
 	/// @copydoc Preset::name
 	std::string id() const noexcept override;

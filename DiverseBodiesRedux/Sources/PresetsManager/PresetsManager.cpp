@@ -125,19 +125,30 @@ std::shared_ptr<Preset> PresetsManager::operator[](const std::string& id) const 
     return getPreset(id);
 }
 
-std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor* actor) const noexcept {
+std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor* actor, const std::function<bool(const RE::Actor* actor, const Preset&)>& filter) const noexcept {
 	std::vector<std::shared_ptr<Preset>> applicablePresets;
     
-    for (auto& preset : m_presets) {
-        if (preset && preset->check(actor) != CoincidenceLevel::NONE) {
-			applicablePresets.push_back(preset);
+    if (filter == NULL) {
+        for (auto& preset : m_presets) {
+            if (preset && preset->check(actor) != CoincidenceLevel::NONE) {
+                applicablePresets.push_back(preset);
+            }
         }
+
+    } else {
+        for (auto& preset : m_presets) {
+            if (preset && filter(actor, *preset)) {
+                applicablePresets.push_back(preset);
+            }
+		}
 	}
 
     std::sort(applicablePresets.begin(), applicablePresets.end(),
         [](const std::shared_ptr<Preset>& a, const std::shared_ptr<Preset>& b) {
             return *a < *b;
-		});
+    });
+
+    return applicablePresets;
 }
 
 std::vector<std::shared_ptr<Preset>> PresetsManager::operator[](const RE::Actor* actor) const noexcept {

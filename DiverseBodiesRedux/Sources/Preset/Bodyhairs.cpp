@@ -297,3 +297,7 @@ void BodyhairsPreset::clear() noexcept
 {
 	*this = std::move(BodyhairsPreset{});  // Используем оператор присваивания для очистки
 }
+
+BodyhairsPreset* BodyhairsPreset::clone() const {
+	return new BodyhairsPreset{ *this };
+}

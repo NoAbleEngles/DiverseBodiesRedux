@@ -305,3 +305,7 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 void BodymorphsPreset::clear() noexcept {
 	*this = std::move(BodymorphsPreset{});  // Используем оператор присваивания для очистки
 }
+
+BodymorphsPreset* BodymorphsPreset::clone() const {
+	return new BodymorphsPreset{ *this };
+}

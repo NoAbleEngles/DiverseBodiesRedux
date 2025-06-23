@@ -142,6 +142,9 @@
     <Filter Include="DiverseBodies\Patches">
       <UniqueIdentifier>{662d9610-7211-4da8-b00f-e3413753ef81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DiverseBodies\ActorsManager\DirectApply">
+      <UniqueIdentifier>{5cc2073b-94f5-4ced-91d5-47fc75fdd954}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\API.h">
@@ -1158,6 +1161,9 @@
     <ClInclude Include="Sources\Patches\Patches.hpp">
       <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\ActorsManager\DirectApply\DirectApply.h">
+      <Filter>DiverseBodies\ActorsManager\DirectApply</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1321,6 +1327,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Hooks\Hooks.cpp">
       <Filter>DiverseBodies\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ActorsManager\DirectApply\DirectApply.cpp">
+      <Filter>DiverseBodies\ActorsManager\DirectApply</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
