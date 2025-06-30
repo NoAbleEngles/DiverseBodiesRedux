@@ -47,6 +47,9 @@ Filter operator|(Filter a, Filter b) noexcept;
 Filter& operator|=(Filter& a, Filter b) noexcept;
 Filter operator&(Filter a, Filter b) noexcept;
 Filter& operator&=(Filter& a, Filter b) noexcept;
+Filter operator~(Filter a) noexcept;
+
+const Filter AllFilters = Filter::Gender | Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::EditorID | Filter::FormID;
 
 /**
  * @brief Класс для хранения и проверки условий, применяемых к объекту Actor.
@@ -113,6 +116,12 @@ public:
      * @brief Сбросить все условия.
      */
 	void clear() noexcept;
+
+	/**
+	 * @brief Печать информации об условиях в строку.
+	 * @return Строка с информацией об условиях.
+	 */
+	std::string print() const;
 
 	bool operator==(const ConditionSettings& other) const noexcept = default;
 	bool operator<(const ConditionSettings& other) const noexcept;

@@ -145,6 +145,12 @@
     <Filter Include="DiverseBodies\ActorsManager\DirectApply">
       <UniqueIdentifier>{5cc2073b-94f5-4ced-91d5-47fc75fdd954}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DiverseBodies\libs">
+      <UniqueIdentifier>{f08fd961-9084-4766-82d4-6163bf9a3328}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\AS3">
+      <UniqueIdentifier>{afe07b88-2882-4350-a296-b173dab65a81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\API.h">
@@ -1333,8 +1339,43 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="Sources\zlib\lib\zlibstatic.lib" />
-    <Library Include="..\..\CommonLibF4\build\CommonLibF4\Release\CommonLibF4.lib" />
-    <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib" />
+    <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib">
+      <Filter>DiverseBodies\libs</Filter>
+    </Library>
+    <Library Include="Sources\zlib\lib\zlibstatic.lib">
+      <Filter>DiverseBodies\libs</Filter>
+    </Library>
+    <Library Include="..\..\vcpkg\installed\x64-windows\lib\mmio.lib">
+      <Filter>DiverseBodies\libs</Filter>
+    </Library>
+    <Library Include="..\..\vcpkg\installed\x64-windows\lib\spdlog.lib">
+      <Filter>DiverseBodies\libs</Filter>
+    </Library>
+    <Library Include="..\..\Boost\lib\libboost_json-vc143-mt-x64-1_88.lib">
+      <Filter>DiverseBodies\libs</Filter>
+    </Library>
+    <Library Include="..\..\CommonLibF4\build\CommonLibF4\Release\CommonLibF4.lib">
+      <Filter>DiverseBodies\libs</Filter>
+    </Library>
+    <Library Include="Sources\fmt\lib\fmt.lib">
+      <Filter>DiverseBodies\libs</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\SwitcherComponent.as">
+      <Filter>DiverseBodies\AS3</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\MenuView.as">
+      <Filter>DiverseBodies\AS3</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\LabelComponent.as">
+      <Filter>DiverseBodies\AS3</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\CheckboxComponent.as">
+      <Filter>DiverseBodies\AS3</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\ButtonComponent.as">
+      <Filter>DiverseBodies\AS3</Filter>
+    </None>
   </ItemGroup>
 </Project>

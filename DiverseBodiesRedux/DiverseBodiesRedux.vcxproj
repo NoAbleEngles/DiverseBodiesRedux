@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -71,6 +71,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName)</TargetName>
+    <OutDir>E:\Games\Fallout 4\MO2\mods\DBR2.0\F4SE\Plugins</OutDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -115,10 +119,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32;_WINDOWS;NDEBUG;_UNICODE;BOOST_STL_INTERFACES_DISABLE_CONCEPTS;WINVER=0x0601;_WIN32_WINNT=0x0601;FMT_SHARED;SPDLOG_SHARED_LIB;SPDLOG_COMPILED_LIB;SPDLOG_FMT_EXTERNAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32;_WINDOWS;_UNICODE;BOOST_STL_INTERFACES_DISABLE_CONCEPTS;WINVER=0x0601;_WIN32_WINNT=0x0601;FMT_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\include;$(BOOST);C:\cpp\CommonLibF4\CommonLibF4\include;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\include;.\Sources</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\spdlog\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\mmio\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\fmt\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\include;$(BOOST);C:\cpp\CommonLibF4\CommonLibF4\include;.\Sources</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -128,12 +132,14 @@
       <UseFullPaths>false</UseFullPaths>
       <AdditionalOptions>%(AdditionalOptions) /utf-8 /Ob3</AdditionalOptions>
       <ForcedIncludeFiles>cstdint;cstddef</ForcedIncludeFiles>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\detourxs\lib;$(BOOSTLIBS);C:\cpp\CommonLibF4\build\CommonLibF4\Release;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\lib;C:\cpp\CommonLibF4\build\vcpkg_installed\x64-windows\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>LDE64x64.lib;zlibstatic.lib;libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;fmt.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\detourxs\lib;$(BOOSTLIBS);C:\cpp\CommonLibF4\build\CommonLibF4\Release;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\lib;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\fmt\lib;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\mmio\lib;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\spdlog\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>fmt.lib;LDE64x64.lib;zlib.lib;libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
@@ -541,9 +547,20 @@
     <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="..\..\Boost\lib\libboost_json-vc143-mt-x64-1_88.lib" />
     <Library Include="..\..\CommonLibF4\build\CommonLibF4\Release\CommonLibF4.lib" />
     <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib" />
+    <Library Include="..\..\vcpkg\installed\x64-windows\lib\mmio.lib" />
+    <Library Include="..\..\vcpkg\installed\x64-windows\lib\spdlog.lib" />
+    <Library Include="Sources\fmt\lib\fmt.lib" />
     <Library Include="Sources\zlib\lib\zlibstatic.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\ButtonComponent.as" />
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\CheckboxComponent.as" />
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\LabelComponent.as" />
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\SwitcherComponent.as" />
+    <None Include="Sources\DiverseBodiesMenu\src\view\MenuView.as" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

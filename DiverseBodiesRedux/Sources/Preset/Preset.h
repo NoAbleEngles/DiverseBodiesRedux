@@ -91,7 +91,7 @@ public:
 	 * @param actor Указатель на актера.
 	 * @return возвращает CoincidenceLevel - enum отражающий уровень совпадения. 0 (NONE) - не соответствует условиям, ABSOLUTE - совпадение по formId или editorId. Проваленная проверка пола всегда вернёт NONE, не продолжая других проверок. Совпадение по FormId или EditorID всегда вернут true, не доходя до прочих проверок. KEYWORDS и FACTIONS имеют по одному флагу для has и hasNot, но проваленная проверка hasNot всё равно вернёт NONE, даже если есть совпадение по has.
 	 */
-	virtual CoincidenceLevel check(const RE::Actor* actor) const noexcept;
+	virtual CoincidenceLevel check(const RE::Actor* actor, Filter filter = AllFilters) const noexcept;
 
 	/**
 	 * @brief Применить пресет к актеру.
@@ -136,13 +136,17 @@ public:
 	 */
 	virtual std::future<bool> isValidAsync() const noexcept;
 
+	/**
+	 * @brief Печать информации о пресете в строку.
+	 * @return Строка с информацией о пресете.
+	 */
+	virtual std::string print() const = 0;
+
 protected:
 	/**
 	 * @brief Условия применения пресета (пол, раса и т.д.).
 	 */
 	ConditionSettings m_conditions{};
-
-private:
 
 	/**
 	 * @brief Загрузить пресет из файла. Сделан только для вызова из конструктора от m_id.
@@ -235,7 +239,7 @@ public:
 	bool operator<(const BodymorphsPreset& other) const noexcept;
 
 	/// @copydoc Preset::check
-	CoincidenceLevel check(const RE::Actor* actor) const noexcept override;
+	CoincidenceLevel check(const RE::Actor* actor, Filter filter = AllFilters) const noexcept override;
 
 	/// @copydoc Preset::isCondtionsEmpty
 	bool isCondtionsEmpty() const noexcept override;
@@ -260,6 +264,9 @@ public:
 
 	/// @copydoc Preset::isValidAsync
 	std::future<bool> isValidAsync() const noexcept override;
+
+	/// @copydoc Preset::print
+	std::string print() const override;
 
 private:
 
@@ -348,7 +355,7 @@ public:
 	bool operator<(const BodyhairsPreset& other) const noexcept;
 
 	/// @copydoc Preset::check
-	CoincidenceLevel check(const RE::Actor* actor) const noexcept override;
+	CoincidenceLevel check(const RE::Actor* actor, Filter filter = AllFilters) const noexcept override;
 
 	/// @copydoc Preset::isCondtionsEmpty
 	bool isCondtionsEmpty() const noexcept override;
@@ -374,6 +381,8 @@ public:
 	/// @copydoc Preset::isValidAsync
 	std::future<bool> isValidAsync() const noexcept override;
 
+	/// @copydoc Preset::print
+	std::string print() const override;
 private:
 
 	/**

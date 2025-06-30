@@ -1,5 +1,6 @@
 #include "PresetsManager.h"
 #include "Ini/ini.h"
+#include <sstream>
 
 namespace globals {
     extern ini::map* g_ini;
@@ -16,6 +17,10 @@ PresetsManager::PresetsManager() {
     m_bodymorphsFolders = utils::string::split(folders_string, ",");
 
     for (const auto& folder : m_bodymorphsFolders) {
+        if (folder.empty()) {
+            logger::error("Empty folder path in bodymorphs folders.");
+            continue;
+		}
         loadPresetsFromFolder<BodymorphsPreset>(folder);
     }
 
@@ -24,11 +29,15 @@ PresetsManager::PresetsManager() {
     if (folders_string.empty()) {
         logger::error("No bodyhairs folders defined in ini.");
         return;
-        m_bodymorphsFolders = utils::string::split(folders_string, ",");
+    }
+    m_bodymorphsFolders = utils::string::split(folders_string, ",");
 
-        for (const auto& folder : m_bodymorphsFolders) {
-            loadPresetsFromFolder<BodymorphsPreset>(folder);
+    for (const auto& folder : m_bodymorphsFolders) {
+        if (folder.empty()) {
+            logger::error("Empty folder path in bodyhairs folders.");
+            continue;
         }
+        loadPresetsFromFolder<BodyhairsPreset>(folder);
     }
 }
 
@@ -128,7 +137,7 @@ std::shared_ptr<Preset> PresetsManager::operator[](const std::string& id) const 
 std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor* actor, const std::function<bool(const RE::Actor* actor, const Preset&)>& filter) const noexcept {
 	std::vector<std::shared_ptr<Preset>> applicablePresets;
     
-    if (filter == NULL) {
+    if (filter == nullptr) {
         for (auto& preset : m_presets) {
             if (preset && preset->check(actor) != CoincidenceLevel::NONE) {
                 applicablePresets.push_back(preset);
@@ -153,4 +162,17 @@ std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor*
 
 std::vector<std::shared_ptr<Preset>> PresetsManager::operator[](const RE::Actor* actor) const noexcept {
 	return getPresets(actor);
+}
+
+std::string PresetsManager::print()
+{
+    std::ostringstream oss;
+    std::lock_guard lock(m_presetsMutex);
+    oss << "PresetsManager: " << m_presets.size() << " presets loaded\n";
+    for (const auto& presetPtr : m_presets) {
+        if (presetPtr) {
+            oss << presetPtr->print() << "\n";
+        }
+    }
+    return oss.str();
 }

@@ -101,9 +101,9 @@ bool BodymorphsPreset::isCondtionsEmpty() const noexcept {
 }
 
 // @brief Проверяет, применим ли пресет к актеру. Возвращает true, если пол актера соответствует условиям пресета и есть морфы для применения.
-CoincidenceLevel BodymorphsPreset::check(const RE::Actor* actor) const noexcept
+CoincidenceLevel BodymorphsPreset::check(const RE::Actor* actor, Filter filter) const noexcept
 {
-	return m_conditions.check(actor);  // Проверяем базовые условия из Preset
+	return m_conditions.check(actor, filter);  // Проверяем базовые условия из Preset
 }
 
 // @brief Применяет пресет к актеру, устанавливая морфы тела. Перед применением удаляет ранее применённые морфы тела, чтобы избежать конфликтов.
@@ -192,6 +192,10 @@ std::future<bool> BodymorphsPreset::isValidAsync() const noexcept {
 bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 {
 	this->clear();  // Очищаем предыдущие данные, чтобы избежать конфликтов
+	if (presetFile.ends_with("_conds.json")) {
+		// Если файл - это условия, то не загружаем его как пресет
+		return false;
+	}
 
 	auto path = std::filesystem::path(presetFile);
 	if (!std::filesystem::exists(path)) {
@@ -203,14 +207,15 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 	auto externalConds = std::filesystem::exists(condsPath);
 	if (externalConds) {
 		try {
-			m_conditions = ConditionSettings(condsPath.string());
+			m_conditions = std::move(ConditionSettings(condsPath.string()));
+			logger::info("Loaded conditions from {}", condsPath.string());
 		} catch (const std::exception& e) {
 			logger::error("Failed to load conditions from {}: {}", condsPath.string(), e.what());
 			externalConds = false;
 		}
-	} else {
+	} /*else {
 		logger::info("No conditions file found for BodyMorphs preset: {}", condsPath.string());
-	}
+	}*/
 
 	auto gender = RE::Actor::Sex::None;
 
@@ -228,22 +233,28 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 			gender = pValue->as_int64() == 0 ? RE::Actor::Sex::Male : RE::Actor::Sex::Female;
 		}
 
-		json_obj = json_obj.if_contains("BodyMorphs")->as_object();
+
+		auto morphsValue = json_obj.if_contains("BodyMorphs");
+		if (!morphsValue || !morphsValue->is_object()) {
+			logger::info("...FAILED : no morphs found in {}", presetFile);
+		} else {
+			json_obj = morphsValue->as_object();
+		}
 
 		if (!json_obj.empty()) {
 			int i = 0;
 			std::for_each(json_obj.begin(), json_obj.end(), [&](const auto& o) {
 				std::string key = o.key();
 				float value;
-				try {
+				if (o.value().is_double()) {
 					value = static_cast<float>(o.value().as_double());
-				} catch (...) {
-					try {
-						value = static_cast<float>(o.value().as_int64());
-					} catch (...) {
-						logger::info("...FAILED : wrong value type");
-						return;
-					}
+				}
+				else if (o.value().is_int64()) {
+					value = static_cast<float>(o.value().as_int64());
+				}
+				else {
+					logger::info("...FAILED : wrong value type {}", (o.value().is_string() ? o.value().as_string().c_str() : ""));
+					return;
 				}
 				m_morphs.emplace(key, std::move(value));
 				++i;
@@ -263,17 +274,27 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 		pugi::xml_node presetNode = doc.child("SliderPresets").child("Preset");
 		if (presetNode) {
 			for (pugi::xml_node sliderNode = presetNode.child("SetSlider"); sliderNode; sliderNode = sliderNode.next_sibling("SetSlider")) {
-				std::string key = sliderNode.attribute("name").value();
-				float value = sliderNode.attribute("value").as_float() / 100.0f;  // делим на 100
+				auto nameAttr = sliderNode.attribute("name");
+				auto valueAttr = sliderNode.attribute("value");
+				if (!nameAttr || !valueAttr) {
+					logger::info("...FAILED : missing name or value attribute in slider");
+					continue;
+				}
+				std::string key = nameAttr.value();
+				float value = valueAttr.as_float() / 100.0f;
 				m_morphs.emplace(std::move(key), value);
 			}
 		}
 
 		if (m_morphs.size() && isCondtionsEmpty()) {
-			if (*path.filename().string().begin() == 'F')
-				gender = RE::Actor::Sex::Female;
-			else if (*path.filename().string().begin() == 'M')
-				gender = RE::Actor::Sex::Male;
+			if (!path.filename().empty()) {
+				if (*path.filename().string().begin() == 'F')
+					gender = RE::Actor::Sex::Female;
+				else if (*path.filename().string().begin() == 'M')
+					gender = RE::Actor::Sex::Male;
+			} else {
+				logger::info("...FAILED : empty filename in {}", presetFile);
+			}
 		}
 	}
 
@@ -293,12 +314,15 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 			logger::info("{} no body type found, setting to SEXY", presetFile);
 		}
 		
-		return true;
 	} else {
 		logger::critical("BodymorphsPreset::loadFromFile: Unsupported file format: {}", presetFile);
 		clear();  // Очищаем данные, если пресет не валиден
 		return false;
 	}
+
+	m_id = path.stem().string();  // Устанавливаем имя пресета из имени файла
+	logger::info("BodymorphsPreset::loadFromFile: {}. Loaded body type: {}", id(), static_cast<int>(m_bodytype));
+	return true;
 }
 
 // @breif Очищает объект
@@ -308,4 +332,32 @@ void BodymorphsPreset::clear() noexcept {
 
 BodymorphsPreset* BodymorphsPreset::clone() const {
 	return new BodymorphsPreset{ *this };
+}
+
+// DiverseBodiesRedux\Sources\Preset\Bodymorphs.cpp
+#include <sstream>
+
+std::string BodymorphsPreset::print() const
+{
+	std::ostringstream oss;
+	oss << "BodymorphsPreset: " << id() << "\n";
+	oss << "  Type: " << static_cast<int>(m_type) << "\n";
+	oss << "  Morphs: ";
+	if (m_morphs.empty()) {
+		oss << "(none)\n";
+	}
+	else {
+		oss << "\n";
+		for (const auto& [name, value] : m_morphs) {
+			oss << "    " << name << " = " << value << "\n";
+		}
+	}
+	oss << "  Conditions: ";
+	if (m_conditions.empty()) {
+		oss << "(none)\n";
+	}
+	else {
+		oss << m_conditions.print();
+	}
+	return oss.str();
 }

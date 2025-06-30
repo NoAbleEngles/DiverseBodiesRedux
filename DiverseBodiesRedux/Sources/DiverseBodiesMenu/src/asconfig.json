@@ -1,0 +1,13 @@
+{
+    "type": "app",
+    "compilerOptions": {
+        "source-path": [
+            "."
+        ],
+        "output": "../bin/DiverseBodiesMenu.swf"
+    },
+    "mainClass": "view.MenuView",
+    "files": [
+        "view/MenuView.as"
+    ]
+}

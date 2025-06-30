@@ -73,7 +73,7 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 	if (it != obj.end()) {
 		auto& value = it->value();
 		if (value.is_string()) {
-			m_id = value.as_string();
+			m_id = value.as_string().c_str();
 		}
 	}
 
@@ -96,6 +96,11 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 					m_tint.g = static_cast<float>(array[1].as_double());
 					m_tint.b = static_cast<float>(array[2].as_double());
 					m_tint.a = static_cast<float>(array[3].as_double());
+				} else if (array[0].is_int64() && array[1].is_int64() && array[2].is_int64() && array[3].is_int64()) {
+					m_tint.r = static_cast<float>(array[0].as_int64());
+					m_tint.g = static_cast<float>(array[1].as_int64());
+					m_tint.b = static_cast<float>(array[2].as_int64());
+					m_tint.a = static_cast<float>(array[3].as_int64());
 				}
 				else {
 					success = false;
@@ -127,6 +132,9 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 				if (array[0].is_double() && array[1].is_double()) {
 					m_offsetUV.x = static_cast<float>(array[0].as_double());
 					m_offsetUV.y = static_cast<float>(array[1].as_double());
+				}  else if (array[0].is_int64() && array[1].is_int64()) {
+					m_offsetUV.x = static_cast<float>(array[0].as_int64());
+					m_offsetUV.y = static_cast<float>(array[1].as_int64());
 				} else {
 					success = false;
 					logger::error("Overlay::loadFromJsonValue: OffsetUV array contains non-double values.");
@@ -157,6 +165,9 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 				if (array[0].is_double() && array[1].is_double()) {
 					m_scaleUV.x = static_cast<float>(array[0].as_double());
 					m_scaleUV.y = static_cast<float>(array[1].as_double());
+				} else if (array[0].is_int64() && array[1].is_int64()) {
+					m_scaleUV.x = static_cast<float>(array[0].as_int64());
+					m_scaleUV.y = static_cast<float>(array[1].as_int64());
 				} else {
 					success = false;
 					logger::error("Overlay::loadFromJsonValue: ScaleUV array contains non-double values.");

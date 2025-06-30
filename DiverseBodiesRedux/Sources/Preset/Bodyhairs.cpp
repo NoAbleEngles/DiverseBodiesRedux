@@ -97,9 +97,9 @@ bool BodyhairsPreset::isCondtionsEmpty() const noexcept
 	return Preset::m_conditions.empty();
 }
 
-CoincidenceLevel BodyhairsPreset::check(const RE::Actor* actor) const noexcept
+CoincidenceLevel BodyhairsPreset::check(const RE::Actor* actor, Filter filter) const noexcept
 {
-	return Preset::check(actor);  // Проверяем базовые условия из Preset
+	return Preset::check(actor, filter);  // Проверяем базовые условия из Preset
 }
 
 bool BodyhairsPreset::apply(RE::Actor* actor) const
@@ -210,10 +210,10 @@ std::future<bool> BodyhairsPreset::isValidAsync() const noexcept {
 			}
 		}
 		if (!anyValid) {
-			logger::error("BodyhairsPreset is not valid: no valid overlays found.");
+			logger::error("BodyhairsPreset {} is not valid: no valid overlays found.", id().empty() ? "[no id]" : id());
 		}
 		return anyValid;
-		});
+	});
 }
 
 bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
@@ -241,8 +241,9 @@ bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
 			if (auto val = it->value(); val.is_array()) {
 				for (const auto& item : val.as_array()) {
 					auto overlay = Overlay{ item.as_object() };
-					if (!overlay.empty())
-						m_overlays.emplace_back();
+					if (!overlay.empty()) {
+						m_overlays.emplace_back(overlay);
+					}
 				}
 			}
 			else {
@@ -282,7 +283,7 @@ bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
 		it = json_obj.find("conditions");
 
 		if (it != json_obj.end()) {
-			m_conditions = ConditionSettings(it->value().as_object());
+			m_conditions = std::move(ConditionSettings(it->value().as_object()));
 		}
 
 	} else {
@@ -290,6 +291,10 @@ bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
 		clear();  // Очищаем данные, если пресет не валиден
 		return false;
 	}
+
+	m_id = path.stem().string();
+	logger::info("BodyhairsPreset::loadFromFile: {}. Loaded {} overlays, {} overlays to remove.", presetFile, m_overlays.size(), m_overlaysToRemove.size());
+	return true;
 }
 
 // @breif Очищает объект
@@ -300,4 +305,42 @@ void BodyhairsPreset::clear() noexcept
 
 BodyhairsPreset* BodyhairsPreset::clone() const {
 	return new BodyhairsPreset{ *this };
+}
+
+// DiverseBodiesRedux\Sources\Preset\Bodyhairs.cpp
+#include <sstream>
+
+std::string BodyhairsPreset::print() const
+{
+	std::ostringstream oss;
+	oss << "BodyhairsPreset: " << id() << "\n";
+	oss << "  Type: " << static_cast<int>(m_type) << "\n";
+	oss << "  Overlays: ";
+	if (m_overlays.empty()) {
+		oss << "(none)\n";
+	}
+	else {
+		oss << "\n";
+		for (const auto& overlay : m_overlays) {
+			oss << "    id=" << overlay.id() << "\n";
+		}
+	}
+	oss << "  OverlaysToRemove: ";
+	if (m_overlaysToRemove.empty()) {
+		oss << "(none)\n";
+	}
+	else {
+		for (const auto& id : m_overlaysToRemove) {
+			oss << id << " ";
+		}
+		oss << "\n";
+	}
+	oss << "  Conditions: ";
+	if (m_conditions.empty()) {
+		oss << "(none)\n";
+	}
+	else {
+		oss << m_conditions.print();
+	}
+	return oss.str();
 }

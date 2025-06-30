@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Diverse Bodies Menu",
+            "type": "flash",
+            "request": "launch",
+            "file": "${workspaceFolder}/src/Main.as",
+            "runtimeExecutable": "path/to/your/flashplayer.exe",
+            "runtimeArgs": [
+                "-o",
+                "output.swf"
+            ],
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+            "outFiles": [
+                "${workspaceFolder}/bin/**/*.swf"
+            ],
+            "preLaunchTask": "compile"
+        }
+    ]
+}
