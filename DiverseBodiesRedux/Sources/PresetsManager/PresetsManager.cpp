@@ -64,7 +64,7 @@ void PresetsManager::validatePresets() {
 
     // Запускаем отдельный detached thread для сбора результатов и обновления коллекции
     std::thread([this, futures = std::move(futures)]() mutable {
-        std::set<std::shared_ptr<Preset>> validPresets;
+        decltype(m_presets) validPresets;
         for (auto& [preset, fut] : futures) {
             if (fut.valid() && fut.get()) {
                 validPresets.insert(preset);
@@ -137,15 +137,20 @@ std::shared_ptr<Preset> PresetsManager::operator[](const std::string& id) const 
 std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor* actor, const std::function<bool(const RE::Actor* actor, const Preset&)>& filter) const noexcept {
 	std::vector<std::shared_ptr<Preset>> applicablePresets;
     
+    logger::info("GET PRESETS:");
+    for (const auto& el : m_presets) {
+        logger::info("{} - {}", el->id(), static_cast<int>(el->type()));
+    }
+
     if (filter == nullptr) {
-        for (auto& preset : m_presets) {
+        for (const auto& preset : m_presets) {
             if (preset && preset->check(actor) != CoincidenceLevel::NONE) {
                 applicablePresets.push_back(preset);
             }
         }
 
     } else {
-        for (auto& preset : m_presets) {
+        for (const auto& preset : m_presets) {
             if (preset && filter(actor, *preset)) {
                 applicablePresets.push_back(preset);
             }

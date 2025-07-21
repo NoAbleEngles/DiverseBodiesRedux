@@ -142,14 +142,26 @@
     <Filter Include="DiverseBodies\Patches">
       <UniqueIdentifier>{662d9610-7211-4da8-b00f-e3413753ef81}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DiverseBodies\ActorsManager\DirectApply">
-      <UniqueIdentifier>{5cc2073b-94f5-4ced-91d5-47fc75fdd954}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DiverseBodies\libs">
       <UniqueIdentifier>{f08fd961-9084-4766-82d4-6163bf9a3328}</UniqueIdentifier>
     </Filter>
     <Filter Include="DiverseBodies\AS3">
       <UniqueIdentifier>{afe07b88-2882-4350-a296-b173dab65a81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\DirectApply">
+      <UniqueIdentifier>{5cc2073b-94f5-4ced-91d5-47fc75fdd954}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\AS3\bin">
+      <UniqueIdentifier>{186cf5a8-a0a4-4ffa-b498-ad3da0aa17d1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\AS3\src">
+      <UniqueIdentifier>{d87b5c6d-d47c-4a5e-8c16-a2622e27e1f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\AS3\src\view">
+      <UniqueIdentifier>{e5beeeca-cd41-43b2-acc9-63674f529620}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\AS3\src\view\components">
+      <UniqueIdentifier>{7a448ab4-ea15-4004-8560-fdd652992e7a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1167,8 +1179,8 @@
     <ClInclude Include="Sources\Patches\Patches.hpp">
       <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\ActorsManager\DirectApply\DirectApply.h">
-      <Filter>DiverseBodies\ActorsManager\DirectApply</Filter>
+    <ClInclude Include="Sources\DirectApply\DirectApply.h">
+      <Filter>DiverseBodies\DirectApply</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1334,8 +1346,11 @@
     <ClCompile Include="Sources\Hooks\Hooks.cpp">
       <Filter>DiverseBodies\Hooks</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\ActorsManager\DirectApply\DirectApply.cpp">
-      <Filter>DiverseBodies\ActorsManager\DirectApply</Filter>
+    <ClCompile Include="patches.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\DirectApply\DirectApply.cpp">
+      <Filter>DiverseBodies\DirectApply</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1362,20 +1377,50 @@
     </Library>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Sources\DiverseBodiesMenu\src\view\components\SwitcherComponent.as">
-      <Filter>DiverseBodies\AS3</Filter>
-    </None>
-    <None Include="Sources\DiverseBodiesMenu\src\view\MenuView.as">
-      <Filter>DiverseBodies\AS3</Filter>
-    </None>
-    <None Include="Sources\DiverseBodiesMenu\src\view\components\LabelComponent.as">
-      <Filter>DiverseBodies\AS3</Filter>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\ButtonComponent.as">
+      <Filter>DiverseBodies\AS3\src\view\components</Filter>
     </None>
     <None Include="Sources\DiverseBodiesMenu\src\view\components\CheckboxComponent.as">
-      <Filter>DiverseBodies\AS3</Filter>
+      <Filter>DiverseBodies\AS3\src\view\components</Filter>
     </None>
-    <None Include="Sources\DiverseBodiesMenu\src\view\components\ButtonComponent.as">
-      <Filter>DiverseBodies\AS3</Filter>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\LabelComponent.as">
+      <Filter>DiverseBodies\AS3\src\view\components</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\components\SwitcherComponent.as">
+      <Filter>DiverseBodies\AS3\src\view\components</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\CustomEvent.as">
+      <Filter>DiverseBodies\AS3\src\view</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\MenuManager.as">
+      <Filter>DiverseBodies\AS3\src\view</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\MenuScaler.as">
+      <Filter>DiverseBodies\AS3\src\view</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\ScrollableMenu.as">
+      <Filter>DiverseBodies\AS3\src\view</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\ThemeEvent.as">
+      <Filter>DiverseBodies\AS3\src\view</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\view\ThemeManager.as">
+      <Filter>DiverseBodies\AS3\src\view</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\dbMenu.fla">
+      <Filter>DiverseBodies\AS3\src</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\ExampleUsage.md">
+      <Filter>DiverseBodies\AS3\src</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\Main.as">
+      <Filter>DiverseBodies\AS3\src</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\src\README.md">
+      <Filter>DiverseBodies\AS3\src</Filter>
+    </None>
+    <None Include="Sources\DiverseBodiesMenu\bin\dbMenu.swf">
+      <Filter>DiverseBodies\AS3\bin</Filter>
     </None>
   </ItemGroup>
 </Project>

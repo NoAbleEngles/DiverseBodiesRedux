@@ -50,6 +50,14 @@ namespace ini
 	bool map::exists() const noexcept{
 		return m_path.empty() || !std::filesystem::exists(m_path);
 	}
+
+	bool map::update() noexcept {
+		if (m_path.empty() || !std::filesystem::exists(m_path)) {
+			std::cerr << "INI file does not exist: " << m_path << std::endl;
+			return false;  // Возвращаем false, если файл не существует
+		}
+		readFile(m_path);  // Обновляем данные из файла
+	}
 	
 	bool map::readFile(const std::filesystem::path& path)
 	{

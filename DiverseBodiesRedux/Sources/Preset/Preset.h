@@ -96,9 +96,10 @@ public:
 	/**
 	 * @brief Применить пресет к актеру.
 	 * @param actor Указатель на актера.
+	 * @param reset3d Если true, сбрасывает 3D актёра после применения пресетов.
 	 * @return true, если успешно.
 	 */
-	virtual bool apply(RE::Actor* actor) const = 0;
+	virtual bool apply(RE::Actor* actor, bool reset3d = true) const = 0;
 
 	/**
 	 * @brief Удалить эффекты пресета с актера.
@@ -245,7 +246,7 @@ public:
 	bool isCondtionsEmpty() const noexcept override;
 
 	/// @copydoc Preset::apply
-	bool apply(RE::Actor*) const override;
+	bool apply(RE::Actor*, bool reset3d = true) const override;
 
 	/// @copydoc Preset::remove
 	bool remove(RE::Actor*) const override;
@@ -361,7 +362,7 @@ public:
 	bool isCondtionsEmpty() const noexcept override;
 
 	/// @copydoc Preset::apply
-	bool apply(RE::Actor*) const override;
+	bool apply(RE::Actor*, bool reset3d = true) const override;
 
 	/// @copydoc Preset::remove
 	bool remove(RE::Actor*) const override;

@@ -2,6 +2,7 @@
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include "Preset.h"
 #include <PugiXML/pugixml.hpp>
+#include <thread>
 
 
 BodyhairsPreset::BodyhairsPreset() :
@@ -102,7 +103,7 @@ CoincidenceLevel BodyhairsPreset::check(const RE::Actor* actor, Filter filter) c
 	return Preset::check(actor, filter);  // Проверяем базовые условия из Preset
 }
 
-bool BodyhairsPreset::apply(RE::Actor* actor) const
+bool BodyhairsPreset::apply(RE::Actor* actor, bool reset3d) const
 {
 	if (!actor) {
 		logger::info("BodyhairsPreset Apply no actor provided!");
@@ -114,12 +115,30 @@ bool BodyhairsPreset::apply(RE::Actor* actor) const
 		return false;
 	}
 
-	if (check(actor) == CoincidenceLevel::NONE) {
+	static std::pair<uint32_t, bool> lastCallParams = { 0, false };
+	static auto lastCallTime = std::chrono::steady_clock::now();
+
+	auto now = std::chrono::steady_clock::now();
+	if (lastCallParams.first == actor->formID && lastCallParams.second == reset3d) {
+		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCallTime).count();
+		if (ms < 1000) {
+			return true; // Пропустить повторный вызов в течение 1 секунды
+		}
+	}
+	// Обновить параметры и время
+	lastCallParams = { actor->formID, reset3d };
+	lastCallTime = now;
+	
+
+	// здесь не нужна проверка, т.к. иначе не будут работать пресеты применяемые вручную. Можно только пол проверять.
+	/*if (check(actor) == CoincidenceLevel::NONE) {
 		logger::info("BodyhairsPreset Apply check failed for actor: {:#x}", actor->formID);
 		return false;
+	}*/
+	if (check(actor, Filter{ Filter::Gender }) == CoincidenceLevel::NONE) {
+		logger::info("BodyMorphs Apply gender check failed for actor: {:#x}", actor->formID);
+		return false;
 	}
-
-	remove(actor);
 
 	if (!actor->GetFullyLoaded3D()) {
 		return false;
@@ -139,6 +158,13 @@ bool BodyhairsPreset::apply(RE::Actor* actor) const
 
 	for (const auto& overlay : m_overlays) {
 		overlay.apply(actor);
+	}
+
+	if (reset3d) {
+		// Сброс 3D модели актера
+		/*using R3D = RE::RESET_3D_FLAGS;
+		actor->Reset3D(false, R3D::kSkin, true, R3D::kNone);*/
+		Interface->UpdateOverlays(actor);
 	}
 
 	return true;
@@ -165,9 +191,14 @@ bool BodyhairsPreset::remove(RE::Actor* actor) const
 
 	auto overlaysUIDs = findOverlaysUid(actor, overlayIds);
 
+	bool once = false;
 	for (const auto& overlay : overlaysUIDs) {
-		Interface->RemoveOverlay(actor, actor->GetSex() == RE::Actor::Female, overlay);
+		if (Interface->RemoveOverlay(actor, actor->GetSex() == RE::Actor::Female, overlay)) {
+			once = true;
+		}
 	}
+
+	return once;
 }
 
 bool BodyhairsPreset::empty() const noexcept

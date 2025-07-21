@@ -424,15 +424,8 @@ private:
 
 	inline static void InitializeInterfaces()
 	{
-		initPromise_ = std::promise<void>();
-		initFuture_ = initPromise_.get_future();
-
-		// Поток для инициализации
-		std::thread([&]() {
-			initPromise_.set_value();
-		}).detach();
-
-		initFuture_.wait();
+		if (isInitialized_)
+			return;
 
 		// Проверяем, установлен ли LooksMenu, только один раз
 		if (F4SE::GetPluginInfo("F4EE").has_value() && !LooksMenu_isInstalled) {
@@ -464,7 +457,8 @@ private:
 						g_bodyMorphInterface = reinterpret_cast<BodyMorphInterface*>(baseAddr + offset_g_bodyMorphInterface);
 						if (g_bodyMorphInterface) {
 							logger::info("{} : initialized", typeid(*g_bodyMorphInterface).name());
-						} else {
+						}
+						else {
 							logger::error("g_bodyMorphInterface is nullptr");
 						}
 					}
@@ -472,7 +466,8 @@ private:
 						g_OverlayInterface = reinterpret_cast<OverlayInterface*>(baseAddr + offset_g_OverlayInterface);
 						if (g_OverlayInterface) {
 							logger::info("{} : initialized", typeid(*g_OverlayInterface).name());
-						} else {
+						}
+						else {
 							logger::error("g_OverlayInterface is nullptr");
 						}
 					}
@@ -480,7 +475,8 @@ private:
 						g_SkinInterface = reinterpret_cast<SkinInterface*>(baseAddr + offset_g_SkinInterface);
 						if (g_SkinInterface) {
 							logger::info("{} : initialized", typeid(*g_SkinInterface).name());
-						} else {
+						}
+						else {
 							logger::error("g_SkinInterface is nullptr");
 						}
 					}
@@ -488,7 +484,8 @@ private:
 						g_CharGenInterface = reinterpret_cast<CharGenInterface*>(baseAddr + offset_g_CharGenInterface);
 						if (g_CharGenInterface) {
 							logger::info("{} : initialized", typeid(*g_CharGenInterface).name());
-						} else {
+						}
+						else {
 							logger::error("g_CharGenInterface is nullptr");
 						}
 					}
@@ -496,18 +493,22 @@ private:
 						g_ActorUpdateManager = reinterpret_cast<ActorUpdateManager*>(baseAddr + offset_g_ActorUpdateManager);
 						if (g_ActorUpdateManager) {
 							logger::info("{} : initialized", typeid(*g_ActorUpdateManager).name());
-						} else {
+						}
+						else {
 							logger::error("g_ActorUpdateManager is nullptr");
 						}
 					}
 					isInitialized_ = true;
-				} else {
+				}
+				else {
 					logger::error("Unsupported LooksMenu version. Checksum: {:X}", sum);
 				}
-			} else {
+			}
+			else {
 				logger::error("Failed to get LooksMenu version, support disabled.");
 			}
-		} else {
+		}
+		else {
 			logger::error("LooksMenu not installed, support disabled.");
 		}
 	}

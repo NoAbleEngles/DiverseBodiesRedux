@@ -4,6 +4,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "F4SE/F4SE.h"
 #include "RE/Fallout.h"
@@ -40,7 +41,9 @@ enum class Filter : int {
 	InFaction = 1 << 3,		// В фракции
 	NotInFaction = 1 << 4,  // Не в фракции
 	EditorID = 1 << 5,		// По editorID
-	FormID = 1 << 6			// По formID
+	NotEditorID = 1 << 6,   // Кроме editorID
+	FormID = 1 << 7,		// По formID
+	NotFormID = 1 << 8		// Кроме formID
 };
 
 Filter operator|(Filter a, Filter b) noexcept;
@@ -48,8 +51,10 @@ Filter& operator|=(Filter& a, Filter b) noexcept;
 Filter operator&(Filter a, Filter b) noexcept;
 Filter& operator&=(Filter& a, Filter b) noexcept;
 Filter operator~(Filter a) noexcept;
+Filter operator^(Filter a, Filter b) noexcept;
+Filter& operator^=(Filter& a, Filter b) noexcept;
 
-const Filter AllFilters = Filter::Gender | Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::EditorID | Filter::FormID;
+const Filter AllFilters = Filter::Gender | Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::EditorID | Filter::NotEditorID | Filter::FormID | Filter::NotFormID;
 
 /**
  * @brief Класс для хранения и проверки условий, применяемых к объекту Actor.
@@ -105,7 +110,7 @@ public:
 	 * Иными словами - если не указан точно
      */
 	CoincidenceLevel check(const RE::Actor* actor, Filter filter
-		= Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::FormID | Filter::EditorID)  const noexcept;
+		= AllFilters)  const noexcept;
 
 	/**
      * @brief Проверяет на пустоту.
@@ -130,13 +135,16 @@ public:
 
 private:
 	RE::Actor::Sex m_gender{ RE::Actor::Sex::None };
-	std::optional<int> m_formID{};
-	std::string m_editorID{};
+	std::unordered_set<uint32_t> m_formIDs{};
+	std::unordered_set<uint32_t> m_notFormIDs{};
+	std::unordered_set<std::string> m_editorIDs{};
+	std::unordered_set<std::string> m_notEditorIDs{};
 	bool m_editorIdContains{};
-	std::vector<RE::BGSKeyword*> m_hasKeyword{};
-	std::vector<RE::BGSKeyword*> m_hasNotKeyword{};
-	std::vector<RE::TESFaction*> m_inFaction{};
-	std::vector<RE::TESFaction*> m_notInFaction{};
+	bool m_notEditorIdContains{};
+	std::unordered_set<RE::BGSKeyword*> m_hasKeyword{};
+	std::unordered_set<RE::BGSKeyword*> m_hasNotKeyword{};
+	std::unordered_set<RE::TESFaction*> m_inFaction{};
+	std::unordered_set<RE::TESFaction*> m_notInFaction{};
 
 	/**
      * @brief Загрузить условия из файла.
@@ -145,11 +153,3 @@ private:
      */
 	bool loadFromFile(const std::filesystem::path& path);
 };
-
-/**
- * @brief Получить TESForm по строковому FormID и имени плагина.
- * @param xFormID Строковый FormID.
- * @param plugin Имя плагина.
- * @return Указатель на TESForm или nullptr.
- */
-RE::TESForm* getFormFromString(const std::string& xFormID, const std::string& plugin);

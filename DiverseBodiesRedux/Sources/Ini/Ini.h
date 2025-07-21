@@ -71,6 +71,13 @@ namespace ini
 		 * @return true если карта пуста, иначе false.
 		 */
 		bool empty() const noexcept;
+
+		/**
+		 * @brief Обновляет данные, если m_path существует.
+		 * @return true если обновил, иначе false
+		 */
+		bool update() noexcept;
+
 		/**
 		 * @brief Проверяет наличие ключа в секции.
 		 * @param key Ключ.

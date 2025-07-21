@@ -107,7 +107,7 @@ CoincidenceLevel BodymorphsPreset::check(const RE::Actor* actor, Filter filter) 
 }
 
 // @brief Применяет пресет к актеру, устанавливая морфы тела. Перед применением удаляет ранее применённые морфы тела, чтобы избежать конфликтов.
-bool BodymorphsPreset::apply(RE::Actor* actor) const
+bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 {
 	if (!actor) {
 		logger::info("BodyMorphs Apply no actor provided!");
@@ -118,9 +118,14 @@ bool BodymorphsPreset::apply(RE::Actor* actor) const
 		logger::info("BodyMorphs Apply no actor provided!");
 		return false;
 	}
-
-	if (check(actor) == CoincidenceLevel::NONE) {
-		logger::info("BodyMorphs Apply check failed for actor: {:#x}", actor->formID);
+	
+	// здесь не нужна проверка, т.к. иначе не будут работать пресеты применяемые вручную. Можно только пол проверять.
+	//if (check(actor) == CoincidenceLevel::NONE) {
+	//	logger::info("BodyMorphs Apply check failed for actor: {:#x}", actor->formID);
+	//	return false;
+	//}
+	if (check(actor, Filter{ Filter::Gender }) == CoincidenceLevel::NONE) {
+		logger::info("BodyMorphs Apply gender check failed for actor: {:#x}", actor->formID);
 		return false;
 	}
 
@@ -138,6 +143,15 @@ bool BodymorphsPreset::apply(RE::Actor* actor) const
 		}
 		Interface->SetMorph(actor, actor->GetSex() == RE::Actor::Sex::Female, morphName, globals::kwd_diversed, morphValue);
 	}
+
+
+	if (!actor->GetFullyLoaded3D()) {
+		return true;
+	}
+
+	// Сброс 3D модели актера
+	using R3D = RE::RESET_3D_FLAGS;
+	actor->Reset3D(false, R3D::kModel | R3D::kSkeleton, true, R3D::kNone);
 
 	return true;
 }
