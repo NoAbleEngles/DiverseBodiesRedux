@@ -1,4 +1,4 @@
-#include "Preset.h"
+#include "Bodymorphs.h"
 #include "PugiXML/pugixml.hpp"
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include "Ini/ini.h"
@@ -184,7 +184,7 @@ bool BodymorphsPreset::empty() const noexcept
 }
 
 // @brief Возвращает имя пресета. Имя - это имя файла (без пути), из которого был загружен пресет.
-std::string BodymorphsPreset::id() const noexcept
+const std::string& BodymorphsPreset::id() const noexcept
 {
 	return Preset::id();
 }
@@ -198,7 +198,7 @@ std::future<bool> BodymorphsPreset::isValidAsync() const noexcept {
 	// Возвращаем future, который выполнит проверку асинхронно
 	return std::async(std::launch::async, [isEmpty, hasMorphs, hasConds]() {
 		return !isEmpty && hasMorphs && hasConds;
-		});
+	});
 }
 
 // @brief загружает пресет из файла. Обнуляет ранее загруженные данные, чтобы избежать конфликтов. 
@@ -246,7 +246,6 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 		if (pValue && pValue->is_int64()) {
 			gender = pValue->as_int64() == 0 ? RE::Actor::Sex::Male : RE::Actor::Sex::Female;
 		}
-
 
 		auto morphsValue = json_obj.if_contains("BodyMorphs");
 		if (!morphsValue || !morphsValue->is_object()) {

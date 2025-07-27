@@ -1182,6 +1182,15 @@
     <ClInclude Include="Sources\DirectApply\DirectApply.h">
       <Filter>DiverseBodies\DirectApply</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Preset\Bodyhairs.h">
+      <Filter>DiverseBodies\Preset</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\Bodymorphs.h">
+      <Filter>DiverseBodies\Preset</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyTattoos.h">
+      <Filter>DiverseBodies\Preset</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1346,11 +1355,11 @@
     <ClCompile Include="Sources\Hooks\Hooks.cpp">
       <Filter>DiverseBodies\Hooks</Filter>
     </ClCompile>
-    <ClCompile Include="patches.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\DirectApply\DirectApply.cpp">
       <Filter>DiverseBodies\DirectApply</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyTattoos.cpp">
+      <Filter>DiverseBodies\Preset</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

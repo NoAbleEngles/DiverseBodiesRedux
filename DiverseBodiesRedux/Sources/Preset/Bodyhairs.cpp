@@ -1,9 +1,10 @@
 #include "Ini/ini.h"
-#include "LooksMenu/LooksMenuInterfaces.h"
-#include "Preset.h"
+#include "Bodyhairs.h"
 #include <PugiXML/pugixml.hpp>
 #include <thread>
 
+std::set<std::string> BodyhairsPreset::ALL_ITEMS_M{};
+std::set<std::string> BodyhairsPreset::ALL_ITEMS_F{};
 
 BodyhairsPreset::BodyhairsPreset() :
 	Preset(std::string{}, PresetType::BODYHAIRS) {}
@@ -149,8 +150,8 @@ bool BodyhairsPreset::apply(RE::Actor* actor, bool reset3d) const
 		logger::critical("OverlayInterface is nullptr!");
 		return false;
 	}
-
-	auto overlaysUIDs = findOverlaysUid(actor, m_overlaysToRemove);
+	auto isFemale = actor->GetSex() == RE::Actor::Sex::Female;
+	auto overlaysUIDs = findOverlaysUid(actor, isFemale ? ALL_ITEMS_F : ALL_ITEMS_M);
 
 	for (const auto& uid : overlaysUIDs) {
 		Interface->RemoveOverlay(actor, actor->GetSex() == RE::Actor::Female, uid);
@@ -206,7 +207,7 @@ bool BodyhairsPreset::empty() const noexcept
 	return id().empty();
 }
 
-std::string BodyhairsPreset::id() const noexcept
+const std::string& BodyhairsPreset::id() const noexcept
 {
 	return Preset::id();
 }
@@ -245,6 +246,31 @@ std::future<bool> BodyhairsPreset::isValidAsync() const noexcept {
 		}
 		return anyValid;
 	});
+
+	// Провалидировать ALL_ITEMS_M и ALL_ITEMS_F
+	static bool runOnce = false;
+	if (!runOnce) {
+		runOnce = true;
+		std::set<std::string> validM, validF;
+		auto& validator = ValidateOverlay::validateOverlay();
+
+		// Проверяем мужские оверлеи
+		for (const auto& id : ALL_ITEMS_M) {
+			auto fut = validator(id);
+			if (fut.get()) {
+				validM.insert(id);
+			}
+		}
+		// Проверяем женские оверлеи
+		for (const auto& id : ALL_ITEMS_F) {
+			auto fut = validator(id);
+			if (fut.get()) {
+				validF.insert(id);
+			}
+		}
+		ALL_ITEMS_M.swap(validM);
+		ALL_ITEMS_F.swap(validF);
+	}
 }
 
 bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
@@ -293,24 +319,6 @@ bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
 			return false;
 		}
 
-		it = json_obj.find("remove");
-
-		if (it != json_obj.end()) {
-			if (auto val = it->value(); val.is_array()) {
-				for (const auto& item : val.as_array()) {
-					if (item.is_string()) {
-						m_overlaysToRemove.emplace_back(item.as_string().c_str());
-					}
-					else {
-						logger::info("...FAILED : wrong remove value type in {}", presetFile);
-					}
-				}
-			}
-			else {
-				logger::info("...FAILED : wrong remove value type in {}", presetFile);
-			}
-		}
-
 		it = json_obj.find("conditions");
 
 		if (it != json_obj.end()) {
@@ -324,7 +332,12 @@ bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
 	}
 
 	m_id = path.stem().string();
-	logger::info("BodyhairsPreset::loadFromFile: {}. Loaded {} overlays, {} overlays to remove.", presetFile, m_overlays.size(), m_overlaysToRemove.size());
+
+	auto& overlay_store = m_conditions.gender() == RE::Actor::Sex::Male ? ALL_ITEMS_M : ALL_ITEMS_F;
+	for (auto& overlay : m_overlays)
+		overlay_store.emplace(overlay.id());
+
+	logger::info("BodyhairsPreset::loadFromFile: {}. Loaded {} overlays.", presetFile, m_overlays.size());
 	return true;
 }
 
@@ -356,16 +369,6 @@ std::string BodyhairsPreset::print() const
 			oss << "    id=" << overlay.id() << "\n";
 		}
 	}
-	oss << "  OverlaysToRemove: ";
-	if (m_overlaysToRemove.empty()) {
-		oss << "(none)\n";
-	}
-	else {
-		for (const auto& id : m_overlaysToRemove) {
-			oss << id << " ";
-		}
-		oss << "\n";
-	}
 	oss << "  Conditions: ";
 	if (m_conditions.empty()) {
 		oss << "(none)\n";
@@ -374,4 +377,21 @@ std::string BodyhairsPreset::print() const
 		oss << m_conditions.print();
 	}
 	return oss.str();
+}
+
+const std::set<std::string> BodyhairsPreset::getAllPossibleMaleOverlays() noexcept {
+	return ALL_ITEMS_M;
+}
+
+const std::set<std::string> BodyhairsPreset::getAllPossibleFemaleOverlays() noexcept {
+	return ALL_ITEMS_F;
+}
+
+void BodyhairsPreset::revalidateAllPossibleOverlays(const std::set<std::string>& AllValidOverlays) {
+	std::set<std::string_view> temp{};
+	for (const auto& overlay : ALL_ITEMS_M) {
+		if (AllValidOverlays.contains(overlay.data())) {
+			temp.emplace(overlay);
+		}
+	}
 }

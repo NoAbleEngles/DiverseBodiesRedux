@@ -76,6 +76,7 @@ void PresetsManager::validatePresets() {
             m_presets.swap(validPresets);
             m_presetsValidated = true;
         }
+
         // Уведомляем всех подписчиков о завершении валидации
         {
             std::lock_guard lock(m_callbacksMutex);
@@ -136,12 +137,7 @@ std::shared_ptr<Preset> PresetsManager::operator[](const std::string& id) const 
 
 std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor* actor, const std::function<bool(const RE::Actor* actor, const Preset&)>& filter) const noexcept {
 	std::vector<std::shared_ptr<Preset>> applicablePresets;
-    
-    logger::info("GET PRESETS:");
-    for (const auto& el : m_presets) {
-        logger::info("{} - {}", el->id(), static_cast<int>(el->type()));
-    }
-
+   
     if (filter == nullptr) {
         for (const auto& preset : m_presets) {
             if (preset && preset->check(actor) != CoincidenceLevel::NONE) {

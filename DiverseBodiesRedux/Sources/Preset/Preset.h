@@ -11,6 +11,10 @@
 #include <future>
 #include "Details/PresetEnums.h"
 #include "ValidateOverlay/ValidateOverlay.h"
+#include "LooksMenu/LooksMenuInterfaces.h"
+
+class BodymorphsPreset;
+class BodyhairsPreset;
 
 /**
  * @brief Абстрактный базовый класс для всех пресетов.
@@ -129,7 +133,7 @@ public:
 	 * @brief Получить имя пресета.
 	 * @return Имя пресета.
 	 */
-	virtual std::string id() const noexcept = 0;
+	virtual const std::string& id() const noexcept = 0;
 
 	/**
 	 * @brief Узнать является ли пресет валидным (не пустой, доступны ресурсы на которые пресет ссылается). Ассинхронный метод.
@@ -167,239 +171,9 @@ protected:
 	PresetType m_type{ PresetType::NONE };
 };
 
-/**
- * @brief Пресет морфов тела (BodyMorph).
- * 
- * Содержит морфы, имя файла, тип тела и методы для применения к актеру.
- */
-class BodymorphsPreset : public Preset
-{
-public:
-	/**
-	 * @brief Конструктор по умолчанию.
-	 */
-	BodymorphsPreset();
-
-	/**
-	 * @brief Конструктор из пути к файлу.
-	 * @param path Путь к файлу пресета.
-	 */
-	BodymorphsPreset(const std::filesystem::path& path);
-
-	/**
-	 * @brief Конструктор из строки пути.
-	 * @param path Строка пути к файлу пресета.
-	 */
-	BodymorphsPreset(const std::string& path);
-
-	/**
-	 * @brief Копирующий конструктор.
-	 */
-	BodymorphsPreset(const BodymorphsPreset& other) noexcept = default;
-
-	/**
-	 * @brief Перемещающий конструктор.
-	 */
-	BodymorphsPreset(BodymorphsPreset&& other) noexcept = default;
-
-	/**
-	 * @brief Деструктор.
-	 */
-	~BodymorphsPreset() = default;
-
-	/// @copydoc Preset::operator=
-	Preset& operator=(const Preset& other) noexcept override;
-
-	/// @copydoc Preset::operator=
-	Preset& operator=(Preset&& other) noexcept override;
-
-	/**
-	 * @brief Оператор присваивания для BodymorphsPreset.
-	 */
-	BodymorphsPreset& operator=(const BodymorphsPreset& other) noexcept;
-
-	/**
-	 * @brief Оператор перемещающего присваивания для BodymorphsPreset.
-	 */
-	BodymorphsPreset& operator=(BodymorphsPreset&& other) noexcept;
-
-	/// @copydoc Preset::operator==
-	bool operator==(const Preset& other) const noexcept override;
-
-	/**
-	 * @brief Сравнение на равенство с другим BodymorphsPreset.
-	 */
-	bool operator==(const BodymorphsPreset& other) const noexcept;
-
-	/// @copydoc Preset::operator<
-	bool operator<(const Preset& other) const noexcept override;
-
-	/**
-	 * @brief Оператор "меньше" для сортировки BodymorphsPreset.
-	 */
-	bool operator<(const BodymorphsPreset& other) const noexcept;
-
-	/// @copydoc Preset::check
-	CoincidenceLevel check(const RE::Actor* actor, Filter filter = AllFilters) const noexcept override;
-
-	/// @copydoc Preset::isCondtionsEmpty
-	bool isCondtionsEmpty() const noexcept override;
-
-	/// @copydoc Preset::apply
-	bool apply(RE::Actor*, bool reset3d = true) const override;
-
-	/// @copydoc Preset::remove
-	bool remove(RE::Actor*) const override;
-
-	/// @copydoc Preset::empty
-	bool empty() const noexcept override;
-
-	/// @copydoc Preset::clear
-	void clear() noexcept override;
-
-	/// @copydoc Preset::clone
-	BodymorphsPreset* clone() const override;
-
-	/// @copydoc Preset::name
-	std::string id() const noexcept override;
-
-	/// @copydoc Preset::isValidAsync
-	std::future<bool> isValidAsync() const noexcept override;
-
-	/// @copydoc Preset::print
-	std::string print() const override;
-
-private:
-
-	/**
-	 * @brief Тип тела, определяемый пресетом.
-	 */
-	BodyType m_bodytype;
-
-	/**
-	 * @brief Морфы тела (имя морфа -> значение).
-	 */
-	std::unordered_map<std::string, float> m_morphs;
-
-	/// @copydoc Preset::loadFromFile
-	bool loadFromFile(const std::string& presetFile) override;
-};
-
-/**
- * @brief Пресет волос для тела (BodyMorph).
- */
-class BodyhairsPreset : public Preset
-{
-public:
-	/**
-	 * @brief Конструктор по умолчанию.
-	 */
-	BodyhairsPreset();
-
-	/**
-	 * @brief Конструктор из пути к файлу.
-	 * @param path Путь к файлу пресета.
-	 */
-	BodyhairsPreset(const std::filesystem::path& path);
-
-	/**
-	 * @brief Конструктор из строки пути.
-	 * @param path Строка пути к файлу пресета.
-	 */
-	BodyhairsPreset(const std::string& path);
-
-	/**
-	 * @brief Копирующий конструктор.
-	 */
-	BodyhairsPreset(const BodyhairsPreset& other) noexcept = default;
-
-	/**
-	 * @brief Перемещающий конструктор.
-	 */
-	BodyhairsPreset(BodyhairsPreset&& other) noexcept = default;
-
-	/**
-	 * @brief Деструктор.
-	 */
-	~BodyhairsPreset() = default;
-
-	/// @copydoc Preset::operator=
-	Preset& operator=(const Preset& other) noexcept override;
-
-	/// @copydoc Preset::operator=
-	Preset& operator=(Preset&& other) noexcept override;
-
-	/**
-	 * @brief Оператор присваивания для BodyhairsPreset.
-	 */
-	BodyhairsPreset& operator=(const BodyhairsPreset& other) noexcept;
-
-	/**
-	 * @brief Оператор перемещающего присваивания для BodyhairsPreset.
-	 */
-	BodyhairsPreset& operator=(BodyhairsPreset&& other) noexcept;
-
-	/// @copydoc Preset::operator==
-	bool operator==(const Preset& other) const noexcept override;
-
-	/**
-	 * @brief Сравнение на равенство с другим BodyhairsPreset.
-	 */
-	bool operator==(const BodyhairsPreset& other) const noexcept;
-
-	/// @copydoc Preset::operator<
-	bool operator<(const Preset& other) const noexcept override;
-
-	/**
-	 * @brief Оператор "меньше" для сортировки BodyhairsPreset.
-	 */
-	bool operator<(const BodyhairsPreset& other) const noexcept;
-
-	/// @copydoc Preset::check
-	CoincidenceLevel check(const RE::Actor* actor, Filter filter = AllFilters) const noexcept override;
-
-	/// @copydoc Preset::isCondtionsEmpty
-	bool isCondtionsEmpty() const noexcept override;
-
-	/// @copydoc Preset::apply
-	bool apply(RE::Actor*, bool reset3d = true) const override;
-
-	/// @copydoc Preset::remove
-	bool remove(RE::Actor*) const override;
-
-	/// @copydoc Preset::empty
-	bool empty() const noexcept override;
-
-	/// @copydoc Preset::clear
-	void clear() noexcept override;
-
-	/// @copydoc Preset::clone
-	BodyhairsPreset* clone() const override;
-
-	/// @copydoc Preset::name
-	std::string id() const noexcept override;
-
-	/// @copydoc Preset::isValidAsync
-	std::future<bool> isValidAsync() const noexcept override;
-
-	/// @copydoc Preset::print
-	std::string print() const override;
-private:
-
-	/**
-	 * @brief Морфы тела (имя морфа -> значение).
-	 */
-	std::vector<Overlay> m_overlays;
-	std::vector<std::string> m_overlaysToRemove;
-
-	/// @copydoc Preset::loadFromFile
-	bool loadFromFile(const std::string& presetFile) override;
-
-	/**
-	 * @brief Валидация оверлеев.
-	 */
-	ValidateOverlay& validate = ValidateOverlay::validateOverlay();
-};
+#include "Bodymorphs.h"
+#include "Bodyhairs.h"
+#include "BodyTattoos.h"
 
 /**
  * @brief Загружает содержимое JSON-файла в строку.
@@ -415,7 +189,7 @@ std::string getJson(const std::filesystem::path& filepath);
  * @return Указатель на T или nullptr.
  */
 template <typename T>
-T* preset_cast(Preset* preset)
+inline T* preset_cast(Preset* preset)
 {
 	if (!preset) {
 		return nullptr;
@@ -442,7 +216,7 @@ T* preset_cast(Preset* preset)
  * @throws std::bad_cast если тип не совпадает.
  */
 template <typename T>
-T& preset_cast(Preset& preset)
+inline T& preset_cast(Preset& preset)
 {
 	if constexpr (std::is_same_v<T, BodymorphsPreset>) {
 		if (preset.type() == PresetType::BODYMORPHS) {
@@ -464,4 +238,43 @@ T& preset_cast(Preset& preset)
  * @param preset вектор с id пресетов, уникальные id которых необходимо получить.
  * @return вектор с найденными id.
  */
-std::vector<uint32_t> findOverlaysUid(RE::Actor* actor, const std::vector<std::string>& overlayIds);
+template <typename Container>
+inline std::vector<uint32_t> findOverlaysUid(RE::Actor* actor, const Container& overlayIds) {
+	using ValueType = typename Container::value_type;
+	static_assert(std::is_same_v<ValueType, std::string>,
+		"Container must contain std::string.");
+
+	std::vector<uint32_t> result{};
+
+	if (!actor) {
+		logger::error("Actor is null in findOverlayUid.");
+		return result;
+	}
+
+	if (overlayIds.empty()) {
+		logger::error("Overlay IDs are empty in findOverlayUid.");
+		return result;
+	}
+
+	auto Interface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
+	if (!Interface) {
+		logger::critical("OverlayInterface is nullptr!");
+		return result;
+	}
+
+	Interface->ForEachOverlay(
+		actor,
+		actor->GetSex() == RE::Actor::Female,
+		[&result, &overlayIds](int32_t uid, const OverlayInterface::OverlayDataPtr& overlay) {
+			if (overlay && overlay->templateName) {
+				for (auto overlayId : overlayIds) {
+					if (strcmp(overlay->templateName.get()->c_str(), overlayId.c_str()) == 0) {
+						result.push_back(overlay->uid);
+					}
+				}
+			}
+		}
+	);
+
+	return result;
+}

@@ -27,13 +27,13 @@ public:
 	// @brief Применяет наложение к актеру. 
 	// * Не проверяет интерфейс, актёра и наложение на валидность.
 	void apply(RE::Actor* actor) const;
-	std::string id() const noexcept;
+	const std::string& id() const noexcept;
 	bool empty() const noexcept;
 	void clear() noexcept;
 
 private:
 
-	std::string m_id{};                             ///< Уникальный идентификатор наложения
+	std::string m_id{};                        ///< Уникальный идентификатор наложения
 	RE::NiColorA m_tint{ 0.0f, 0.0f, 0.0f, 1.0f };  ///< Цвет наложения (RGBA)
 	RE::NiPoint2 m_offsetUV{ 0.0, 0.0 };            ///< Смещение UV-координат
 	RE::NiPoint2 m_scaleUV{ 1.0, 1.0 };             ///< Масштаб UV-координат

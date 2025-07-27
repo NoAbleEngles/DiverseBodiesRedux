@@ -33,6 +33,7 @@ CoincidenceLevel operator|(CoincidenceLevel a, CoincidenceLevel b) noexcept;
 CoincidenceLevel& operator|=(CoincidenceLevel& a, CoincidenceLevel b) noexcept;
 bool operator<(CoincidenceLevel lhs, CoincidenceLevel rhs) noexcept;
 
+// @brief Флаги фильтров для условий, применяемых к объекту Actor. Что бы всё работало корректно при добавлении новых фильтров, нужно добавлять их только в AllFilters, getFilterFromString и метод Check.
 enum class Filter : int {
 	None = 0,				// Нет фильтра
 	Gender = 1 << 0,		// Пол
@@ -40,10 +41,10 @@ enum class Filter : int {
 	HasNotKeyword = 1 << 2, // Не имеет ключевого слова
 	InFaction = 1 << 3,		// В фракции
 	NotInFaction = 1 << 4,  // Не в фракции
-	EditorID = 1 << 5,		// По editorID
-	NotEditorID = 1 << 6,   // Кроме editorID
-	FormID = 1 << 7,		// По formID
-	NotFormID = 1 << 8		// Кроме formID
+	EditorIDs = 1 << 5,		// По editorID
+	NotEditorIDs = 1 << 6,  // Кроме editorID
+	FormIDs = 1 << 7,		// По formID
+	NotFormIDs = 1 << 8		// Кроме formID
 };
 
 Filter operator|(Filter a, Filter b) noexcept;
@@ -54,7 +55,34 @@ Filter operator~(Filter a) noexcept;
 Filter operator^(Filter a, Filter b) noexcept;
 Filter& operator^=(Filter& a, Filter b) noexcept;
 
-const Filter AllFilters = Filter::Gender | Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::EditorID | Filter::NotEditorID | Filter::FormID | Filter::NotFormID;
+const Filter AllFilters = Filter::Gender | Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::EditorIDs | Filter::NotEditorIDs | Filter::FormIDs | Filter::NotFormIDs;
+
+/**
+ * @brief Преобразует строковое представление фильтра в enum Filter.
+ * @param filterString Строка, представляющая фильтр.
+ * @return Соответствующий enum Filter или Filter::None, если строка не распознана.
+ */
+Filter getFilterFromString(const std::string& filterString) noexcept;
+
+/**
+ * @brief Получает строковое представление фильтра.
+ * @param filter Фильтр, для которого нужно получить строку.
+ * @return Строковое представление фильтра.
+ */
+constexpr std::string_view getFilterString(Filter filter) noexcept;
+
+/**
+ * @brief Выполняет функцию для каждого значения Filter.
+ * @param func Функция, принимающая Filter в качестве параметра.
+ */
+void for_each_filter(const std::function<void(Filter)>& func) noexcept;
+
+/**
+ * @brief Получает самый старший бит из флагов Filter. Обычно используется как getHighestBit(AllFilters). Для корректной работы нужно, чтобы флаги были в порядке возрастания, без "дырок".
+ * @param flags Флаги, из которых нужно получить самый старший бит.
+ * @return Самый старший бит из флагов Filter или Filter::None, если флаги равны 0.
+ */
+constexpr Filter getHighestBit(Filter flags) noexcept;
 
 /**
  * @brief Класс для хранения и проверки условий, применяемых к объекту Actor.
@@ -121,6 +149,12 @@ public:
      * @brief Сбросить все условия.
      */
 	void clear() noexcept;
+
+	/**
+	 * @brief Получить условие пола актёра.
+	 * @return Пол актёра.
+	 */
+	RE::Actor::Sex gender() const noexcept;
 
 	/**
 	 * @brief Печать информации об условиях в строку.

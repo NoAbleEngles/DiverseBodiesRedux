@@ -1016,9 +1016,8 @@
                 case 32: // Space - CheckboxChanged только для CheckboxComponent
                     if (currentItem && currentItem.type === 2 && currentElement) { // CheckboxComponent
                         log("ScrollableMenu: Space нажат на CheckboxComponent");
-                        var newChecked:Boolean = !currentElement.checked;
-                        currentElement.checked = newChecked;
-                        sendCheckboxCallback(currentItem.labelText, newChecked);
+                        currentElement.selected = !currentElement.selected
+                        sendCheckboxCallback(currentItem.labelText, currentElement.selected);
                     } else {
                         log("ScrollableMenu: Space нажат НЕ на CheckboxComponent - игнорируем");
                     }
@@ -1123,8 +1122,8 @@
                             }
                         } else if (currentItem.type === 2) { // CheckboxComponent - устанавливает если не установлен
                             log("ScrollableMenu: Стрелка вправо на CheckboxComponent");
-                            if (!currentElement.checked) {
-                                currentElement.checked = true;
+                            if (!currentElement.selected) {
+                                currentElement.selected = true;
                                 sendCheckboxCallback(currentItem.labelText, true);
                             }
                         }
@@ -1148,8 +1147,8 @@
                             }
                         } else if (currentItem.type === 2) { // CheckboxComponent - снимает если установлен
                             log("ScrollableMenu: Стрелка влево на CheckboxComponent");
-                            if (currentElement.checked) {
-                                currentElement.checked = false;
+                            if (currentElement.selected) {
+                                currentElement.selected = false;
                                 sendCheckboxCallback(currentItem.labelText, false);
                             }
                         }

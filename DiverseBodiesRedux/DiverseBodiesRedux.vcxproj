@@ -479,6 +479,9 @@
     <ClInclude Include="Sources\Patches\Patches.hpp" />
     <ClInclude Include="Sources\PCH.h" />
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
+    <ClInclude Include="Sources\Preset\Bodyhairs.h" />
+    <ClInclude Include="Sources\Preset\Bodymorphs.h" />
+    <ClInclude Include="Sources\Preset\BodyTattoos.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
     <ClInclude Include="Sources\Preset\Details\PresetEnums.h" />
@@ -530,7 +533,6 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiObjectNET.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiRect.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Scaleform\GFx\GFx_Player.cpp" />
-    <ClCompile Include="patches.cpp" />
     <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp" />
     <ClCompile Include="Sources\detourxs\detourxs.cpp" />
     <ClCompile Include="Sources\DirectApply\DirectApply.cpp" />
@@ -541,6 +543,7 @@
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
+    <ClCompile Include="Sources\Preset\BodyTattoos.cpp" />
     <ClCompile Include="Sources\Preset\Details\Conditions.cpp" />
     <ClCompile Include="Sources\Preset\Details\Overlay.cpp" />
     <ClCompile Include="Sources\Preset\Preset.cpp" />

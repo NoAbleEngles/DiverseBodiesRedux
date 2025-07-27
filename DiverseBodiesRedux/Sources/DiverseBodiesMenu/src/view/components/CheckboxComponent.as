@@ -17,8 +17,6 @@ package view.components {
      */
     public class CheckboxComponent extends MovieClip {
         public static const EVENT_CHANGE:String = "eventCheckboxComponentChange";
-        public static const EVENT_PUSH:String = "eventCheckboxComponentPush";
-        public static const EVENT_BACK:String = "eventCheckboxComponentBack";
         public static const EVENT_HOVER:String = "eventCheckboxComponentHover";
         
         private var label:TextField;
@@ -249,11 +247,9 @@ package view.components {
             
             // Отправляем push при установке, back при снятии
             if (_selected) {
-                log("CheckboxComponent: чекбокс установлен - отправляем push");
-                dispatchEvent(new Event(EVENT_PUSH));
+                log("CheckboxComponent: чекбокс установлен - отправляем change");
             } else {
-                log("CheckboxComponent: чекбокс снят - отправляем back");
-                dispatchEvent(new Event(EVENT_BACK));
+                log("CheckboxComponent: чекбокс снят - отправляем change");
             }
             
             // Одиночный клик также отправляет hover

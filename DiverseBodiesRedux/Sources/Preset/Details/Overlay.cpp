@@ -43,14 +43,14 @@ void Overlay::apply(RE::Actor* actor) const {
 		actor,
 		actor->GetSex() == RE::Actor::Sex::Female,
 		m_priority,
-		m_id,
+		m_id.data(),
 		m_tint,
 		m_offsetUV,
 		m_scaleUV
 	);
 }
 
-std::string Overlay::id() const noexcept {
+const std::string& Overlay::id() const noexcept {
 	return m_id;
 }
 
