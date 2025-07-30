@@ -15,6 +15,12 @@
 
 class BodymorphsPreset;
 class BodyhairsPreset;
+class BodyTattoosPreset;
+class BodyOverlayCustom0;
+class BodyOverlayCustom1;
+class BodyOverlayCustom2;
+class BodyOverlayCustom3;
+class BodyOverlayCustom4;
 
 /**
  * @brief Абстрактный базовый класс для всех пресетов.
@@ -143,10 +149,6 @@ protected:
 	Preset& operator=(Preset&& other) = delete;
 };
 
-class OverlayPreset;
-class BodymorphsPreset;
-class BodyhairsPreset;
-
 /**
  * @brief Загружает содержимое JSON-файла в строку.
  * @param filepath Путь к JSON-файлу.
@@ -159,7 +161,6 @@ template <typename T, typename P>
 concept PresetCastable =
 std::derived_from<std::remove_pointer_t<std::remove_reference_t<T>>, Preset>&&
 std::derived_from<std::remove_pointer_t<std::remove_reference_t<P>>, Preset>;
-
 
 /**
  * @brief Безопасное приведение Preset* к нужному типу-наследнику.

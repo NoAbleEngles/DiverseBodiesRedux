@@ -1,47 +1,21 @@
 #include "PresetsManager.h"
 #include "Ini/ini.h"
 #include <sstream>
-#include <Preset/BodyMorphs.h>
-#include <Preset/Bodyhairs.h>
 
 
 namespace globals {
     extern ini::map* g_ini;
 }
 
-
 PresetsManager::PresetsManager() {
-    // Парсим BODYMORPHS из папок, указанных в ini-файле 
-    auto folders_string = globals::g_ini->at<std::string>("PATH/sBodymorphsFolders", "");
-    if (folders_string.empty()) {
-        logger::error("No bodymorphs folders defined in ini.");
-        return;
-    }
-    m_bodymorphsFolders = utils::string::split(folders_string, ",");
-
-    for (const auto& folder : m_bodymorphsFolders) {
-        if (folder.empty()) {
-            logger::error("Empty folder path in bodymorphs folders.");
-            continue;
-		}
-        loadPresetsFromFolder<BodymorphsPreset>(folder);
-    }
-
-    // Парсим BODYHAIRS из папок, указанных в ini-файле
-    folders_string = globals::g_ini->at<std::string>("PATH/sBodyhairsFolders", "");
-    if (folders_string.empty()) {
-        logger::error("No bodyhairs folders defined in ini.");
-        return;
-    }
-    m_bodymorphsFolders = utils::string::split(folders_string, ",");
-
-    for (const auto& folder : m_bodymorphsFolders) {
-        if (folder.empty()) {
-            logger::error("Empty folder path in bodyhairs folders.");
-            continue;
-        }
-        loadPresetsFromFolder<BodyhairsPreset>(folder);
-    }
+    loadPresets<BodymorphsPreset>("PATH/sBodymorphsFolders");
+    loadPresets<BodyhairsPreset>("PATH/sBodyhairsFolders");
+    loadPresets<BodyTattoosPreset>("PATH/sBodyTattoosFolders");
+    loadPresets<BodyOverlayCustom0>("PATH/sBodyOverlaysCustom0Folders");
+    loadPresets<BodyOverlayCustom1>("PATH/sBodyOverlaysCustom1Folders");
+    loadPresets<BodyOverlayCustom2>("PATH/sBodyOverlaysCustom2Folders");
+    loadPresets<BodyOverlayCustom3>("PATH/sBodyOverlaysCustom3Folders");
+    loadPresets<BodyOverlayCustom4>("PATH/sBodyOverlaysCustom4Folders");
 }
 
 PresetsManager& PresetsManager::get() {

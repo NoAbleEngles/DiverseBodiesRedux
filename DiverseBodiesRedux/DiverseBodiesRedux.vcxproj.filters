@@ -163,6 +163,12 @@
     <Filter Include="DiverseBodies\AS3\src\view\components">
       <UniqueIdentifier>{7a448ab4-ea15-4004-8560-fdd652992e7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DiverseBodies\Preset\OverlayPresets">
+      <UniqueIdentifier>{4f50bb67-f33c-4629-8d04-983329219ec1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\Preset\OverlayPresets\Custom">
+      <UniqueIdentifier>{2abf2812-8979-4e84-98fc-07bb678c5471}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\API.h">
@@ -1182,14 +1188,32 @@
     <ClInclude Include="Sources\DirectApply\DirectApply.h">
       <Filter>DiverseBodies\DirectApply</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Preset\Bodyhairs.h">
-      <Filter>DiverseBodies\Preset</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Preset\Bodymorphs.h">
       <Filter>DiverseBodies\Preset</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Preset\OverlayPreset.h">
       <Filter>DiverseBodies\Preset</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\Bodyhairs.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyTattoos.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyOverlayCustom0.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyOverlayCustom1.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyOverlayCustom2.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyOverlayCustom3.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyOverlayCustom4.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1201,9 +1225,6 @@
     </ClCompile>
     <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp">
       <Filter>DiverseBodies\LooksMenu</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Preset\Bodyhairs.cpp">
-      <Filter>DiverseBodies\Preset</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp">
       <Filter>DiverseBodies\Preset</Filter>
@@ -1360,6 +1381,27 @@
     </ClCompile>
     <ClCompile Include="Sources\Preset\OverlayPreset.cpp">
       <Filter>DiverseBodies\Preset</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\Bodyhairs.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyTattoos.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyOverlayCustom0.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyOverlayCustom1.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyOverlayCustom2.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyOverlayCustom3.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyOverlayCustom4.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
