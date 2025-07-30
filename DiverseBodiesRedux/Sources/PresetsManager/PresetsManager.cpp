@@ -1,6 +1,9 @@
 #include "PresetsManager.h"
 #include "Ini/ini.h"
 #include <sstream>
+#include <Preset/BodyMorphs.h>
+#include <Preset/Bodyhairs.h>
+
 
 namespace globals {
     extern ini::map* g_ini;

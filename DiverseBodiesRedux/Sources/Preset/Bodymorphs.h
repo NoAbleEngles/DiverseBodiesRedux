@@ -6,9 +6,11 @@
  *
  * Содержит морфы, имя файла, тип тела и методы для применения к актеру.
  */
-class BodymorphsPreset : public Preset
+class BodymorphsPreset final : public Preset
 {
 public:
+	static constexpr PresetType PRESET_TYPE = PresetType::BODYMORPHS;
+
 	/**
 	 * @brief Конструктор по умолчанию.
 	 */
@@ -27,35 +29,9 @@ public:
 	BodymorphsPreset(const std::string& path);
 
 	/**
-	 * @brief Копирующий конструктор.
-	 */
-	BodymorphsPreset(const BodymorphsPreset& other) noexcept = default;
-
-	/**
-	 * @brief Перемещающий конструктор.
-	 */
-	BodymorphsPreset(BodymorphsPreset&& other) noexcept = default;
-
-	/**
 	 * @brief Деструктор.
 	 */
 	~BodymorphsPreset() = default;
-
-	/// @copydoc Preset::operator=
-	Preset& operator=(const Preset& other) noexcept override;
-
-	/// @copydoc Preset::operator=
-	Preset& operator=(Preset&& other) noexcept override;
-
-	/**
-	 * @brief Оператор присваивания для BodymorphsPreset.
-	 */
-	BodymorphsPreset& operator=(const BodymorphsPreset& other) noexcept;
-
-	/**
-	 * @brief Оператор перемещающего присваивания для BodymorphsPreset.
-	 */
-	BodymorphsPreset& operator=(BodymorphsPreset&& other) noexcept;
 
 	/// @copydoc Preset::operator==
 	bool operator==(const Preset& other) const noexcept override;
@@ -73,11 +49,14 @@ public:
 	 */
 	bool operator<(const BodymorphsPreset& other) const noexcept;
 
+	/**
+	 * @brief Получить реальный тип класса.
+	 * @return PresetType класса.
+	 */
+	PresetType type() const noexcept override;
+
 	/// @copydoc Preset::check
 	CoincidenceLevel check(const RE::Actor* actor, Filter filter = AllFilters) const noexcept override;
-
-	/// @copydoc Preset::isCondtionsEmpty
-	bool isCondtionsEmpty() const noexcept override;
 
 	/// @copydoc Preset::apply
 	bool apply(RE::Actor*, bool reset3d = true) const override;
@@ -90,12 +69,6 @@ public:
 
 	/// @copydoc Preset::clear
 	void clear() noexcept override;
-
-	/// @copydoc Preset::clone
-	BodymorphsPreset* clone() const override;
-
-	/// @copydoc Preset::name
-	const std::string& id() const noexcept override;
 
 	/// @copydoc Preset::isValidAsync
 	std::future<bool> isValidAsync() const noexcept override;
@@ -117,4 +90,9 @@ private:
 
 	/// @copydoc Preset::loadFromFile
 	bool loadFromFile(const std::string& presetFile) override;
+
+	BodymorphsPreset(const BodymorphsPreset& other) = delete;
+	BodymorphsPreset& operator=(const BodymorphsPreset& other) = delete;
+	BodymorphsPreset(BodymorphsPreset&& other) = delete;
+	BodymorphsPreset& operator=(BodymorphsPreset&& other) = delete;
 };

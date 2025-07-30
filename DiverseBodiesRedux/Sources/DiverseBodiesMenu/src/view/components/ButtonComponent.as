@@ -4,8 +4,6 @@ package view.components {
     import flash.text.TextFormat;
     import flash.events.MouseEvent;
     import flash.events.Event;
-    import flash.utils.Timer;
-    import flash.events.TimerEvent;
     import view.ScrollableMenu;
 
     /**
@@ -40,7 +38,6 @@ package view.components {
                 ScrollableMenu.mainInstance.BGSCodeObj.Log(message);
             }
         }
-        private var pushTimer:Timer;
 
         /**
          * @brief Создает новую кнопку с указанным текстом
@@ -231,24 +228,6 @@ package view.components {
             updateVisualState();
         }
 
-        // ===== МЕТОДЫ ПОДСВЕТКИ =====
-
-        /**
-         * @brief Подсвечивает текст зелёным на 0.5 секунды (для push события)
-         */
-        public function highlightPush():void {
-            if (pushTimer) {
-                pushTimer.stop();
-                pushTimer = null;
-            }
-            
-            setTextColor(0x00FF00); // Зелёный цвет
-            
-            pushTimer = new Timer(500, 1); // 0.5 секунды
-            pushTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onPushTimerComplete);
-            pushTimer.start();
-        }
-
         /**
          * @brief Подсвечивает текст жёлтым (для hover события)
          */
@@ -311,17 +290,6 @@ package view.components {
                 var textFormat:TextFormat = label.getTextFormat();
                 textFormat.color = color;
                 label.setTextFormat(textFormat);
-            }
-        }
-
-        /**
-         * @brief Обработчик завершения таймера push-анимации
-         */
-        private function onPushTimerComplete(e:TimerEvent):void {
-            setTextColor(originalTextColor);
-            if (pushTimer) {
-                pushTimer.removeEventListener(TimerEvent.TIMER_COMPLETE, onPushTimerComplete);
-                pushTimer = null;
             }
         }
     }

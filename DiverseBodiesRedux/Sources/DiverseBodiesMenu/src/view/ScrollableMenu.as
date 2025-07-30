@@ -47,7 +47,6 @@
         private var menuItems:Array = [];         // Данные элементов
         private var visualElements:Array = [];    // Визуальные компоненты
         private var _activeIndex:int = -1;
-        private var currentHoverIndex:int = -1;    // Индекс текущего hover элемента
         
         // Ссылки на менеджеры с паттерном Observer
         private var themeManager:ThemeManager;
@@ -64,78 +63,6 @@
             if (mainInstance && mainInstance.BGSCodeObj && 
                 typeof mainInstance.BGSCodeObj.Log === "function") {
                 mainInstance.BGSCodeObj.Log(message);
-            }
-        }
-
-        /**
-         * Логирует текущее состояние компонентов для диагностики
-         */
-        private function logComponentState():void {
-            try {
-                log("=== ДИАГНОСТИКА СОСТОЯНИЯ КОМПОНЕНТОВ ===");
-                log("ScrollableMenu: scrollPane.name=" + (scrollPane ? scrollPane.name : "нет"));
-                log("ScrollableMenu: scrollPane.parent=" + (scrollPane && scrollPane.parent ? scrollPane.parent.name : "нет"));
-                log("ScrollableMenu: scrollPane на сцене=" + (scrollPane && scrollPane.stage ? "да" : "нет"));
-                
-                if (contentContainer) {
-                    log("ScrollableMenu: contentContainer.name=" + contentContainer.name);
-                    log("ScrollableMenu: contentContainer.parent=" + (contentContainer.parent ? contentContainer.parent.name : "нет"));
-                    log("ScrollableMenu: contentContainer на сцене=" + (contentContainer.stage ? "да" : "нет"));
-                    log("ScrollableMenu: contentContainer.visible=" + contentContainer.visible);
-                    log("ScrollableMenu: contentContainer.alpha=" + contentContainer.alpha);
-                    log("ScrollableMenu: contentContainer.numChildren=" + contentContainer.numChildren);
-                    log("ScrollableMenu: contentContainer размер=" + contentContainer.width + "x" + contentContainer.height);
-                    log("ScrollableMenu: contentContainer.x=" + contentContainer.x + ", y=" + contentContainer.y);
-                    
-                    // Диагностика детей contentContainer
-                    if (contentContainer.numChildren > 0) {
-                        for (var i:int = 0; i < Math.min(contentContainer.numChildren, 3); i++) {
-                            var child:* = contentContainer.getChildAt(i);
-                            log("ScrollableMenu: element[" + i + "].stage=" + (child.stage ? "есть" : "нет") + 
-                                ", visible=" + child.visible + ", alpha=" + child.alpha);
-                        }
-                        if (contentContainer.numChildren > 3) {
-                            log("ScrollableMenu: ... и ещё " + (contentContainer.numChildren - 3) + " элементов");
-                        }
-                    }
-                } else {
-                    log("ScrollableMenu: contentContainer=null");
-                }
-                
-                if (scrollPane) {
-                    log("ScrollableMenu: scrollPane.source=" + (scrollPane.source ? "есть" : "нет"));
-                    log("ScrollableMenu: scrollPane.source === contentContainer: " + (scrollPane.source === contentContainer));
-                    log("ScrollableMenu: scrollPane размер=" + scrollPane.width + "x" + scrollPane.height);
-                    log("ScrollableMenu: scrollPane.verticalScrollPosition=" + scrollPane.verticalScrollPosition);
-                    log("ScrollableMenu: scrollPane.maxVerticalScrollPosition=" + scrollPane.maxVerticalScrollPosition);
-                    log("ScrollableMenu: scrollPane.visible=" + scrollPane.visible);
-                    log("ScrollableMenu: scrollPane.alpha=" + scrollPane.alpha);
-                    
-                    // Проверяем children ScrollPane
-                    if (scrollPane.numChildren > 0) {
-                        log("ScrollableMenu: scrollPane.numChildren=" + scrollPane.numChildren);
-                        var foundContentContainer:Boolean = false;
-                        for (var j:int = 0; j < scrollPane.numChildren; j++) {
-                            var spChild:* = scrollPane.getChildAt(j);
-                            log("ScrollableMenu: scrollPane.child[" + j + "]=" + spChild.name + 
-                                ", stage=" + (spChild.stage ? "есть" : "нет"));
-                            if (spChild === contentContainer) {
-                                foundContentContainer = true;
-                                log("ScrollableMenu: *** НАЙДЕН! contentContainer является child[" + j + "] ScrollPane");
-                            }
-                        }
-                        if (!foundContentContainer) {
-                            log("ScrollableMenu: *** ПРОБЛЕМА! contentContainer НЕ НАЙДЕН среди детей ScrollPane");
-                        }
-                    }
-                }
-                
-                log("ScrollableMenu: menuItems.length=" + (menuItems ? menuItems.length : "нет"));
-                log("ScrollableMenu: visualElements.length=" + (visualElements ? visualElements.length : "нет"));
-                log("ScrollableMenu: _activeIndex=" + _activeIndex);
-                log("=== КОНЕЦ ДИАГНОСТИКИ ===");
-            } catch (e:Error) {
-                log("ScrollableMenu: Ошибка в logComponentState: " + e.message);
             }
         }
 
@@ -419,7 +346,6 @@
             log("ScrollableMenu: Установка " + items.length + " элементов");
             
             this.menuItems = items;
-            clearAllHoverHighlights(); // Убираем все hover подсветки
             clearVisualElements();
             
             // Восстанавливаем связь contentContainer с ScrollPane перед созданием элементов
@@ -461,55 +387,16 @@
                 log("ScrollableMenu: Нет интерактивных элементов, активный индекс сброшен");
             }
             
-            // Диагностика иерархии отображения
-            log("ScrollableMenu: === ДИАГНОСТИКА ВИДИМОСТИ ===");
-            log("ScrollableMenu: scrollPane.visible=" + scrollPane.visible + ", alpha=" + scrollPane.alpha);
-            log("ScrollableMenu: contentContainer.visible=" + contentContainer.visible + ", alpha=" + contentContainer.alpha);
-            log("ScrollableMenu: contentContainer.numChildren=" + contentContainer.numChildren);
-            log("ScrollableMenu: scrollPane на сцене=" + (scrollPane.stage ? "да" : "нет"));
-            log("ScrollableMenu: contentContainer на сцене=" + (contentContainer.stage ? "да" : "нет"));
-            
-            // Проверяем источник ScrollPane
-            if (scrollPane.source === contentContainer) {
-                log("ScrollableMenu: ScrollPane правильно привязан к contentContainer");
-            } else {
-                log("ScrollableMenu: ОШИБКА! ScrollPane НЕ привязан к contentContainer!");
-                scrollPane.source = contentContainer; // Принудительно переназначаем
-            }
-            
-            // КРИТИЧЕСКИ ВАЖНО: для ScrollPane нужно использовать source, а не addChild
+            // Обеспечиваем правильную связь ScrollPane с контейнером
             if (scrollPane.source !== contentContainer) {
-                log("ScrollableMenu: Исправляем source ScrollPane...");
                 try {
                     scrollPane.source = contentContainer;
-                    log("ScrollableMenu: ScrollPane.source установлен в contentContainer");
-                    
-                    // Принудительно обновляем ScrollPane после установки source
                     scrollPane.invalidate();
-                    scrollPane.drawNow();
-                    scrollPane.validateNow();
                     scrollPane.update();
-                    
-                    log("ScrollableMenu: ScrollPane принудительно обновлен после установки source");
                 } catch (fixError:Error) {
-                    log("ScrollableMenu: КРИТИЧЕСКАЯ ОШИБКА при установке source: " + fixError.message);
+                    log("ScrollableMenu: ОШИБКА при установке source: " + fixError.message);
                 }
             }
-            
-            // Дополнительная проверка видимости после установки source
-            if (contentContainer.stage === null) {
-                log("ScrollableMenu: ВНИМАНИЕ! contentContainer всё ещё не на сцене после установки source");
-                // Попробуем принудительно перерисовать с помощью корректных методов
-                scrollPane.invalidate();
-                scrollPane.drawNow();
-                scrollPane.validateNow();
-                scrollPane.update();
-            } else {
-                log("ScrollableMenu: contentContainer теперь правильно на сцене");
-            }
-            
-            // Логируем состояние после установки элементов
-            //logComponentState();
             
             log("ScrollableMenu: Элементы установлены успешно");
         }
@@ -695,7 +582,9 @@
                             options[j] = String(options[j]).replace(/^\s+|\s+$/g, "");
                         }
                         element = new SwitcherComponent(options, data.selectedIndex || 0);
-                        element.addEventListener(SwitcherComponent.EVENT_CHANGE, createElementHandler(index, data));
+                        element.addEventListener(SwitcherComponent.EVENT_CHANGE, createSwitcherHandler(index, data));
+                        element.addEventListener(SwitcherComponent.EVENT_BACK, createBackHandler(index, data));
+                        element.addEventListener(SwitcherComponent.EVENT_PUSH, createElementHandler(index, data));
                         // Добавляем обработчик клика для установки активного индекса
                         element.addEventListener(MouseEvent.CLICK, createMouseClickHandler(index, data));
                         break;
@@ -829,81 +718,8 @@
             menuScaler = null;
             
             _activeIndex = -1;
-            currentHoverIndex = -1;
             
             log("ScrollableMenu: Уничтожение завершено");
-        }
-
-        /**
-         * Добавляет один элемент в конец меню без полного пересоздания
-         * (оптимизация производительности)
-         */
-        public function addItem(item:Object):void {
-            if (!menuItems) {
-                menuItems = [];
-            }
-            
-            // Убедимся, что ScrollPane использует contentContainer как источник
-            if (contentContainer && scrollPane && scrollPane.source !== contentContainer) {
-                try {
-                    scrollPane.source = contentContainer;
-                    log("ScrollableMenu: scrollPane.source переназначен на contentContainer в addItem");
-                } catch (addError:Error) {
-                    log("ScrollableMenu: Ошибка установки scrollPane.source в addItem: " + addError.message);
-                }
-            }
-            
-            menuItems.push(item);
-            var itemIndex:int = menuItems.length - 1;
-            
-            // Создаем визуальный элемент только для нового item
-            var element:* = createElementByType(item, itemIndex);
-            if (element) {
-                // Вычисляем позицию для нового элемента
-                var scaledVerticalMargin:Number = menuScaler.getScaledVerticalMargin();
-                var scaledItemHeight:Number = menuScaler.getScaledItemHeight();
-                var scaledItemSpacing:Number = menuScaler.getScaledItemSpacing();
-                
-                var yPos:Number = scaledVerticalMargin; // Отступ сверху
-                for (var i:int = 0; i < itemIndex; i++) {
-                    yPos += scaledItemHeight + scaledItemSpacing;
-                }
-                
-                // Устанавливаем позицию и ширину нового элемента  
-                element.x = 5; // 5px отступ слева
-                element.y = yPos;
-                // Ширина элемента: ширина ScrollPane минус 5px слева и справа
-                var availableWidth:Number = scrollPane.width - 10;
-                if (element.hasOwnProperty('width')) {
-                    element.width = availableWidth;
-                }
-                
-                contentContainer.addChild(element);
-                visualElements.push(element);
-                
-                // Обновляем только размер контейнера
-                updateContentSize();
-                
-                // ДИАГНОСТИКА: Проверяем, что элемент корректно добавлен
-                log("ScrollableMenu: === ДИАГНОСТИКА ДОБАВЛЕНИЯ ЭЛЕМЕНТА ===");
-                log("ScrollableMenu: contentContainer.numChildren=" + contentContainer.numChildren);
-                log("ScrollableMenu: visualElements.length=" + visualElements.length);
-                log("ScrollableMenu: element.parent=" + (element.parent ? element.parent.name : "null"));
-                log("ScrollableMenu: element.stage=" + (element.stage ? "присутствует" : "null"));
-                log("ScrollableMenu: contentContainer.stage=" + (contentContainer.stage ? "присутствует" : "null"));
-                log("ScrollableMenu: contentContainer.parent=" + (contentContainer.parent ? contentContainer.parent.name : "null"));
-                log("ScrollableMenu: scrollPane.source === contentContainer: " + (scrollPane.source === contentContainer));
-                
-                // Принудительно обновляем ScrollPane после добавления элемента
-                scrollPane.invalidate();
-                scrollPane.drawNow();
-                scrollPane.validateNow();
-                scrollPane.update();
-                
-                log("ScrollableMenu: Добавлен элемент #" + itemIndex + " (" + item.type + ") - ИНКРЕМЕНТАЛЬНО");
-            } else {
-                log("ScrollableMenu: ⚠️ ОШИБКА! Не удалось создать элемент для item #" + itemIndex);
-            }
         }
 
         // ===== ФУНКЦИИ ОТПРАВКИ КОЛБЭКОВ В C++ =====
@@ -975,6 +791,14 @@
          * Обработчик нажатия клавиш
          */
         private function onKeyDown(event:KeyboardEvent):void {
+            // Обрабатываем ESC и TAB независимо от наличия элементов в меню
+            if (event.keyCode === 27 || event.keyCode === 9) { // ESC или TAB
+                log("ScrollableMenu: " + (event.keyCode === 27 ? "ESC" : "TAB") + " нажат - отправляем BackPressed");
+                sendBackCallback();
+                dispatchEvent(new CustomEvent("menuBack", {}));
+                return;
+            }
+            
             if (!menuItems || menuItems.length === 0) return;
             
             var interactiveIndices:Array = [];
@@ -994,14 +818,9 @@
                 ", currentItem.type=" + (currentItem ? currentItem.type : "нет"));
             
             switch (event.keyCode) {
-                case 27: // ESC - отправляет BackPressed
-                    log("ScrollableMenu: ESC нажат - отправляем BackPressed");
-                    sendBackCallback();
-                    break;
-                    
-                case 9: // TAB - отправляет BackPressed
-                    log("ScrollableMenu: TAB нажат - отправляем BackPressed");
-                    sendBackCallback();
+                case 27: // ESC - уже обработан выше
+                case 9: // TAB - уже обработан выше
+                    // Эти события уже обработаны в начале функции
                     break;
                     
                 case 13: // Enter - отправляет ItemSelected только для ButtonComponent
@@ -1110,15 +929,10 @@
                         if (currentItem.type === 1) { // ButtonComponent - то же что Enter
                             log("ScrollableMenu: Стрелка вправо на ButtonComponent - отправляем ItemSelected");
                             sendPushCallback(currentItem.labelText);
-                        } else if (currentItem.type === 3) { // SwitcherComponent - переключение в бОльшую сторону
-                            log("ScrollableMenu: Стрелка вправо на SwitcherComponent");
+                        } else if (currentItem.type === 3) { // SwitcherComponent - делегируем обработку компоненту
+                            log("ScrollableMenu: Стрелка вправо на SwitcherComponent - вызываем switchRight()");
                             if (currentElement.hasOwnProperty("switchRight")) {
-                                var oldIndex:int = currentElement.index;
-                                currentElement.switchRight();
-                                var newIndex:int = currentElement.index;
-                                if (newIndex !== oldIndex) {
-                                    sendSwitcherCallback(currentItem.labelText, newIndex);
-                                }
+                                currentElement.switchRight(); // Компонент сам отправит нужные события
                             }
                         } else if (currentItem.type === 2) { // CheckboxComponent - устанавливает если не установлен
                             log("ScrollableMenu: Стрелка вправо на CheckboxComponent");
@@ -1135,15 +949,11 @@
                         if (currentItem.type === 1) { // ButtonComponent - то же что ESC/TAB
                             log("ScrollableMenu: Стрелка влево на ButtonComponent - отправляем BackPressed");
                             sendBackCallback();
-                        } else if (currentItem.type === 3) { // SwitcherComponent - переключение в меньшую сторону
-                            log("ScrollableMenu: Стрелка влево на SwitcherComponent");
+                            dispatchEvent(new CustomEvent("menuBack", {}));
+                        } else if (currentItem.type === 3) { // SwitcherComponent - делегируем обработку компоненту
+                            log("ScrollableMenu: Стрелка влево на SwitcherComponent - вызываем switchLeft()");
                             if (currentElement.hasOwnProperty("switchLeft")) {
-                                var oldLeftIndex:int = currentElement.index;
-                                currentElement.switchLeft();
-                                var newLeftIndex:int = currentElement.index;
-                                if (newLeftIndex !== oldLeftIndex) {
-                                    sendSwitcherCallback(currentItem.labelText, newLeftIndex);
-                                }
+                                currentElement.switchLeft(); // Компонент сам отправит нужные события
                             }
                         } else if (currentItem.type === 2) { // CheckboxComponent - снимает если установлен
                             log("ScrollableMenu: Стрелка влево на CheckboxComponent");
@@ -1196,7 +1006,6 @@
          */
         private function createHoverHandler(index:int, data:Object):Function {
             return function(event:Event):void {
-                currentHoverIndex = index;
                 log("ScrollableMenu: Hover элемента " + index + " типа " + data.type);
                 
                 // Отправляем ItemHoverChanged только для ButtonComponent при клике мышью
@@ -1233,42 +1042,45 @@
                             sendCheckboxCallback(data.labelText, element.selected);
                         }
                     }
-                    if (data.type === 3) { // SwitcherComponent
-                        var switcher:* = visualElements[index];
-                        if (switcher && switcher.hasOwnProperty("index")) {
-                            sendSwitcherCallback(data.labelText, switcher.index);
-                        }
-                    }
+                    // SwitcherComponent events are handled by createSwitcherHandler, не дублируем здесь
                 }
             };
         }
 
         /**
-         * Очищает все hover подсветки
+         * Создает обработчик back событий от компонентов
          */
-        public function clearAllHoverHighlights():void {
-            currentHoverIndex = -1;
-            log("ScrollableMenu: Все hover подсветки сброшены");
-            // Hover обрабатывается через события, не через методы компонентов
+        private function createBackHandler(index:int, data:Object):Function {
+            return function(event:Event):void {
+                log("ScrollableMenu: Back событие от элемента " + index + " типа " + data.type);
+                
+                // Отправляем back в C++
+                sendBackCallback();
+                
+                // Диспетчируем событие menuBack для MenuManager
+                dispatchEvent(new CustomEvent("menuBack", {}));
+            };
         }
 
         /**
-         * @brief Устанавливает hover подсветку для элемента по индексу
-         * @param index Индекс элемента
+         * Создает обработчик событий CHANGE для SwitcherComponent
          */
-        public function setHoverHighlight(index:int):void {
-            if (index < 0 || index >= visualElements.length) {
-                log("ScrollableMenu: setHoverHighlight - некорректный индекс: " + index);
-                return;
-            }
-            
-            // Сбрасываем предыдущий hover
-            clearAllHoverHighlights();
-            
-            // Устанавливаем новый hover индекс
-            currentHoverIndex = index;
-            log("ScrollableMenu: Hover индекс установлен на элемент " + index);
-            // Визуальная hover подсветка управляется самими компонентами через события
+        private function createSwitcherHandler(index:int, data:Object):Function {
+            return function(event:Event):void {
+                log("ScrollableMenu: Switcher CHANGE событие от элемента " + index);
+                
+                // Получаем текущий индекс из компонента
+                var element:* = visualElements[index];
+                if (element && element.hasOwnProperty("index")) {
+                    var currentIndex:int = element.index;
+                    log("ScrollableMenu: Switcher изменен на индекс " + currentIndex);
+                    
+                    // Отправляем в C++
+                    sendSwitcherCallback(data.labelText, currentIndex);
+                } else {
+                    log("ScrollableMenu: ОШИБКА - не удалось получить индекс из SwitcherComponent");
+                }
+            };
         }
 
         /**
@@ -1466,7 +1278,6 @@
             clearVisualElements();
             menuItems = [];
             _activeIndex = -1;
-            currentHoverIndex = -1;
             log("ScrollableMenu: Все элементы очищены");
         }
 
@@ -1492,13 +1303,6 @@
          */
         public function getCurrentItems():Array {
             return menuItems ? menuItems.slice() : [];
-        }
-
-        /**
-         * Обновляет элементы меню
-         */
-        public function updateItems(items:Array, focusIndex:int = 0):void {
-            setItems(items, focusIndex);
         }
     }
 }

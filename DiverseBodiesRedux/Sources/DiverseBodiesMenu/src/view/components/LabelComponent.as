@@ -1,14 +1,17 @@
-package view.components {
+﻿package view.components {
     import flash.display.MovieClip;
     import flash.text.TextField;
     import flash.text.TextFormat;
+    import flash.events.MouseEvent;
+    import flash.events.Event;
     import view.ScrollableMenu;
 
     /**
      * @brief Статический текстовый компонент для отображения заголовков и информации
      * 
-     * Предоставляет простой текстовый элемент без интерактивности.
+     * Предоставляет простой текстовый элемент с минимальной интерактивностью для навигации.
      * Используется для заголовков разделов, информационных сообщений и разделителей в меню.
+     * Поддерживает обработку правого клика для события "назад" в меню с только лейблами.
      */
     public class LabelComponent extends MovieClip {
         private var label:TextField;
@@ -41,6 +44,7 @@ package view.components {
         private function init():void {
             createBackground();
             createLabel();
+            addEventListeners();
         }
 
         private function createBackground():void {
@@ -61,6 +65,13 @@ package view.components {
             label.selectable = false;
             label.mouseEnabled = false;
             addChild(label);
+        }
+
+        /**
+         * @brief Добавляет обработчики событий мыши для базовой интерактивности
+         */
+        private function addEventListeners():void {
+            // LabelComponent остается неинтерактивным - не добавляем обработчики
         }
 
         // Геттеры и сеттеры
@@ -94,11 +105,10 @@ package view.components {
          */
         public function setColorsRGBA(normalColorRGBA:uint, textColorRGBA:uint, 
                                      hoverColorRGBA:uint, selectedColorRGBA:uint):void {
-            // Сохраняем цвета для будущего использования
+            // Сохраняем только используемые цвета для лейблов
             normalColor = normalColorRGBA & 0x00FFFFFF; // Убираем альфа для RGB
             textColor = textColorRGBA & 0x00FFFFFF;
-            hoverColor = hoverColorRGBA & 0x00FFFFFF;
-            selectedColor = selectedColorRGBA & 0x00FFFFFF;
+            // hoverColor и selectedColor не используются в LabelComponent
             
             // Применяем цвета
             updateBackgroundColor();
@@ -120,8 +130,6 @@ package view.components {
         // Свойства для хранения цветов
         private var normalColor:uint = 0x000000; // Прозрачный для лейблов
         private var textColor:uint = 0xFFFFFF;
-        private var hoverColor:uint = 0x333333;
-        private var selectedColor:uint = 0x666666;
 
         /**
          * @brief Устанавливает цвет текста
@@ -208,6 +216,6 @@ package view.components {
          */
         private function updateVisualState():void {
             updateBackgroundColor();
-        }
+		}
     }
 }

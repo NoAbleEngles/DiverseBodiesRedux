@@ -213,7 +213,12 @@ package {
          */
         public function hover(labelText:String):void {
             var idx:int = find(labelText);
-            if (idx >= 0) setHoverHighlight(idx);
+            if (idx >= 0) {
+                // Теперь подсветка управляется автоматически через setActiveIndex в ScrollableMenu
+                if (menuManager && menuManager.scrollableMenu) {
+                    menuManager.scrollableMenu.setActiveIndex(idx);
+                }
+            }
         }
 
         /**
@@ -364,10 +369,6 @@ package {
                 ExternalInterface.addCallback("setMenuMargins", setMenuMargins);
                 ExternalInterface.addCallback("getMenuMargins", getMenuMargins);
                 ExternalInterface.addCallback("getMenuScaleInfo", getMenuScaleInfo);
-                
-                // Методы управления подсветкой
-                ExternalInterface.addCallback("setHoverHighlight", setHoverHighlight);
-                ExternalInterface.addCallback("clearHoverHighlight", clearHoverHighlight);
                 
                 // Методы настройки цветов
                 ExternalInterface.addCallback("setComponentColors", setComponentColors);
@@ -1112,25 +1113,6 @@ package {
             scaleRetryCount = 0;
             
             log("Main: Система отложенного масштабирования остановлена");
-        }
-
-        /**
-         * @brief Устанавливает подсветку (жёлтую) для кнопки по индексу
-         * @param index Индекс кнопки
-         */
-        public function setHoverHighlight(index:int):void {
-            if (menuManager && menuManager.scrollableMenu) {
-                menuManager.scrollableMenu.setHoverHighlight(index);
-            }
-        }
-
-        /**
-         * @brief Сбрасывает подсветку (жёлтую) для всех кнопок
-         */
-        public function clearHoverHighlight():void {
-            if (menuManager && menuManager.scrollableMenu) {
-                menuManager.scrollableMenu.clearAllHoverHighlights();
-            }
         }
     }
 }

@@ -24,26 +24,18 @@ class BodyhairsPreset;
 class Preset
 {
 public:
+	static constexpr PresetType PRESET_TYPE = PresetType::NONE;
+
 	/**
 	 * @brief Конструктор по умолчанию.
 	 */
 	Preset() = default;
 
 	/**
-	 * @brief Конструктор с указанием типа пресета.
-	 * @param type Тип пресета.
+	 * @brief Конструктор с указанием id пресета.
+	 * @param id Уникальный идентификатор пресета, обычно соответствует имени файла без расширения.
 	 */
-	Preset(std::string filepath, PresetType type);
-
-	/**
-	 * @brief Копирующий конструктор.
-	 */
-	Preset(const Preset& other) noexcept = default;
-
-	/**
-	 * @brief Перемещающий конструктор.
-	 */
-	Preset(Preset&& other) noexcept = default;
+	Preset(const std::string& id);
 
 	/**
 	 * @brief Виртуальный деструктор.
@@ -54,28 +46,14 @@ public:
 	 * @brief Получить тип пресета.
 	 * @return Тип пресета.
 	 */
-	PresetType type() const noexcept;
+	virtual PresetType type() const noexcept = 0;
 
 	/**
 	 * @brief Сравнение на равенство с другим пресетом.
 	 * @param other Другой пресет.
 	 * @return true, если пресеты равны.
 	 */
-	virtual bool operator==(const Preset& other) const noexcept = 0;
-
-	/**
-	 * @brief Оператор присваивания.
-	 * @param other Другой пресет.
-	 * @return Ссылка на этот объект.
-	 */
-	virtual Preset& operator=(const Preset& other) noexcept = 0;
-
-	/**
-	 * @brief Оператор перемещающего присваивания.
-	 * @param other Другой пресет.
-	 * @return Ссылка на этот объект.
-	 */
-	virtual Preset& operator=(Preset&& other) noexcept = 0;
+	 virtual bool operator==(const Preset& other) const noexcept = 0;
 
 	/**
 	 * @brief Оператор "меньше" для сортировки.
@@ -121,19 +99,13 @@ public:
 	/**
 	 * @brief Очистить содержимое пресета.
 	 */
-	virtual void clear() noexcept;
-
-	/**
-	 * @brief Клонировать пресет.
-	 * @return Указатель на новый пресет, созданный на основе текущего.
-	 */
-	virtual Preset* clone() const = 0;
+	virtual void clear() noexcept = 0;
 
 	/**
 	 * @brief Получить имя пресета.
 	 * @return Имя пресета.
 	 */
-	virtual const std::string& id() const noexcept = 0;
+	virtual const std::string& id() const noexcept;
 
 	/**
 	 * @brief Узнать является ли пресет валидным (не пустой, доступны ресурсы на которые пресет ссылается). Ассинхронный метод.
@@ -165,15 +137,15 @@ protected:
 	 */
 	std::string m_id{};
 
-	/**
-	 * @brief Тип пресета.
-	 */
-	PresetType m_type{ PresetType::NONE };
+	Preset(const Preset& other) = delete;
+	Preset& operator=(const Preset& other) = delete;
+	Preset(Preset&& other) = delete;
+	Preset& operator=(Preset&& other) = delete;
 };
 
-#include "Bodymorphs.h"
-#include "Bodyhairs.h"
-#include "BodyTattoos.h"
+class OverlayPreset;
+class BodymorphsPreset;
+class BodyhairsPreset;
 
 /**
  * @brief Загружает содержимое JSON-файла в строку.
@@ -182,54 +154,40 @@ protected:
  */
 std::string getJson(const std::filesystem::path& filepath);
 
+// Концепт: P и T — наследники Preset, P — указатель или ссылка
+template <typename T, typename P>
+concept PresetCastable =
+std::derived_from<std::remove_pointer_t<std::remove_reference_t<T>>, Preset>&&
+std::derived_from<std::remove_pointer_t<std::remove_reference_t<P>>, Preset>;
+
+
 /**
  * @brief Безопасное приведение Preset* к нужному типу-наследнику.
  * @tparam T Целевой тип (например, BodymorphsPreset).
  * @param preset Указатель на Preset.
  * @return Указатель на T или nullptr.
  */
-template <typename T>
-inline T* preset_cast(Preset* preset)
+template <typename T, typename P>
+	requires PresetCastable<T, P>&& std::is_pointer_v<P>&& std::is_pointer_v<T>
+inline T preset_cast(P preset)
 {
-	if (!preset) {
+	if (preset && preset->type() == std::remove_pointer_t<T>::PRESET_TYPE) {
+		using BasePtr = std::conditional_t<
+			std::is_const_v<std::remove_pointer_t<T>>,
+			const Preset*,
+			Preset*
+		>;
+		return static_cast<T>(const_cast<BasePtr>(preset));
+	}
+	else {
 		return nullptr;
 	}
-	if constexpr (std::is_same_v<T, BodymorphsPreset>) {
-		if (preset->type() == PresetType::BODYMORPHS) {
-			return static_cast<T*>(preset);
-		}
-	}
-	// Добавьте другие типы при необходимости, например OverlayPreset
-	// else if constexpr (std::is_same_v<T, OverlayPreset>) {
-	//     if (preset->type() == PresetType::OVERLAY) {
-	//         return static_cast<T*>(preset);
-	//     }
-	// }
-	return nullptr;
 }
 
-/**
- * @brief Безопасное приведение Preset& к нужному типу-наследнику.
- * @tparam T Целевой тип (например, BodymorphsPreset).
- * @param preset Ссылка на Preset.
- * @return Ссылка на T.
- * @throws std::bad_cast если тип не совпадает.
- */
 template <typename T>
-inline T& preset_cast(Preset& preset)
+inline T preset_cast(auto* preset)
 {
-	if constexpr (std::is_same_v<T, BodymorphsPreset>) {
-		if (preset.type() == PresetType::BODYMORPHS) {
-			return static_cast<T&>(preset);
-		}
-	}
-	// Добавьте другие типы при необходимости, например OverlayPreset
-	// else if constexpr (std::is_same_v<T, OverlayPreset>) {
-	//     if (preset.type() == PresetType::OVERLAY) {
-	//         return static_cast<T&>(preset);
-	//     }
-	// }
-	throw std::bad_cast();
+	return preset_cast<T, decltype(preset)>(preset);
 }
 
 /**

@@ -56,7 +56,7 @@ namespace ini
 			std::cerr << "INI file does not exist: " << m_path << std::endl;
 			return false;  // Возвращаем false, если файл не существует
 		}
-		readFile(m_path);  // Обновляем данные из файла
+		return readFile(m_path);  // Обновляем данные из файла
 	}
 	
 	bool map::readFile(const std::filesystem::path& path)

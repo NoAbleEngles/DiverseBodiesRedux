@@ -73,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>$(ProjectName)</TargetName>
-    <OutDir>E:\Games\Fallout 4\MO2\mods\DBR2.0\F4SE\Plugins</OutDir>
+    <OutDir>E:\Games\Fallout 4\MO2\mods\DBR2.0\F4SE\Plugins\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -130,10 +130,10 @@
       <ExternalWarningLevel>TurnOffAllWarnings</ExternalWarningLevel>
       <DisableSpecificWarnings>4200;4201;4324;4251;4275;4996;4100</DisableSpecificWarnings>
       <UseFullPaths>false</UseFullPaths>
-      <AdditionalOptions>%(AdditionalOptions) /utf-8 /Ob3</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
       <ForcedIncludeFiles>cstdint;cstddef</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -481,7 +481,7 @@
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Bodyhairs.h" />
     <ClInclude Include="Sources\Preset\Bodymorphs.h" />
-    <ClInclude Include="Sources\Preset\BodyTattoos.h" />
+    <ClInclude Include="Sources\Preset\OverlayPreset.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
     <ClInclude Include="Sources\Preset\Details\PresetEnums.h" />
@@ -543,7 +543,7 @@
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
-    <ClCompile Include="Sources\Preset\BodyTattoos.cpp" />
+    <ClCompile Include="Sources\Preset\OverlayPreset.cpp" />
     <ClCompile Include="Sources\Preset\Details\Conditions.cpp" />
     <ClCompile Include="Sources\Preset\Details\Overlay.cpp" />
     <ClCompile Include="Sources\Preset\Preset.cpp" />

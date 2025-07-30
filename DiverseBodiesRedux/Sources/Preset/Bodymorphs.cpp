@@ -7,10 +7,10 @@
 
 
 BodymorphsPreset::BodymorphsPreset() :
-	Preset(std::string{}, PresetType::BODYMORPHS) {}
+	Preset(std::string{}) {}
 
 BodymorphsPreset::BodymorphsPreset(const std::filesystem::path& path) :
-	Preset(path.string(), PresetType::BODYMORPHS)
+	Preset(path.stem().string())
 {
 	if (!loadFromFile(path.string())) {
 		logger::error("Failed to load BodymorphsPreset from path: {}", path.string());
@@ -18,56 +18,16 @@ BodymorphsPreset::BodymorphsPreset(const std::filesystem::path& path) :
 }
 
 BodymorphsPreset::BodymorphsPreset(const std::string& path) :
-	Preset(path, PresetType::BODYMORPHS)
+	Preset(path)
 {
 	if (!loadFromFile(path)) {
 		logger::error("Failed to load BodymorphsPreset from path: {}", path);
 	};
 }
 
-Preset& BodymorphsPreset::operator=(const Preset& other) noexcept {
-	if (this != &other) {
-		Preset::operator=(other);
-		if (auto bp_other = dynamic_cast<const BodymorphsPreset*>(&other); bp_other) {
-			*this = *bp_other;
-		} else {
-			logger::error("Failed to cast Preset to BodymorphsPreset in assignment operator.");
-		}
-	}
-	return *this;
-}
-
-Preset& BodymorphsPreset::operator=(Preset&& other) noexcept
-{
-	if (this != &other) {
-		if (auto bp_other = dynamic_cast<BodymorphsPreset*>(&other); bp_other) {
-			*this = std::move(*bp_other);
-		} else {
-			logger::error("Failed to cast Preset to BodymorphsPreset in move assignment operator.");
-		}
-	}
-	return *this;
-}
-
-BodymorphsPreset& BodymorphsPreset::operator=(const BodymorphsPreset& other) noexcept
-{
-	if (this != &other) {
-		Preset::operator=(other);
-	}
-	return *this;
-}
-
-BodymorphsPreset& BodymorphsPreset::operator=(BodymorphsPreset&& other) noexcept  
-{  
-	if (this != &other) {  
-		Preset::operator=(std::move(other));  
-	}  
-	return *this;  
-}
-
 bool BodymorphsPreset::operator==(const Preset& other) const noexcept
 {
-	if (auto bp_other = dynamic_cast<const BodymorphsPreset*>(&other); bp_other) {
+	if (auto bp_other = preset_cast<const BodymorphsPreset*>(&other); bp_other) {
 		return *this == *bp_other;
 	} else {
 		return false;
@@ -79,10 +39,14 @@ bool BodymorphsPreset::operator==(const BodymorphsPreset& other) const noexcept
 	return Preset::operator==(other);
 }
 
+PresetType BodymorphsPreset::type() const noexcept { 
+	return PRESET_TYPE; 
+}
+
 // @brief Упорядочивает пресеты по типу, затем по полу, затем по имени. Для сортировки в списке пресетов и удобного поиска. Поддерживает сравнение с базовым классом Preset для использования в контейнерах STL.
 bool BodymorphsPreset::operator<(const Preset& other) const noexcept
 {
-	if (auto bp_other = dynamic_cast<const BodymorphsPreset*>(&other); bp_other) {
+	if (auto bp_other = preset_cast<const BodymorphsPreset*>(&other); bp_other) {
 		return *this < *bp_other;
 	} else {
 		return Preset::operator<(other);
@@ -93,11 +57,6 @@ bool BodymorphsPreset::operator<(const Preset& other) const noexcept
 bool BodymorphsPreset::operator<(const BodymorphsPreset& other) const noexcept
 {
 	return Preset::operator<(other);
-}
-
-// @brief Проверяет, пуст ли пресет.
-bool BodymorphsPreset::isCondtionsEmpty() const noexcept {
-	return Preset::m_conditions.empty();
 }
 
 // @brief Проверяет, применим ли пресет к актеру. Возвращает true, если пол актера соответствует условиям пресета и есть морфы для применения.
@@ -180,13 +139,7 @@ bool BodymorphsPreset::remove(RE::Actor* actor) const
 // @brief Возвращает true, если пресет пустой или не валидный. Пустой пресет - это пресет без имени.
 bool BodymorphsPreset::empty() const noexcept
 {
-	return id().empty();
-}
-
-// @brief Возвращает имя пресета. Имя - это имя файла (без пути), из которого был загружен пресет.
-const std::string& BodymorphsPreset::id() const noexcept
-{
-	return Preset::id();
+	return type() <= PresetType::NONE || type() >= PresetType::END || id().empty();
 }
 
 std::future<bool> BodymorphsPreset::isValidAsync() const noexcept {
@@ -340,11 +293,9 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 
 // @breif Очищает объект
 void BodymorphsPreset::clear() noexcept {
-	*this = std::move(BodymorphsPreset{});  // Используем оператор присваивания для очистки
-}
-
-BodymorphsPreset* BodymorphsPreset::clone() const {
-	return new BodymorphsPreset{ *this };
+	Preset::clear();
+	m_bodytype = BodyType::NONE;
+	m_morphs.clear();
 }
 
 // DiverseBodiesRedux\Sources\Preset\Bodymorphs.cpp
@@ -354,7 +305,7 @@ std::string BodymorphsPreset::print() const
 {
 	std::ostringstream oss;
 	oss << "BodymorphsPreset: " << id() << "\n";
-	oss << "  Type: " << static_cast<int>(m_type) << "\n";
+	oss << "  Type: " << GetPresetTypeString(type()) << "\n";
 	oss << "  Morphs: ";
 	if (m_morphs.empty()) {
 		oss << "(none)\n";

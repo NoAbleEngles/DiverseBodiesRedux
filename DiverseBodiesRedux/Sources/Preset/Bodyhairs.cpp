@@ -6,248 +6,92 @@
 std::set<std::string> BodyhairsPreset::ALL_ITEMS_M{};
 std::set<std::string> BodyhairsPreset::ALL_ITEMS_F{};
 
-BodyhairsPreset::BodyhairsPreset() :
-	Preset(std::string{}, PresetType::BODYHAIRS) {}
+void BodyhairsPreset::addOverlaysFromThisToPossibleOverlays() {
+	if (!empty()) {
+		auto& overlay_store = m_conditions.gender() == RE::Actor::Sex::Male ? ALL_ITEMS_M : ALL_ITEMS_F;
+		for (auto& overlay : m_overlays)
+			overlay_store.emplace(overlay.id());
+	}
+}
+
+BodyhairsPreset::BodyhairsPreset() : OverlayPreset() {}
 
 BodyhairsPreset::BodyhairsPreset(const std::filesystem::path& path) :
-	Preset(path.string(), PresetType::BODYHAIRS)
-{
-	if (!loadFromFile(path.string())) {
-		logger::error("Failed to load BodyhairsPreset from path: {}", path.string());
-	};
+	OverlayPreset(path.string()) {
+	addOverlaysFromThisToPossibleOverlays();
 }
 
 BodyhairsPreset::BodyhairsPreset(const std::string& path) :
-	Preset(path, PresetType::BODYHAIRS)
-{
-	if (!loadFromFile(path)) {
-		logger::error("Failed to load BodyhairsPreset from path: {}", path);
-	};
+	OverlayPreset(path) {
+	addOverlaysFromThisToPossibleOverlays();
 }
 
-Preset& BodyhairsPreset::operator=(const Preset& other) noexcept {
-	if (this != &other) {
-		Preset::operator=(other);
-		if (auto bp_other = dynamic_cast<const BodyhairsPreset*>(&other); bp_other) {
-			*this = *bp_other;
-		}
-		else {
-			logger::error("Failed to cast Preset to BodyhairsPreset in assignment operator.");
-		}
-	}
-	return *this;
+const std::set<std::string> BodyhairsPreset::getAllPossibleMaleOverlays() noexcept {
+	return ALL_ITEMS_M;
 }
 
-Preset& BodyhairsPreset::operator=(Preset&& other) noexcept
-{
-	if (this != &other) {
-		if (auto bp_other = dynamic_cast<BodyhairsPreset*>(&other); bp_other) {
-			*this = std::move(*bp_other);
-		}
-		else {
-			logger::error("Failed to cast Preset to BodyhairsPreset in move assignment operator.");
+const std::set<std::string> BodyhairsPreset::getAllPossibleFemaleOverlays() noexcept {
+	return ALL_ITEMS_F;
+}
+
+void BodyhairsPreset::revalidateAllPossibleOverlays(const std::set<std::string>& AllValidOverlays) {
+	std::set<std::string_view> temp{};
+	for (const auto& overlay : ALL_ITEMS_M) {
+		if (AllValidOverlays.contains(overlay.data())) {
+			temp.emplace(overlay);
 		}
 	}
-	return *this;
 }
 
-BodyhairsPreset& BodyhairsPreset::operator=(const BodyhairsPreset& other) noexcept
-{
-	if (this != &other) {
-		Preset::operator=(other);
+bool BodyhairsPreset::operator==(const Preset& other) const noexcept {
+	auto ptrOther = preset_cast<const BodyhairsPreset*>(&other);
+	if (!ptrOther) {
+		return false;
 	}
-	return *this;
-}
 
-BodyhairsPreset& BodyhairsPreset::operator=(BodyhairsPreset&& other) noexcept
-{
-	if (this != &other) {
-		Preset::operator=(std::move(other));
+	if (OverlayPreset::operator==(other)) {
+		if (auto otherOverlayPreset = preset_cast<OverlayPreset*>(&other); otherOverlayPreset) {
+			return *static_cast<const OverlayPreset*>(this) == other;
+		}
 	}
-	return *this;
-}
-
-bool BodyhairsPreset::operator==(const Preset& other) const noexcept
-{
-	auto bp_other = dynamic_cast<const BodyhairsPreset*>(&other);
-	if (bp_other)
-		return *this == *bp_other;
-	return Preset::operator==(other);
-}
-
-bool BodyhairsPreset::operator==(const BodyhairsPreset& other) const noexcept
-{
-	return Preset::operator==(other);
+	return false;
 }
 
 bool BodyhairsPreset::operator<(const Preset& other) const noexcept
 {
-	auto bp_other = dynamic_cast<const BodyhairsPreset*>(&other);
-	if (bp_other)
-		return *this < *bp_other;
-
-	return Preset::operator<(other);
+	return OverlayPreset::operator<(other);
 }
 
-bool BodyhairsPreset::operator<(const BodyhairsPreset& other) const noexcept
-{
-	return Preset::operator<(other);
+PresetType BodyhairsPreset::type() const noexcept {
+	return PRESET_TYPE;
 }
 
-bool BodyhairsPreset::isCondtionsEmpty() const noexcept
-{
-	return Preset::m_conditions.empty();
+void BodyhairsPreset::clear() noexcept {
+	OverlayPreset::clear();
 }
 
-CoincidenceLevel BodyhairsPreset::check(const RE::Actor* actor, Filter filter) const noexcept
-{
-	return Preset::check(actor, filter);  // Проверяем базовые условия из Preset
-}
-
-bool BodyhairsPreset::apply(RE::Actor* actor, bool reset3d) const
-{
-	if (!actor) {
-		logger::info("BodyhairsPreset Apply no actor provided!");
+bool BodyhairsPreset::remove(RE::Actor* actor) const {
+	if (!actor || !actor->GetFullyLoaded3D())
 		return false;
-	}
-
-	if (actor = RE::fallout_cast<RE::Actor*>(actor); !actor) {
-		logger::info("BodyhairsPreset Apply no actor provided!");
-		return false;
-	}
-
-	static std::pair<uint32_t, bool> lastCallParams = { 0, false };
-	static auto lastCallTime = std::chrono::steady_clock::now();
-
-	auto now = std::chrono::steady_clock::now();
-	if (lastCallParams.first == actor->formID && lastCallParams.second == reset3d) {
-		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastCallTime).count();
-		if (ms < 1000) {
-			return true; // Пропустить повторный вызов в течение 1 секунды
-		}
-	}
-	// Обновить параметры и время
-	lastCallParams = { actor->formID, reset3d };
-	lastCallTime = now;
 	
-
-	// здесь не нужна проверка, т.к. иначе не будут работать пресеты применяемые вручную. Можно только пол проверять.
-	/*if (check(actor) == CoincidenceLevel::NONE) {
-		logger::info("BodyhairsPreset Apply check failed for actor: {:#x}", actor->formID);
-		return false;
-	}*/
-	if (check(actor, Filter{ Filter::Gender }) == CoincidenceLevel::NONE) {
-		logger::info("BodyMorphs Apply gender check failed for actor: {:#x}", actor->formID);
-		return false;
-	}
-
-	if (!actor->GetFullyLoaded3D()) {
-		return false;
-	}
+	bool isFemale = actor->GetSex() == RE::Actor::Sex::Female;
+	auto overlaysUIDs = findOverlaysUid(actor, isFemale ? ALL_ITEMS_F : ALL_ITEMS_M);
 
 	auto Interface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
 	if (!Interface) {
 		logger::critical("OverlayInterface is nullptr!");
 		return false;
 	}
-	auto isFemale = actor->GetSex() == RE::Actor::Sex::Female;
-	auto overlaysUIDs = findOverlaysUid(actor, isFemale ? ALL_ITEMS_F : ALL_ITEMS_M);
-
-	for (const auto& uid : overlaysUIDs) {
-		Interface->RemoveOverlay(actor, actor->GetSex() == RE::Actor::Female, uid);
-	}
-
-	for (const auto& overlay : m_overlays) {
-		overlay.apply(actor);
-	}
-
-	if (reset3d) {
-		// Сброс 3D модели актера
-		/*using R3D = RE::RESET_3D_FLAGS;
-		actor->Reset3D(false, R3D::kSkin, true, R3D::kNone);*/
-		Interface->UpdateOverlays(actor);
-	}
-
-	return true;
-}
-
-bool BodyhairsPreset::remove(RE::Actor* actor) const
-{
-	if (!actor || !actor->GetFullyLoaded3D())
-		return false;
-
-	if (m_overlays.empty())
-		return true;  // Nothing to remove
-
-	auto Interface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
-	if (!Interface) {
-		logger::error("BodyMorphInterface is nullptr!");
-		return false;
-	}
-
-	std::vector<std::string> overlayIds(m_overlays.size());
-	for (size_t i = 0; i < m_overlays.size(); ++i) {
-		overlayIds[i] = m_overlays[i].id();
-	}
-
-	auto overlaysUIDs = findOverlaysUid(actor, overlayIds);
 
 	bool once = false;
-	for (const auto& overlay : overlaysUIDs) {
-		if (Interface->RemoveOverlay(actor, actor->GetSex() == RE::Actor::Female, overlay)) {
-			once = true;
-		}
+	for (const auto& uid : overlaysUIDs) {
+		if (Interface->RemoveOverlay(actor, actor->GetSex() == RE::Actor::Female, uid) && !once) once = true;
 	}
 
 	return once;
 }
 
-bool BodyhairsPreset::empty() const noexcept
-{
-	return id().empty();
-}
-
-const std::string& BodyhairsPreset::id() const noexcept
-{
-	return Preset::id();
-}
-
 std::future<bool> BodyhairsPreset::isValidAsync() const noexcept {
-	// Если пресет пустой — сразу false
-	if (empty()) {
-		return std::async(std::launch::deferred, [] { return false; });
-	}
-
-	// Копируем id оверлеев для потокобезопасности
-	std::vector<std::string> overlayIds;
-	overlayIds.reserve(m_overlays.size());
-	for (const auto& overlay : m_overlays) {
-		overlayIds.push_back(overlay.id());
-	}
-
-	// Для каждого id запускаем асинхронную валидацию
-	std::vector<std::future<bool>> futures;
-	futures.reserve(overlayIds.size());
-	for (const auto& id : overlayIds) {
-		futures.push_back(validate(id));
-	}
-
-	// Возвращаем общий future, который завершится, когда все проверки завершатся
-	return std::async(std::launch::async, [futures = std::move(futures), overlayIds, this]() mutable {
-		bool anyValid = false;
-		for (size_t i = 0; i < futures.size(); ++i) {
-			// Ждём завершения каждой проверки, но не блокируем основной поток, т.к. isValidAsync сам асинхронный
-			if (futures[i].get()) {
-				anyValid = true;
-			}
-		}
-		if (!anyValid) {
-			logger::error("BodyhairsPreset {} is not valid: no valid overlays found.", id().empty() ? "[no id]" : id());
-		}
-		return anyValid;
-	});
-
-	// Провалидировать ALL_ITEMS_M и ALL_ITEMS_F
 	static bool runOnce = false;
 	if (!runOnce) {
 		runOnce = true;
@@ -271,127 +115,5 @@ std::future<bool> BodyhairsPreset::isValidAsync() const noexcept {
 		ALL_ITEMS_M.swap(validM);
 		ALL_ITEMS_F.swap(validF);
 	}
-}
-
-bool BodyhairsPreset::loadFromFile(const std::string& presetFile)
-{
-	this->clear();  // Очищаем предыдущие данные, чтобы избежать конфликтов
-
-	auto path = std::filesystem::path(presetFile);
-	if (!std::filesystem::exists(path)) {
-		logger::error("BodyMorphs preset file does not exist: {}", presetFile);
-		return false;
-	}
-
-	if (path.extension() == ".json") {
-		boost::json::object json_obj;
-		try {
-			json_obj = boost::json::parse(getJson(path)).as_object();
-		} catch (...) {
-			logger::info("...FAILED : {} wrong json format", presetFile);
-			return false;
-		}
-
-		auto it = json_obj.find("add");
-
-		if (it != json_obj.end()) {
-			if (auto val = it->value(); val.is_array()) {
-				for (const auto& item : val.as_array()) {
-					auto overlay = Overlay{ item.as_object() };
-					if (!overlay.empty()) {
-						m_overlays.emplace_back(overlay);
-					}
-				}
-			}
-			else {
-				logger::info("...FAILED : wrong remove value type in {}", presetFile);
-			}
-		}
-		else {
-			logger::error("BodyhairsPreset::loadFromFile: 'add' key not found in JSON preset file: {}", presetFile);
-			clear();  // Очищаем данные, если пресет не валиден
-			return false;
-		}
-
-		if (m_overlays.empty()) {
-			logger::info("...FAILED : no overlays in {}", presetFile);
-			clear();  // Очищаем данные, если пресет не валиден
-			return false;
-		}
-
-		it = json_obj.find("conditions");
-
-		if (it != json_obj.end()) {
-			m_conditions = std::move(ConditionSettings(it->value().as_object()));
-		}
-
-	} else {
-		logger::critical("BodyhairsPreset::loadFromFile: Unsupported file format: {}", presetFile);
-		clear();  // Очищаем данные, если пресет не валиден
-		return false;
-	}
-
-	m_id = path.stem().string();
-
-	auto& overlay_store = m_conditions.gender() == RE::Actor::Sex::Male ? ALL_ITEMS_M : ALL_ITEMS_F;
-	for (auto& overlay : m_overlays)
-		overlay_store.emplace(overlay.id());
-
-	logger::info("BodyhairsPreset::loadFromFile: {}. Loaded {} overlays.", presetFile, m_overlays.size());
-	return true;
-}
-
-// @breif Очищает объект
-void BodyhairsPreset::clear() noexcept
-{
-	*this = std::move(BodyhairsPreset{});  // Используем оператор присваивания для очистки
-}
-
-BodyhairsPreset* BodyhairsPreset::clone() const {
-	return new BodyhairsPreset{ *this };
-}
-
-// DiverseBodiesRedux\Sources\Preset\Bodyhairs.cpp
-#include <sstream>
-
-std::string BodyhairsPreset::print() const
-{
-	std::ostringstream oss;
-	oss << "BodyhairsPreset: " << id() << "\n";
-	oss << "  Type: " << static_cast<int>(m_type) << "\n";
-	oss << "  Overlays: ";
-	if (m_overlays.empty()) {
-		oss << "(none)\n";
-	}
-	else {
-		oss << "\n";
-		for (const auto& overlay : m_overlays) {
-			oss << "    id=" << overlay.id() << "\n";
-		}
-	}
-	oss << "  Conditions: ";
-	if (m_conditions.empty()) {
-		oss << "(none)\n";
-	}
-	else {
-		oss << m_conditions.print();
-	}
-	return oss.str();
-}
-
-const std::set<std::string> BodyhairsPreset::getAllPossibleMaleOverlays() noexcept {
-	return ALL_ITEMS_M;
-}
-
-const std::set<std::string> BodyhairsPreset::getAllPossibleFemaleOverlays() noexcept {
-	return ALL_ITEMS_F;
-}
-
-void BodyhairsPreset::revalidateAllPossibleOverlays(const std::set<std::string>& AllValidOverlays) {
-	std::set<std::string_view> temp{};
-	for (const auto& overlay : ALL_ITEMS_M) {
-		if (AllValidOverlays.contains(overlay.data())) {
-			temp.emplace(overlay);
-		}
-	}
+	return OverlayPreset::isValidAsync(); // Вызов базового метода для проверки валидности оверлеев
 }
