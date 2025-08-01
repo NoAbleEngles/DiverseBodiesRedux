@@ -16,6 +16,7 @@
 class BodymorphsPreset;
 class BodyhairsPreset;
 class BodyTattoosPreset;
+class NailsPreset;
 class BodyOverlayCustom0;
 class BodyOverlayCustom1;
 class BodyOverlayCustom2;

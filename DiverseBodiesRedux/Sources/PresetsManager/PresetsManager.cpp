@@ -10,7 +10,8 @@ namespace globals {
 PresetsManager::PresetsManager() {
     loadPresets<BodymorphsPreset>("PATH/sBodymorphsFolders");
     loadPresets<BodyhairsPreset>("PATH/sBodyhairsFolders");
-    loadPresets<BodyTattoosPreset>("PATH/sBodyTattoosFolders");
+    loadPresets<BodyTattoosPreset>("PATH/sBodyTattoosFolders"); 
+    loadPresets<BodyTattoosPreset>("PATH/sNailsFolders");
     loadPresets<BodyOverlayCustom0>("PATH/sBodyOverlaysCustom0Folders");
     loadPresets<BodyOverlayCustom1>("PATH/sBodyOverlaysCustom1Folders");
     loadPresets<BodyOverlayCustom2>("PATH/sBodyOverlaysCustom2Folders");

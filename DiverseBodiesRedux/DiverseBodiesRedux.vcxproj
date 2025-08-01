@@ -486,6 +486,7 @@
     <ClInclude Include="Sources\Preset\BodyOverlayCustom2.h" />
     <ClInclude Include="Sources\Preset\BodyOverlayCustom3.h" />
     <ClInclude Include="Sources\Preset\BodyOverlayCustom4.h" />
+    <ClInclude Include="Sources\Preset\Nails.h" />
     <ClInclude Include="Sources\Preset\OverlayPreset.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
@@ -554,6 +555,7 @@
     <ClCompile Include="Sources\Preset\BodyOverlayCustom2.cpp" />
     <ClCompile Include="Sources\Preset\BodyOverlayCustom3.cpp" />
     <ClCompile Include="Sources\Preset\BodyOverlayCustom4.cpp" />
+    <ClCompile Include="Sources\Preset\Nails.cpp" />
     <ClCompile Include="Sources\Preset\OverlayPreset.cpp" />
     <ClCompile Include="Sources\Preset\Details\Conditions.cpp" />
     <ClCompile Include="Sources\Preset\Details\Overlay.cpp" />

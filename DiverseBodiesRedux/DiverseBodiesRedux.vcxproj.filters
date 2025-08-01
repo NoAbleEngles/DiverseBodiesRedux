@@ -1215,6 +1215,9 @@
     <ClInclude Include="Sources\Preset\BodyOverlayCustom4.h">
       <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Preset\Nails.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1402,6 +1405,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Preset\BodyOverlayCustom4.cpp">
       <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\Nails.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
