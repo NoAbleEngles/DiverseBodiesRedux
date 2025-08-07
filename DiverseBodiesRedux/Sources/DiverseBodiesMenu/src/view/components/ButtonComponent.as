@@ -5,16 +5,24 @@ package view.components {
     import flash.events.MouseEvent;
     import flash.events.Event;
     import view.ScrollableMenu;
+    import view.Logger;
 
     /**
-     * @brief Интерактивная кнопка с визуальной обратной связью
+     * Интерактивная кнопка с визуальной обратной связью
      * 
      * Предоставляет базовый интерактивный элемент кнопки с текстовой меткой,
      * визуальными состояниями (обычное, активное, hover) и событиями клика.
-     * Поддерживает автоматическое изменение внешнего вида при взаимодействии.
+     * Поддерживает автоматическое изменение внешнего вида при взаимодействии
+     * и применение цветовых тем через ThemeManager.
      * 
-     * ПРИМЕЧАНИЕ: Если есть конфликт с символами библиотеки, удалите символы
-     * ButtonComponent и CheckboxComponent из FLA библиотеки или отвяжите их от классов.
+     * События:
+     * - EVENT_HOVER: одиночный клик (выбор элемента)
+     * - EVENT_PUSH: двойной клик (активация элемента)
+     * 
+     * Поддерживаемые взаимодействия:
+     * - Клавиша Enter/Right Arrow: активация
+     * - Клавиша Left Arrow/ESC: возврат назад
+     * - Автоматическая прокрутка при навигации клавиатурой
      */
     public class ButtonComponent extends MovieClip {
         public static const EVENT_PUSH:String = "eventButtonComponentPush";
@@ -28,19 +36,15 @@ package view.components {
         private var originalTextColor:uint = 0xFFFFFF;
         
         /**
-         * @brief Логирует сообщение через trace и дублирует в C++ через ScrollableMenu.mainInstance
+         * Логирует сообщение через централизованный Logger
          * @param message Сообщение для логирования
          */
         private function log(message:String):void {
-            trace(message);
-            if (ScrollableMenu.mainInstance && ScrollableMenu.mainInstance.BGSCodeObj && 
-                typeof ScrollableMenu.mainInstance.BGSCodeObj.Log === "function") {
-                ScrollableMenu.mainInstance.BGSCodeObj.Log(message);
-            }
+            Logger.getInstance().debug(message, "ButtonComponent");
         }
 
         /**
-         * @brief Создает новую кнопку с указанным текстом
+         * Создает новую кнопку с указанным текстом
          * @param labelText Текст для отображения на кнопке
          */
         public function ButtonComponent(labelText:String = "Button") {
@@ -48,20 +52,41 @@ package view.components {
             init();
         }
 
+        /**
+         * Инициализирует компонент
+         */
         private function init():void {
             createBackground();
             createLabel();
             addEventListeners();
             updateVisualState();
+            
+            this.visible = true;
+            this.alpha = 1.0;
+            
+            this.addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+        }
+        
+        /**
+         * Обработчик добавления на сцену
+         */
+        private function onAddedToStage(e:Event):void {
+            this.removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
         }
 
+        /**
+         * Создает фон кнопки
+         */
         private function createBackground():void {
-            // Создаем фон кнопки
             graphics.beginFill(0x333333, 1);
             graphics.lineStyle(2, 0x666666);
             graphics.drawRoundRect(0, 0, bgWidth, bgHeight, 8, 8);
             graphics.endFill();
         }
+
+        /**
+         * Создает текстовое поле
+         */
 
         private function createLabel():void {
             label = new TextField();
@@ -76,18 +101,26 @@ package view.components {
             addChild(label);
         }
 
+        /**
+         * Добавляет обработчики событий мыши
+         */
         private function addEventListeners():void {
             this.buttonMode = true;
             this.doubleClickEnabled = true;
+            this.mouseEnabled = true;
+            this.mouseChildren = false; // Предотвращаем конфликты с TextField
             this.addEventListener(MouseEvent.CLICK, onClick);
             this.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
             this.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
             this.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+            this.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+            this.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
         }
 
-        // Геттеры и сеттеры
+        // ===== ГЕТТЕРЫ И СЕТТЕРЫ =====
+        
         /**
-         * @brief Устанавливает активное состояние кнопки
+         * Устанавливает активное состояние кнопки
          * @param value true для активного состояния, false для обычного
          */
         public function set active(value:Boolean):void {
@@ -96,7 +129,7 @@ package view.components {
         }
 
         /**
-         * @brief Возвращает текущее активное состояние кнопки
+         * Возвращает текущее активное состояние кнопки
          * @return true если кнопка активна, false если обычная
          */
         public function get active():Boolean {
@@ -104,7 +137,7 @@ package view.components {
         }
 
         /**
-         * @brief Возвращает текущий текст кнопки
+         * Возвращает текущий текст кнопки
          * @return Строка с текстом кнопки
          */
         public function get labelText():String {
@@ -112,7 +145,7 @@ package view.components {
         }
 
         /**
-         * @brief Устанавливает новый текст кнопки
+         * Устанавливает новый текст кнопки
          * @param value Новый текст для отображения
          */
         public function set labelText(value:String):void {
@@ -123,7 +156,7 @@ package view.components {
         }
 
         /**
-         * @brief Устанавливает ширину компонента
+         * Устанавливает ширину компонента
          * @param value Новая ширина
          */
         override public function set width(value:Number):void {
@@ -134,14 +167,14 @@ package view.components {
         }
         
         /**
-         * @brief Возвращает текущую ширину компонента
+         * Возвращает текущую ширину компонента
          */
         override public function get width():Number {
             return bgWidth;
         }
         
         /**
-         * @brief Устанавливает высоту компонента
+         * Устанавливает высоту компонента
          * @param value Новая высота
          */
         override public function set height(value:Number):void {
@@ -152,14 +185,14 @@ package view.components {
         }
         
         /**
-         * @brief Возвращает текущую высоту компонента
+         * Возвращает текущую высоту компонента
          */
         override public function get height():Number {
             return bgHeight;
         }
         
         /**
-         * @brief Перерисовывает компонент с новыми размерами
+         * Перерисовывает компонент с новыми размерами
          */
         private function redrawComponent():void {
             // Очищаем графику
@@ -178,6 +211,9 @@ package view.components {
             updateVisualState();
         }
 
+        /**
+         * Обновляет визуальное состояние кнопки
+         */
         private function updateVisualState():void {
             graphics.clear();
             
@@ -204,17 +240,27 @@ package view.components {
             }
         }
 
-        // Обработчики событий
+        // ===== ОБРАБОТЧИКИ СОБЫТИЙ =====
+        
+        /**
+         * Обработчик одиночного клика по кнопке
+         */
         private function onClick(e:MouseEvent):void {
-            log("ButtonComponent: клик по '" + _labelText + "' - отправляем hover");
+            log("ButtonComponent: одиночный клик по '" + _labelText + "' - отправляем EVENT_HOVER (выбор)");
             dispatchEvent(new Event(EVENT_HOVER));
         }
 
+        /**
+         * Обработчик двойного клика по кнопке
+         */
         private function onDoubleClick(e:MouseEvent):void {
-            log("ButtonComponent: двойной клик по '" + _labelText + "' - отправляем push");
+            log("ButtonComponent: двойной клик по '" + _labelText + "' - отправляем EVENT_PUSH (активация)");
             dispatchEvent(new Event(EVENT_PUSH));
         }
 
+        /**
+         * Обработчик наведения мыши на кнопку
+         */
         private function onMouseOver(e:MouseEvent):void {
             // Только визуальное изменение, НЕ отправляем hover события
             graphics.clear();
@@ -224,19 +270,36 @@ package view.components {
             graphics.endFill();
         }
 
+        /**
+         * Обработчик ухода мыши с кнопки
+         */
         private function onMouseOut(e:MouseEvent):void {
             updateVisualState();
         }
 
         /**
-         * @brief Подсвечивает текст жёлтым (для hover события)
+         * Обработчик нажатия мыши на кнопку
+         */
+        private function onMouseDown(e:MouseEvent):void {
+            // Начало нажатия
+        }
+
+        /**
+         * Обработчик отпускания мыши
+         */
+        private function onMouseUp(e:MouseEvent):void {
+            // Завершение нажатия
+        }
+
+        /**
+         * Подсвечивает текст жёлтым цветом для hover события
          */
         public function highlightHover():void {
             setTextColor(0xFFFF00); // Жёлтый цвет
         }
 
         /**
-         * @brief Убирает подсветку hover (возвращает оригинальный цвет)
+         * Убирает подсветку hover и возвращает оригинальный цвет
          */
         public function clearHover():void {
             setTextColor(originalTextColor);
@@ -245,7 +308,7 @@ package view.components {
         // ===== МЕТОДЫ УПРАВЛЕНИЯ ЦВЕТАМИ =====
 
         /**
-         * @brief Устанавливает цвета компонента с поддержкой альфа-канала
+         * Устанавливает цвета компонента с поддержкой альфа-канала
          * @param normalColorRGBA Обычный цвет фона (ARGB hex)
          * @param textColorRGBA Цвет текста (ARGB hex)
          * @param hoverColorRGBA Цвет при наведении (ARGB hex)
@@ -265,7 +328,7 @@ package view.components {
         }
 
         /**
-         * @brief Устанавливает цвета компонента (совместимость, без альфа-канала)
+         * Устанавливает цвета компонента для совместимости без альфа-канала
          * @param normalColor Обычный цвет фона (RGB hex)
          * @param textColor Цвет текста (RGB hex)
          * @param hoverColor Цвет при наведении (RGB hex)
@@ -282,7 +345,7 @@ package view.components {
         private var selectedColor:uint = 0x00CCFF;
 
         /**
-         * @brief Устанавливает цвет текста
+         * Устанавливает цвет текста
          * @param color Цвет в формате 0xRRGGBB
          */
         private function setTextColor(color:uint):void {

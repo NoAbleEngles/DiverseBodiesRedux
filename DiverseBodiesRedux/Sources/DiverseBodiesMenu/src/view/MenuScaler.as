@@ -254,6 +254,7 @@ package view {
         private function log(message:String):void {
             trace(message);
             // Не используем mainInstance, чтобы избежать циклических зависимостей
+            // Логирование теперь происходит через события
         }
         
         /**

@@ -21,15 +21,11 @@
         private var bgHeight:Number = 45;
 
         /**
-         * @brief Логирует сообщение через trace и дублирует в C++ через Main
+         * @brief Логирует сообщение
          * @param message Сообщение для логирования
          */
         private function log(message:String):void {
             trace(message);
-            if (ScrollableMenu.mainInstance && ScrollableMenu.mainInstance.BGSCodeObj && 
-                typeof ScrollableMenu.mainInstance.BGSCodeObj.Log === "function") {
-                ScrollableMenu.mainInstance.BGSCodeObj.Log(message);
-            }
         }
 
         /**

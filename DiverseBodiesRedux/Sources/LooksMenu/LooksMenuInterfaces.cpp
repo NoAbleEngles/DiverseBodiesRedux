@@ -132,7 +132,7 @@ bool CharGenInterface::LoadHairColorData(const std::string& filePath, const ModI
 void CharGenInterface::UnlockHeadParts(){};
 void CharGenInterface::UnlockTints(){};
 
-void CharGenInterface::ProcessHairColor(RE::NiAVObject* node, RE::BGSColorForm* colorForm, RE::BSShaderMaterial* /*RE::BSLightingShaderMaterialBase* shaderMaterial*/){};
+void CharGenInterface::ProcessHairColor(RE::NiAVObject* node, RE::BGSColorForm* colorForm, /*RE::BSLightingShaderMaterialBase**/void* shaderMaterial){};
 const char* CharGenInterface::ProcessEyebrowPath(RE::TESNPC* npc) { return nullptr; };
 
 void CharGenInterface::ClearHairColorMods()

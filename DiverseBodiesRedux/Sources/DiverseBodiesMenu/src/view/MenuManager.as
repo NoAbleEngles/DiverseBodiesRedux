@@ -1,147 +1,265 @@
 package view {
-    // import flash.display.MovieClip;
-    // import flash.text.TextField;
-    // import flash.text.TextFormat;
     import flash.external.ExternalInterface;
+    import flash.events.EventDispatcher;
+    import flash.events.Event;
     import fl.containers.ScrollPane;
     import view.ScrollableMenu;
     import view.MenuScaler;
     import view.ThemeManager;
+    import view.CustomEvent;
 
     /**
-     * @brief Менеджер меню - центральный класс для управления отображением и логикой меню
-     * 
-     * Координирует работу между различными компонентами системы:
-     * - Управляет отображением и скрытием меню
-     * - Инициализирует и настраивает внутренние компоненты (ScrollPane)
-     * - Обрабатывает события от пользователя и передает их в C++
-     * - Интегрируется с системой масштабирования (MenuScaler)
-     * - Управляет цветовыми схемами через ThemeManager
-     * - (legacy) Предоставляет fallback функциональность при отсутствии элементов в FLA
+     * @brief Центральный менеджер меню - единый управляющий класс для всей системы меню
      * 
      * Основные обязанности:
-     * - Поиск и инициализация компонентов меню в контейнере (без заголовка и background)
-     * - Управление жизненным циклом ScrollableMenu
-     * - Координация масштабирования через MenuScaler
-     * - Управление цветовыми схемами через ThemeManager
-     * - Обработка событий выбора элементов и навигации
+     * - Управление жизненным циклом всех компонентов меню (ScrollableMenu, MenuScaler, ThemeManager)
+     * - Централизованная обработка всех событий от компонентов
+     * - Единый интерфейс для взаимодействия с C++ через ExternalInterface
+     * - Координация масштабирования и цветовых схем
+     * - Управление отображением и скрытием меню
      */
-    public class MenuManager {
-        private var menuContainer:ScrollPane;      // scrollPane_mc со сцены
-        private var _scrollableMenu:ScrollableMenu; // Управляет ScrollPane
-        private var menuScaler:MenuScaler;        // Управляет масштабированием
-        private var themeManager:ThemeManager;    // Управляет цветовыми схемами
+    public class MenuManager extends EventDispatcher {
+        // ===== КОМПОНЕНТЫ СИСТЕМЫ =====
+        private var menuContainer:ScrollPane;      // ScrollPane контейнер из FLA
+        private var _scrollableMenu:ScrollableMenu; // Прокручиваемое меню с элементами
+        private var menuScaler:MenuScaler;        // Менеджер масштабирования
+        private var themeManager:ThemeManager;    // Менеджер цветовых схем
         
+        // ===== СОСТОЯНИЕ МЕНЮ =====
         private var isVisible:Boolean = false;
+        private var isInitialized:Boolean = false;
 
-        /**
-         * @brief Логирует сообщение через trace и дублирует в C++ через ScrollableMenu.mainInstance
-         * @param message Сообщение для логирования
-         */
-        private function log(message:String):void {
-            trace(message);
-            if (ScrollableMenu.mainInstance && ScrollableMenu.mainInstance.BGSCodeObj && 
-                typeof ScrollableMenu.mainInstance.BGSCodeObj.Log === "function") {
-                ScrollableMenu.mainInstance.BGSCodeObj.Log(message);
-            }
-        }
-
+        
         /**
          * @brief Конструктор - инициализирует MenuManager с заданным контейнером
          * @param container ScrollPane контейнер меню (scrollPane_mc из FLA)
          */
         public function MenuManager(container:ScrollPane) {
+            super();
             this.menuContainer = container;
             log("MenuManager: Инициализация с контейнером " + container.name);
             
-            initializeComponentsInternal();
-            
-            // Инициализируем систему масштабирования
-            initializeScaling();
+            // Инициализируем все компоненты системы
+            initializeComponents();
             
             // По умолчанию скрываем меню
             hideMenu();
-        }
-
-        /**
-         * @brief Инициализирует все компоненты меню (ScrollPane, масштабирование, цветовые схемы)
-         */
-        private function initializeComponentsInternal():void {
-            log("MenuManager: Инициализация ScrollPane...");
-            initializeScrollPane();
-            
-            log("MenuManager: Инициализация системы цветов...");
-            initializeThemeManager();
             
             log("MenuManager: Инициализация завершена");
         }
 
-
-        // Заголовок и background не используются
-
         /**
-         * Инициализирует ScrollPane
+         * @brief Инициализирует все компоненты системы меню
          */
-        private function initializeScrollPane():void {
+        private function initializeComponents():void {
+            if (isInitialized) {
+                log("MenuManager: Компоненты уже инициализированы");
+                return;
+            }
+            
+            log("MenuManager: Начало инициализации компонентов...");
+            
+            // 1. Инициализируем MenuScaler (синглтон)
+            menuScaler = MenuScaler.getInstance();
+            menuScaler.initialize(menuContainer);
+            menuScaler.addEventListener(MenuScaler.SCALE_CHANGED, onScaleChanged);
+            log("MenuManager: MenuScaler инициализирован");
+            
+            // 2. Инициализируем ThemeManager (синглтон)
+            themeManager = ThemeManager.getInstance();
+            themeManager.addEventListener(ThemeManager.THEME_CHANGED, onThemeChanged);
+            themeManager.addEventListener(ThemeManager.COMPONENT_COLORS_CHANGED, onComponentColorsChanged);
+            themeManager.addEventListener(ThemeManager.SCROLLABLE_MENU_COLORS_CHANGED, onScrollableMenuColorsChanged);
+            log("MenuManager: ThemeManager инициализирован");
+            
+            // 3. Инициализируем ScrollableMenu
             _scrollableMenu = new ScrollableMenu(menuContainer);
             _scrollableMenu.addEventListener("menuItemSelected", onMenuItemSelected);
+            _scrollableMenu.addEventListener("menuItemHover", onMenuItemHover);
+            _scrollableMenu.addEventListener("menuCheckboxChanged", onMenuCheckboxChanged);
+            _scrollableMenu.addEventListener("menuSwitcherChanged", onMenuSwitcherChanged);
             _scrollableMenu.addEventListener("menuBack", onMenuBack);
-            log("MenuManager: fl.containers.ScrollPane инициализирован");
+            log("MenuManager: ScrollableMenu инициализирован");
+            
+            // 4. Связываем компоненты
+            themeManager.initialize(menuContainer, _scrollableMenu);
+            
+            isInitialized = true;
+            log("MenuManager: Все компоненты инициализированы");
+        }
+
+        
+        /**
+         * @brief Логирует сообщение через trace и отправляет в C++ через Main
+         * @param message Сообщение для логирования
+         */
+        private function log(message:String):void {
+            trace(message);
+            // Отправляем событие вверх, Main перехватит и отправит в C++
+            dispatchEvent(new CustomEvent("log", {message: message}));
+        }
+
+        // ===== ОБРАБОТЧИКИ СОБЫТИЙ ОТ КОМПОНЕНТОВ =====
+
+        /**
+         * @brief Обработчик изменения масштаба от MenuScaler
+         */
+        private function onScaleChanged(event:Event):void {
+            log("MenuManager: Получено событие изменения масштаба");
+            
+            if (_scrollableMenu) {
+                _scrollableMenu.updateScale();
+            }
+            
+            // Отправляем событие наружу
+            dispatchEvent(new CustomEvent("scaleChanged", {scale: menuScaler.scale}));
         }
 
         /**
-         * Инициализирует систему управления цветовыми схемами
+         * @brief Обработчик изменения темы от ThemeManager
          */
-        private function initializeThemeManager():void {
-            log("MenuManager: Инициализация ThemeManager...");
+        private function onThemeChanged(event:Event):void {
+            log("MenuManager: Получено событие изменения темы");
             
-            try {
-                themeManager = ThemeManager.getInstance();
-                themeManager.initialize(menuContainer, _scrollableMenu);
-                log("MenuManager: ThemeManager инициализирован успешно");
-            } catch (error:Error) {
-                log("ERROR: Ошибка инициализации ThemeManager: " + error.message);
-                log("Stack: " + error.getStackTrace());
+            if (_scrollableMenu) {
+                _scrollableMenu.updateTheme();
+            }
+            
+            // Отправляем событие наружу
+            dispatchEvent(new CustomEvent("themeChanged", {}));
+        }
+
+        /**
+         * @brief Обработчик изменения цветов компонентов от ThemeManager
+         */
+        private function onComponentColorsChanged(event:Event):void {
+            log("MenuManager: Получено событие изменения цветов компонентов");
+            
+            if (_scrollableMenu) {
+                _scrollableMenu.updateComponentColors();
             }
         }
 
-        // fallback ScrollPane и background не требуются
-        // private function createFallbackScrollPane():void {}
-
         /**
-         * Инициализирует систему масштабирования меню
+         * @brief Обработчик изменения цветов ScrollableMenu от ThemeManager
          */
-        private function initializeScaling():void {
-            log("MenuManager: Инициализация системы масштабирования...");
+        private function onScrollableMenuColorsChanged(event:Event):void {
+            log("MenuManager: Получено событие изменения цветов ScrollableMenu");
             
-            try {
-                menuScaler = MenuScaler.getInstance();
-                menuScaler.initialize(menuContainer);
-                log("MenuManager: MenuScaler инициализирован успешно");
-            } catch (error:Error) {
-                log("ERROR: Ошибка инициализации MenuScaler: " + error.message);
-                log("Stack: " + error.getStackTrace());
+            if (_scrollableMenu) {
+                _scrollableMenu.updateScrollPaneColors();
             }
         }
 
         /**
-         * Рекурсивно ищет первый TextField в контейнере
+         * @brief Обработчик выбора элемента меню от ScrollableMenu
          */
-        // Поиск TextField не требуется
-
-        // ----- Публичные методы для управления меню -----
+        private function onMenuItemSelected(event:*):void {
+            var itemIndex:int = event.data.index;
+            var itemData:Object = event.data.item; // Исправлено: было event.data.data
+            
+            log("MenuManager: Выбран элемент " + itemIndex + ": '" + itemData.labelText + "'");
+            
+            // Логируем дополнительную информацию в зависимости от типа
+            switch (itemData.type) {
+                case 2: // Checkbox
+                    log("  └── Состояние checkbox: " + itemData.checked);
+                    break;
+                case 3: // Switcher  
+                    log("  └── Выбрано: " + itemData.selectedValue + " (индекс: " + itemData.selectedIndex + ")");
+                    break;
+            }
+            
+            // Отправляем событие наружу для Main
+            dispatchEvent(new CustomEvent("menuItemSelected", {
+                index: itemIndex,
+                item: itemData
+            }));
+        }
 
         /**
-         * Показывает меню с заданными параметрами
+         * @brief Обработчик события "назад" от ScrollableMenu
+         */
+        private function onMenuBack(event:*):void {
+            log("MenuManager: Получено событие 'назад'");
+            
+            // Отправляем событие наружу для Main
+            dispatchEvent(new CustomEvent("menuBack", {}));
+        }
+
+        /**
+         * @brief Обработчик события наведения/выбора элемента от ScrollableMenu
+         */
+        private function onMenuItemHover(event:*):void {
+            var labelText:String = event.data.labelText;
+            log("MenuManager: Выбран элемент: '" + labelText + "'");
+            
+            // Отправляем событие наружу для Main
+            dispatchEvent(new CustomEvent("menuItemHover", {
+                labelText: labelText
+            }));
+        }
+
+        /**
+         * @brief Обработчик изменения checkbox от ScrollableMenu
+         */
+        private function onMenuCheckboxChanged(event:*):void {
+            var labelText:String = event.data.labelText;
+            var checked:Boolean = event.data.checked;
+            log("MenuManager: Checkbox изменен: '" + labelText + "' = " + checked);
+            
+            // Отправляем событие наружу для Main
+            dispatchEvent(new CustomEvent("menuCheckboxChanged", {
+                labelText: labelText,
+                checked: checked
+            }));
+        }
+
+        /**
+         * @brief Обработчик изменения switcher от ScrollableMenu
+         */
+        private function onMenuSwitcherChanged(event:*):void {
+            var labelText:String = event.data.labelText;
+            var selectedIndex:int = event.data.selectedIndex;
+            log("MenuManager: Switcher изменен: '" + labelText + "' = " + selectedIndex);
+            
+            // Отправляем событие наружу для Main
+            dispatchEvent(new CustomEvent("menuSwitcherChanged", {
+                labelText: labelText,
+                selectedIndex: selectedIndex
+            }));
+        }
+
+        
+        // ===== ПУБЛИЧНОЕ API ДЛЯ УПРАВЛЕНИЯ МЕНЮ =====
+
+        /**
+         * @brief Показывает меню с заданными параметрами
+         * @param title Заголовок меню (не используется, оставлен для совместимости)
+         * @param items Массив элементов меню
+         * @param activeIndex Индекс активного элемента (по умолчанию 0)
          */
         public function showMenu(title:String, items:Array, activeIndex:int = 0):void {
-            log("MenuManager: Показать меню '" + title + "' с " + items.length + " элементами");
+            log("MenuManager: showMenu() НАЧАЛО - элементов: " + (items ? items.length : 0));
             
-
-            // Заголовок и background не используются
+            if (!isInitialized) {
+                log("MenuManager: ERROR - Компоненты не инициализированы");
+                return;
+            }
             
+            log("MenuManager: Вызываем updateItems()");
+            // Обновляем элементы меню
             updateItems(items, activeIndex);
             
+            log("MenuManager: updateItems() завершен, показываем контейнер");
+            
+            // ПРИНУДИТЕЛЬНО ПОКАЗЫВАЕМ SCROLLPANE
+            if (menuContainer) {
+                menuContainer.visible = true;
+                menuContainer.alpha = 1.0;
+            }
+            
+            // Показываем контейнер
             menuContainer.visible = true;
             isVisible = true;
             
@@ -150,26 +268,35 @@ package view {
                 menuContainer.stage.focus = menuContainer.stage;
             }
             
-            log("MenuManager: Меню показано успешно (без заголовка)");
+            log("MenuManager: showMenu() ЗАВЕРШЕН - меню показано успешно");
         }
 
-
-        // Методы для заголовка и background не требуются
-
         /**
-         * Обновляет элементы меню
+         * @brief Обновляет элементы меню
+         * @param items Массив элементов меню
+         * @param activeIndex Индекс активного элемента (по умолчанию 0)
          */
         public function updateItems(items:Array, activeIndex:int = 0):void {
-            if (_scrollableMenu) {
-                _scrollableMenu.setItems(items, activeIndex);
-                log("MenuManager: Элементы меню обновлены (" + items.length + " элементов)");
-            } else {
-                log("ERROR: Не удалось обновить элементы - scrollableMenu не инициализирован");
+            log("MenuManager: updateItems() НАЧАЛО - элементов: " + (items ? items.length : 0) + ", activeIndex: " + activeIndex);
+            
+            if (!_scrollableMenu) {
+                log("MenuManager: ERROR - ScrollableMenu не инициализирован");
+                return;
             }
+            
+            if (!items) {
+                log("MenuManager: WARNING - Передан null массив элементов");
+                items = [];
+            }
+            
+            log("MenuManager: Вызываем _scrollableMenu.setItems()");
+            _scrollableMenu.setItems(items, activeIndex);
+            log("MenuManager: _scrollableMenu.setItems() завершен");
+            log("MenuManager: Элементы меню обновлены (" + items.length + " элементов), активный индекс: " + activeIndex);
         }
 
         /**
-         * Скрывает меню
+         * @brief Скрывает меню
          */
         public function hideMenu():void {
             menuContainer.visible = false;
@@ -178,21 +305,21 @@ package view {
         }
 
         /**
-         * Проверяет, видимо ли меню
+         * @brief Проверяет, видимо ли меню
          */
         public function get visible():Boolean {
             return isVisible;
         }
 
         /**
-         * Получает текущий активный индекс
+         * @brief Получает текущий активный индекс
          */
         public function getCurrentActiveIndex():int {
             return _scrollableMenu ? _scrollableMenu.activeIndex : -1;
         }
 
         /**
-         * Получает количество элементов в меню
+         * @brief Получает количество элементов в меню
          */
         public function getItemCount():int {
             return _scrollableMenu ? _scrollableMenu.getCurrentItems().length : 0;
@@ -200,7 +327,6 @@ package view {
 
         /**
          * @brief Получает текущие элементы меню
-         * @return Массив текущих элементов или пустой массив
          */
         public function getCurrentItems():Array {
             return _scrollableMenu ? _scrollableMenu.getCurrentItems() : [];
@@ -218,129 +344,21 @@ package view {
                 return;
             }
             
-            // Получаем текущие элементы для проверки границ и типа
-            var currentItems:Array = _scrollableMenu.getCurrentItems();
-            if (!currentItems || currentItems.length === 0) {
-                log("MenuManager: WARNING - Нет элементов в меню для установки активного индекса");
-                return;
-            }
-            
-            // Проверяем корректность индекса
-            if (newIndex < 0 || newIndex >= currentItems.length) {
-                log("MenuManager: ERROR - Некорректный индекс " + newIndex + ", доступно элементов: " + currentItems.length);
-                return;
-            }
-            
-            // Проверяем, что элемент интерактивный (не LabelComponent)
-            var targetItem:Object = currentItems[newIndex];
-            if (targetItem && targetItem.type === 0) { // LabelComponent
-                log("MenuManager: WARNING - Нельзя установить активный индекс на LabelComponent (индекс " + newIndex + ")");
-                return;
-            }
-            
-            // Вызываем напрямую публичный метод setActiveIndex
-            try {
-                // Сохраняем старый активный индекс
-                var oldActiveIndex:int = _scrollableMenu.activeIndex;
-                
-                // Напрямую устанавливаем активный индекс
-                _scrollableMenu.setActiveIndex(newIndex);
-                
-                log("MenuManager: Активный индекс изменен с " + oldActiveIndex + " на " + newIndex);
-            } catch (error:Error) {
-                log("MenuManager: ERROR при установке активного индекса: " + error.message);
-            }
+            _scrollableMenu.setActiveIndex(newIndex);
         }
 
         /**
-         * @brief Возвращает ссылку на ScrollableMenu
+         * @brief Возвращает ссылка на ScrollableMenu
          */
         public function get scrollableMenu():ScrollableMenu {
             return _scrollableMenu;
         }
 
-        // ----- Обработчики событий -----
+        
+        // ===== API ДЛЯ УПРАВЛЕНИЯ МАСШТАБИРОВАНИЕМ =====
 
         /**
-         * Обработчик выбора элемента меню
-         */
-        private function onMenuItemSelected(event:*):void {
-            var itemIndex:int = event.data.index;
-            var itemData:Object = event.data.item;
-            
-            log("MenuManager: Выбран элемент " + itemIndex + ": '" + itemData.labelText + "'");
-            
-            // Логируем дополнительную информацию в зависимости от типа
-            switch (itemData.type) {
-                case 2: // Checkbox
-                    log("  └── Состояние checkbox: " + itemData.checked);
-                    break;
-                case 3: // Switcher  
-                    log("  └── Выбрано: " + itemData.selectedValue + " (индекс: " + itemData.selectedIndex + ")");
-                    break;
-            }
-            
-            // Отправляем в C++
-            if (ExternalInterface.available) {
-                try {
-                    ExternalInterface.call("onMenuItemSelected", itemIndex, itemData);
-                    log("MenuManager: Данные отправлены в C++");
-                } catch (error:Error) {
-                    log("MenuManager: Ошибка отправки в C++: " + error.message);
-                }
-            } else {
-                log("MenuManager: ExternalInterface недоступен");
-            }
-        }
-
-        /**
-         * Обработчик события "назад"
-         */
-        private function onMenuBack(event:*):void {
-            log("MenuManager: Получено событие 'назад'");
-            
-            // Отправляем в C++
-            if (ExternalInterface.available) {
-                try {
-                    ExternalInterface.call("onMenuBack");
-                    log("MenuManager: Событие 'назад' отправлено в C++");
-                } catch (error:Error) {
-                    log("MenuManager: Ошибка отправки onMenuBack в C++: " + error.message);
-                }
-            } else {
-                log("MenuManager: ExternalInterface недоступен для onMenuBack");
-            }
-        }
-
-        /**
-         * Очистка ресурсов
-         */
-        public function dispose():void {
-            log("MenuManager: Очистка ресурсов...");
-            
-            if (_scrollableMenu) {
-                _scrollableMenu.removeEventListener("menuItemSelected", onMenuItemSelected);
-                _scrollableMenu.removeEventListener("menuBack", onMenuBack);
-                _scrollableMenu.destroy();
-                _scrollableMenu = null;
-            }
-            
-            if (menuScaler) {
-                menuScaler.destroy();
-                menuScaler = null;
-            }
-            
-            // titleLabel = null; // удалено, больше не используется
-            // background_mc = null; // удалено, больше не используется
-            menuContainer = null;
-            
-            log("MenuManager: Ресурсы очищены");
-        }
-
-        // ----- Методы управления масштабированием -----
-
-        /**
-         * Принудительно обновляет масштабирование меню
+         * @brief Принудительно обновляет масштабирование меню
          */
         public function updateScale():void {
             if (menuScaler) {
@@ -350,9 +368,6 @@ package view {
 
         /**
          * @brief Принудительно обновляет масштабирование с гарантированным результатом
-         * 
-         * Этот метод использует forceUpdateScale() из MenuScaler для обеспечения
-         * корректного масштабирования независимо от состояния готовности меню
          */
         public function forceUpdateScale():void {
             if (menuScaler) {
@@ -361,7 +376,7 @@ package view {
         }
 
         /**
-         * Переключает режим масштабирования (пропорциональное/растягивающее)
+         * @brief Переключает режим масштабирования (пропорциональное/растягивающее)
          */
         public function setStretchMode(useStretch:Boolean):void {
             if (menuScaler) {
@@ -374,60 +389,40 @@ package view {
         }
 
         /**
-         * Получает текущий коэффициент масштабирования
+         * @brief Получает текущий коэффициент масштабирования
          */
         public function getCurrentScale():Number {
             return menuScaler ? menuScaler.getCurrentScale() : 1.0;
         }
 
         /**
-         * Получает информацию о базовом разрешении
+         * @brief Получает информацию о базовом разрешении
          */
         public function getBaseResolution():Object {
             return menuScaler ? menuScaler.getBaseResolution() : {width: 1920, height: 1080};
         }
 
         /**
-         * Устанавливает отступы меню от краев экрана
-         * @param right отступ справа (пиксели)
-         * @param top отступ сверху (пиксели)  
-         * @param bottom отступ снизу (пиксели)
+         * @brief Устанавливает отступы меню от краев экрана
          */
-        public function setMenuMargins(right:Number, top:Number, bottom:Number):void {
+        public function setMenuMargins(horizontal:Number, vertical:Number):void {
             if (menuScaler) {
-                menuScaler.setMargins(right, top);
+                menuScaler.setMargins(horizontal, vertical);
             }
         }
 
         /**
-         * Получает текущие отступы меню
+         * @brief Получает текущие отступы меню
          */
         public function getMenuMargins():Object {
-            return menuScaler ? menuScaler.getMargins() : {right: 10, top: 10, bottom: 10};
+            return menuScaler ? menuScaler.getMargins() : {horizontal: 5, vertical: 10};
         }
 
-        // ===== МЕТОДЫ УПРАВЛЕНИЯ ЦВЕТОВЫМИ СХЕМАМИ =====
+        
+        // ===== API ДЛЯ УПРАВЛЕНИЯ ЦВЕТОВЫМИ СХЕМАМИ =====
 
         /**
          * @brief Применяет полную цветовую тему (18 аргументов из C++)
-         * @param scrollPaneBorder Цвет границы ScrollPane (ARGB)
-         * @param scrollPaneBackground Цвет фона ScrollPane (ARGB)
-         * @param labelNormal Обычный цвет Label (ARGB)
-         * @param labelText Цвет текста Label (ARGB)
-         * @param labelHover Цвет Label при hover (ARGB)
-         * @param labelSelected Цвет выделенного Label (ARGB)
-         * @param buttonNormal Обычный цвет Button (ARGB)
-         * @param buttonText Цвет текста Button (ARGB)
-         * @param buttonHover Цвет Button при hover (ARGB)
-         * @param buttonSelected Цвет выделенного Button (ARGB)
-         * @param checkboxNormal Обычный цвет Checkbox (ARGB)
-         * @param checkboxText Цвет текста Checkbox (ARGB)
-         * @param checkboxHover Цвет Checkbox при hover (ARGB)
-         * @param checkboxSelected Цвет выделенного Checkbox (ARGB)
-         * @param switcherNormal Обычный цвет Switcher (ARGB)
-         * @param switcherText Цвет текста Switcher (ARGB)
-         * @param switcherHover Цвет Switcher при hover (ARGB)
-         * @param switcherSelected Цвет выделенного Switcher (ARGB)
          */
         public function setColorsTheme(scrollPaneBorder:uint, scrollPaneBackground:uint,
                                       labelNormal:uint, labelText:uint, labelHover:uint, labelSelected:uint,
@@ -441,7 +436,7 @@ package view {
                 return;
             }
             
-            // Устанавливаем цвета ScrollPane через ThemeManager
+            // Устанавливаем цвета ScrollPane
             themeManager.setScrollableMenuColorsRGBA(scrollPaneBorder, scrollPaneBackground);
             
             // Устанавливаем цвета компонентов
@@ -450,19 +445,13 @@ package view {
             themeManager.setComponentColorsRGBA(2, checkboxNormal, checkboxText, checkboxHover, checkboxSelected); // Checkbox
             themeManager.setComponentColorsRGBA(3, switcherNormal, switcherText, switcherHover, switcherSelected); // Switcher
             
-            log("MenuManager: Цветовая тема применена через ThemeManager");
+            log("MenuManager: Цветовая тема применена");
         }
 
         /**
          * @brief Устанавливает цвета для определенного типа компонентов (без альфа-канала)
-         * @param componentType Тип компонента (0=Label, 1=Button, 2=Checkbox, 3=Switcher)
-         * @param normalColor Обычный цвет элемента (RGB hex)
-         * @param textColor Цвет текста (RGB hex)
-         * @param hoverColor Цвет при наведении (RGB hex)
-         * @param selectedColor Цвет выделенного элемента (RGB hex)
          */
         public function setComponentColors(componentType:int, normalColor:uint, textColor:uint, hoverColor:uint, selectedColor:uint):void {
-            // Конвертируем RGB в RGBA, добавляя полную непрозрачность
             var normalColorRGBA:uint = 0xFF000000 | normalColor;
             var textColorRGBA:uint = 0xFF000000 | textColor;
             var hoverColorRGBA:uint = 0xFF000000 | hoverColor;
@@ -473,11 +462,6 @@ package view {
 
         /**
          * @brief Устанавливает цвета для определенного типа компонентов с поддержкой альфа-канала
-         * @param componentType Тип компонента (0=Label, 1=Button, 2=Checkbox, 3=Switcher)
-         * @param normalColorRGBA Обычный цвет элемента (ARGB hex)
-         * @param textColorRGBA Цвет текста (ARGB hex)
-         * @param hoverColorRGBA Цвет при наведении (ARGB hex)
-         * @param selectedColorRGBA Цвет выделенного элемента (ARGB hex)
          */
         public function setComponentColorsRGBA(componentType:int, normalColorRGBA:uint, 
                                              textColorRGBA:uint, hoverColorRGBA:uint, 
@@ -492,11 +476,8 @@ package view {
 
         /**
          * @brief Устанавливает цвета для ScrollPane (без альфа-канала)
-         * @param borderColor Цвет границы/ободка (RGB hex)
-         * @param backgroundColor Цвет фона/подложки (RGB hex)
          */
         public function setScrollableMenuColors(borderColor:uint, backgroundColor:uint):void {
-            // Конвертируем RGB в RGBA, добавляя полную непрозрачность
             var borderColorRGBA:uint = 0xFF000000 | borderColor;
             var backgroundColorRGBA:uint = 0xFF000000 | backgroundColor;
             
@@ -505,8 +486,6 @@ package view {
 
         /**
          * @brief Устанавливает цвета для ScrollPane с поддержкой альфа-канала
-         * @param borderColorRGBA Цвет границы/ободка (ARGB hex)
-         * @param backgroundColorRGBA Цвет фона/подложки (ARGB hex)
          */
         public function setScrollableMenuColorsRGBA(borderColorRGBA:uint, backgroundColorRGBA:uint):void {
             if (themeManager) {
@@ -529,8 +508,6 @@ package view {
 
         /**
          * @brief Получает текущие цвета компонента
-         * @param componentType Тип компонента (0=Label, 1=Button, 2=Checkbox, 3=Switcher)
-         * @return Объект с цветами компонента или null при ошибке
          */
         public function getComponentColors(componentType:int):Object {
             if (themeManager) {
@@ -543,7 +520,6 @@ package view {
 
         /**
          * @brief Получает текущие цвета ScrollPane
-         * @return Объект с цветами ScrollPane
          */
         public function getScrollableMenuColors():Object {
             if (themeManager) {
@@ -554,40 +530,15 @@ package view {
             }
         }
 
-        /**
-         * @brief Публичный метод для принудительной инициализации компонентов
-         * Используется из Main.as для обеспечения корректной инициализации
-         */
-        public function initializeComponents():void {
-            log("MenuManager: Публичная инициализация компонентов...");
-            
-            // Вызываем приватный метод инициализации
-            initializeComponentsInternal();
-            
-            // Дополнительно обновляем масштабирование
-            updateScale();
-            
-            log("MenuManager: Публичная инициализация завершена");
-        }
-
-        /**
-         * @brief Применяет отложенные цвета после полной инициализации
-         * Вызывается после завершения всех инициализаций для повторного применения цветов
-         */
-        public function applyDelayedColors():void {
-            if (themeManager) {
-                themeManager.applyDelayedColors();
-            } else {
-                log("MenuManager: ERROR - ThemeManager не инициализирован для отложенных цветов");
-            }
-        }
+        
+        // ===== ДОПОЛНИТЕЛЬНЫЕ МЕТОДЫ =====
 
         /**
          * @brief Добавляет один элемент в меню
          * @param item Элемент меню для добавления
          */
         public function addItem(item:Object):void {
-            log("MenuManager: Добавление элемента в меню - " + item.text);
+            log("MenuManager: Добавление элемента в меню - текст: '" + item.text + "', тип: " + item.type);
             
             if (!_scrollableMenu) {
                 log("MenuManager: ERROR - ScrollableMenu не инициализирован");
@@ -595,26 +546,98 @@ package view {
             }
             
             try {
-                // Получаем текущие элементы
-                var currentItems:Array = _scrollableMenu.getCurrentItems();
-                if (!currentItems) {
-                    currentItems = [];
-                }
-                
-                // Добавляем новый элемент
-                currentItems.push(item);
-                
-                // Обновляем меню с новым списком элементов
-                updateItems(currentItems, currentItems.length - 1);
-                
-                log("MenuManager: Элемент добавлен, всего элементов: " + currentItems.length);
+                // Добавляем элемент без пересоздания всех остальных
+                _scrollableMenu.addSingleItem(item);
+                log("MenuManager: Элемент добавлен успешно через addSingleItem()");
             } catch (error:Error) {
                 log("MenuManager: ERROR - Ошибка добавления элемента: " + error.message);
+                log("MenuManager: Stack trace: " + error.getStackTrace());
             }
         }
 
         /**
-         * Уничтожает MenuManager и очищает все ресурсы
+         * @brief Очищает все элементы меню
+         */
+        public function clearAllItems():void {
+            log("MenuManager: Очистка всех элементов меню");
+            
+            if (!_scrollableMenu) {
+                log("MenuManager: ERROR - ScrollableMenu не инициализирован");
+                return;
+            }
+            
+            try {
+                // Очищаем элементы и обновляем отображение
+                _scrollableMenu.setItems([], -1);
+                log("MenuManager: Все элементы меню очищены");
+            } catch (error:Error) {
+                log("MenuManager: ERROR - Ошибка очистки элементов: " + error.message);
+            }
+        }
+
+        /**
+         * @brief Устанавливает состояние checkbox компонента (вызывается из C++)
+         * @param labelText Текст элемента для поиска
+         * @param checked Новое состояние checkbox
+         */
+        public function setCheckboxState(labelText:String, checked:Boolean):void {
+            log("MenuManager: setCheckboxState(" + labelText + ", " + checked + ")");
+            
+            if (!_scrollableMenu) {
+                log("MenuManager: ERROR - ScrollableMenu не инициализирован");
+                return;
+            }
+            
+            // Находим элемент и изменяем его состояние
+            var items:Array = _scrollableMenu.getCurrentItems();
+            for (var i:int = 0; i < items.length; i++) {
+                var item:Object = items[i];
+                if (item && item.labelText === labelText && item.type === 2) { // Checkbox
+                    item.checked = checked;
+                    // Можно обновить визуальный элемент, если нужно
+                    log("MenuManager: Checkbox состояние изменено для '" + labelText + "'");
+                    return;
+                }
+            }
+            log("MenuManager: WARNING - Checkbox '" + labelText + "' не найден");
+        }
+
+        /**
+         * @brief Устанавливает состояние switcher компонента (вызывается из C++)
+         * @param labelText Текст элемента для поиска
+         * @param selectedIndex Новый выбранный индекс switcher
+         */
+        public function setSwitcherState(labelText:String, selectedIndex:int):void {
+            log("MenuManager: setSwitcherState(" + labelText + ", " + selectedIndex + ")");
+            
+            if (!_scrollableMenu) {
+                log("MenuManager: ERROR - ScrollableMenu не инициализирован");
+                return;
+            }
+            
+            // Находим элемент и изменяем его состояние
+            var items:Array = _scrollableMenu.getCurrentItems();
+            for (var i:int = 0; i < items.length; i++) {
+                var item:Object = items[i];
+                if (item && item.labelText === labelText && item.type === 3) { // Switcher
+                    item.selectedIndex = selectedIndex;
+                    // Можно обновить визуальный элемент, если нужно
+                    log("MenuManager: Switcher состояние изменено для '" + labelText + "'");
+                    return;
+                }
+            }
+            log("MenuManager: WARNING - Switcher '" + labelText + "' не найден");
+        }
+
+        /**
+         * @brief Очистка ресурсов
+         */
+        public function dispose():void {
+            destroy();
+        }
+
+        /**
+         * @brief Уничтожает MenuManager и очищает все ресурсы
          */
         public function destroy():void {
             log("MenuManager: Начало уничтожения...");
@@ -622,7 +645,7 @@ package view {
             // Скрываем меню
             hideMenu();
             
-            // Очищаем ScrollableMenu
+            // Отписываемся от событий и очищаем ScrollableMenu
             if (_scrollableMenu) {
                 _scrollableMenu.removeEventListener("menuItemSelected", onMenuItemSelected);
                 _scrollableMenu.removeEventListener("menuBack", onMenuBack);
@@ -631,25 +654,28 @@ package view {
                 log("MenuManager: ScrollableMenu уничтожен");
             }
             
-            // Очищаем MenuScaler
+            // Отписываемся от событий и очищаем MenuScaler
             if (menuScaler) {
+                menuScaler.removeEventListener(MenuScaler.SCALE_CHANGED, onScaleChanged);
                 menuScaler.destroy();
                 menuScaler = null;
                 log("MenuManager: MenuScaler уничтожен");
             }
             
-            // Очищаем ThemeManager
+            // Отписываемся от событий и очищаем ThemeManager
             if (themeManager) {
+                themeManager.removeEventListener(ThemeManager.THEME_CHANGED, onThemeChanged);
+                themeManager.removeEventListener(ThemeManager.COMPONENT_COLORS_CHANGED, onComponentColorsChanged);
+                themeManager.removeEventListener(ThemeManager.SCROLLABLE_MENU_COLORS_CHANGED, onScrollableMenuColorsChanged);
                 themeManager.destroy();
                 themeManager = null;
                 log("MenuManager: ThemeManager уничтожен");
             }
             
             // Очищаем ссылки
-            // titleLabel = null; // удалено, больше не используется
-            // background_mc = null; // удалено, больше не используется
             menuContainer = null;
             isVisible = false;
+            isInitialized = false;
             
             log("MenuManager: Уничтожение завершено");
         }

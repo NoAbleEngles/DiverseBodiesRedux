@@ -41,10 +41,6 @@ package view.components {
          */
         private function log(message:String):void {
             trace(message);
-            if (ScrollableMenu.mainInstance && ScrollableMenu.mainInstance.BGSCodeObj && 
-                typeof ScrollableMenu.mainInstance.BGSCodeObj.Log === "function") {
-                ScrollableMenu.mainInstance.BGSCodeObj.Log(message);
-            }
         }
 
         /**
@@ -142,9 +138,10 @@ package view.components {
             if (_selectedIndex > 0) {
                 _selectedIndex--;
                 updateContent();
-                log("SwitcherComponent: переключено влево на '" + _options[_selectedIndex] + "' - отправляем back");
+                log("SwitcherComponent: переключено влево на '" + _options[_selectedIndex] + "' - отправляем CHANGE");
+                log("SwitcherComponent: Dispatching EVENT_CHANGE = '" + EVENT_CHANGE + "'");
                 dispatchEvent(new Event(EVENT_CHANGE));
-                dispatchEvent(new Event(EVENT_BACK)); // Влево = back
+                // НЕ отправляем EVENT_BACK - это только для выхода из меню
             }
         }
 
@@ -155,9 +152,10 @@ package view.components {
             if (_selectedIndex < _options.length - 1) {
                 _selectedIndex++;
                 updateContent();
-                log("SwitcherComponent: переключено вправо на '" + _options[_selectedIndex] + "' - отправляем push");
+                log("SwitcherComponent: переключено вправо на '" + _options[_selectedIndex] + "' - отправляем CHANGE");
+                log("SwitcherComponent: Dispatching EVENT_CHANGE = '" + EVENT_CHANGE + "'");
                 dispatchEvent(new Event(EVENT_CHANGE));
-                dispatchEvent(new Event(EVENT_PUSH)); // Вправо = push
+                // НЕ отправляем EVENT_PUSH - это только для активации элементов
             }
         }
 

@@ -11,7 +11,7 @@ PresetsManager::PresetsManager() {
     loadPresets<BodymorphsPreset>("PATH/sBodymorphsFolders");
     loadPresets<BodyhairsPreset>("PATH/sBodyhairsFolders");
     loadPresets<BodyTattoosPreset>("PATH/sBodyTattoosFolders"); 
-    loadPresets<BodyTattoosPreset>("PATH/sNailsFolders");
+    loadPresets<NailsPreset>("PATH/sNailsFolders");
     loadPresets<BodyOverlayCustom0>("PATH/sBodyOverlaysCustom0Folders");
     loadPresets<BodyOverlayCustom1>("PATH/sBodyOverlaysCustom1Folders");
     loadPresets<BodyOverlayCustom2>("PATH/sBodyOverlaysCustom2Folders");
@@ -113,7 +113,7 @@ std::shared_ptr<Preset> PresetsManager::operator[](const std::string& id) const 
     return getPreset(id);
 }
 
-std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor* actor, const std::function<bool(const RE::Actor* actor, const Preset&)>& filter) const noexcept {
+std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor* actor, const std::function<bool(const RE::Actor* actor, const std::shared_ptr<Preset>)>& filter) const noexcept {
 	std::vector<std::shared_ptr<Preset>> applicablePresets;
    
     if (filter == nullptr) {
@@ -125,7 +125,7 @@ std::vector<std::shared_ptr<Preset>> PresetsManager::getPresets(const RE::Actor*
 
     } else {
         for (const auto& preset : m_presets) {
-            if (preset && filter(actor, *preset)) {
+            if (preset && filter(actor, preset)) {
                 applicablePresets.push_back(preset);
             }
 		}

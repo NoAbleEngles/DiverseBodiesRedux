@@ -133,14 +133,14 @@
       <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
       <ForcedIncludeFiles>cstdint;cstddef</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\detourxs\lib;$(BOOSTLIBS);C:\cpp\CommonLibF4\build\CommonLibF4\Release;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\lib;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\fmt\lib;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\mmio\lib;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\spdlog\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>fmt.lib;LDE64x64.lib;zlib.lib;libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fmt.lib;LDE64x64.lib;zlibstatic.lib;libboost_json-vc143-mt-x64-1_88.lib;CommonLibF4.lib;spdlog.lib;mmio.lib;Version.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
@@ -464,6 +464,7 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Types2D.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Viewport.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\VTABLE_IDs.h" />
+    <ClInclude Include="..\..\f4se\f4se\GameCustomization.h" />
     <ClInclude Include="Sources\ActorsManager\ActorsManager.h" />
     <ClInclude Include="Sources\ActorsManager\Details\ActorsPresetHashEquals.hpp" />
     <ClInclude Include="Sources\ActorsManager\Details\PresetsGenerator.hpp" />

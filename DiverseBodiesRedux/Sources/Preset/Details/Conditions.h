@@ -41,10 +41,8 @@ enum class Filter : int {
 	HasNotKeyword = 1 << 2, // Не имеет ключевого слова
 	InFaction = 1 << 3,		// В фракции
 	NotInFaction = 1 << 4,  // Не в фракции
-	EditorIDs = 1 << 5,		// По editorID
-	NotEditorIDs = 1 << 6,  // Кроме editorID
-	FormIDs = 1 << 7,		// По formID
-	NotFormIDs = 1 << 8		// Кроме formID
+	FormIDs = 1 << 5,		// По formID
+	NotFormIDs = 1 << 6		// Кроме formID
 };
 
 Filter operator|(Filter a, Filter b) noexcept;
@@ -55,7 +53,7 @@ Filter operator~(Filter a) noexcept;
 Filter operator^(Filter a, Filter b) noexcept;
 Filter& operator^=(Filter& a, Filter b) noexcept;
 
-const Filter AllFilters = Filter::Gender | Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::EditorIDs | Filter::NotEditorIDs | Filter::FormIDs | Filter::NotFormIDs;
+const Filter AllFilters = Filter::Gender | Filter::HasKeyword | Filter::HasNotKeyword | Filter::InFaction | Filter::NotInFaction | Filter::FormIDs | Filter::NotFormIDs;
 
 /**
  * @brief Преобразует строковое представление фильтра в enum Filter.
@@ -171,10 +169,10 @@ private:
 	RE::Actor::Sex m_gender{ RE::Actor::Sex::None };
 	std::unordered_set<uint32_t> m_formIDs{};
 	std::unordered_set<uint32_t> m_notFormIDs{};
-	std::unordered_set<std::string> m_editorIDs{};
-	std::unordered_set<std::string> m_notEditorIDs{};
-	bool m_editorIdContains{};
-	bool m_notEditorIdContains{};
+	/*std::unordered_set<std::string> m_editorIDs{};
+	std::unordered_set<std::string> m_notEditorIDs{};*/
+	/*bool m_editorIdContains{};
+	bool m_notEditorIdContains{};*/
 	std::unordered_set<RE::BGSKeyword*> m_hasKeyword{};
 	std::unordered_set<RE::BGSKeyword*> m_hasNotKeyword{};
 	std::unordered_set<RE::TESFaction*> m_inFaction{};

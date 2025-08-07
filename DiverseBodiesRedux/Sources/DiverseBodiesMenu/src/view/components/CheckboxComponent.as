@@ -35,10 +35,6 @@ package view.components {
          */
         private function log(message:String):void {
             trace(message);
-            if (ScrollableMenu.mainInstance && ScrollableMenu.mainInstance.BGSCodeObj && 
-                typeof ScrollableMenu.mainInstance.BGSCodeObj.Log === "function") {
-                ScrollableMenu.mainInstance.BGSCodeObj.Log(message);
-            }
         }
 
         /**
@@ -242,7 +238,8 @@ package view.components {
             drawCheckbox();
             log("CheckboxComponent: '" + _labelText + "' = " + _selected);
             
-            // Отправляем change событие
+            // Отправляем change событие в ScrollableMenu
+            log("CheckboxComponent: Dispatching EVENT_CHANGE = '" + EVENT_CHANGE + "'");
             dispatchEvent(new Event(EVENT_CHANGE));
             
             // Отправляем push при установке, back при снятии

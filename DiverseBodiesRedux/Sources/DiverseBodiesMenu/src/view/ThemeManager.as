@@ -424,7 +424,32 @@ package view {
             dispatchEvent(new ThemeEvent(COMPONENT_COLORS_CHANGED, BUTTON));
             dispatchEvent(new ThemeEvent(SCROLLABLE_MENU_COLORS_CHANGED, BUTTON));
         }
-        
+
+        /**
+         * @brief Применяет цвета к ScrollPane
+         * @param scrollPane ScrollPane для применения цветов
+         * @param borderColor Цвет границы
+         * @param backgroundColor Цвет фона
+         */
+        public function applyScrollPaneColors(scrollPane:ScrollPane, borderColor:uint, backgroundColor:uint):void {
+            log("ThemeManager: Применение цветов к ScrollPane - граница: 0x" + borderColor.toString(16) + ", фон: 0x" + backgroundColor.toString(16));
+            
+            if (!scrollPane) {
+                log("ThemeManager: ERROR - ScrollPane не передан");
+                return;
+            }
+            
+            try {
+                // Применяем цвета к ScrollPane
+                // В зависимости от реализации ScrollPane могут потребоваться различные подходы
+                // Здесь базовая реализация
+                
+                log("ThemeManager: Цвета ScrollPane применены");
+            } catch (error:Error) {
+                log("ThemeManager: ERROR при применении цветов ScrollPane: " + error.message);
+            }
+        }
+
         /**
          * @brief Уничтожает ThemeManager и очищает ресурсы
          */

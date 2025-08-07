@@ -2,9 +2,9 @@
 
 namespace Version {
 	constexpr auto Name = "DiverseBodies";
-	constexpr auto Version = "2.0.0";
+	constexpr auto Version = "2.0.3";
 	constexpr auto VersionCount = 1;
-	constexpr auto Date = "2024-02-29";
+	constexpr auto Date = "2025-08-07";
 	constexpr const size_t UID = 'DBR2';
 	constexpr auto SerializationVer = 200;
 }
