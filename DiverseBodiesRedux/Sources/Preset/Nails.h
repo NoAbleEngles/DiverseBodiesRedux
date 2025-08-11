@@ -2,7 +2,7 @@
 #include "OverlayPreset.h"
 
 /**
- * @brief Пресет волос для тела (BodyMorph).
+ * @brief Пресет волос для ногтей (NailsPreset).
  */
 class NailsPreset final : public OverlayPreset
 {

@@ -10,7 +10,6 @@
 #include <unordered_map>
 #include <future>
 #include "Details/PresetEnums.h"
-#include "ValidateOverlay/ValidateOverlay.h"
 #include "LooksMenu/LooksMenuInterfaces.h"
 
 class BodymorphsPreset;

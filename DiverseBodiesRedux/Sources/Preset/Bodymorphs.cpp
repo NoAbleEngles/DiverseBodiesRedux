@@ -2,7 +2,6 @@
 #include "PugiXML/pugixml.hpp"
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include "Ini/ini.h"
-#include "ValidateOverlay/ValidateOverlay.h"
 #include "globals.h"
 
 

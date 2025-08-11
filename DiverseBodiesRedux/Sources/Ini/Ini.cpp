@@ -61,8 +61,6 @@ namespace ini
 	
 	bool map::readFile(const std::filesystem::path& path)
 	{
-		m_inimap.clear();  // Очищаем текущую карту перед загрузкой нового файла
-		
 		if (!std::filesystem::exists(path)) {
 			std::cerr << "INI file does not exist: " << path << std::endl;
 			m_path = "";
@@ -75,6 +73,8 @@ namespace ini
 			m_path = "";
 			return false;
 		}
+
+		m_inimap.clear();  // Очищаем текущую карту перед загрузкой нового файла
 
 		m_path = path.string();  // Сохраняем путь к файлу
 
@@ -139,6 +139,10 @@ namespace ini
 
 	bool map::readFile(const std::string& path) {
 		return readFile(std::filesystem::path(path));
+	}
+
+	bool map::reload() {
+		return readFile(m_path);
 	}
 
 	// Реализация метода contains

@@ -133,7 +133,7 @@
       <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
       <ForcedIncludeFiles>cstdint;cstddef</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -464,7 +464,6 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Types2D.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Viewport.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\VTABLE_IDs.h" />
-    <ClInclude Include="..\..\f4se\f4se\GameCustomization.h" />
     <ClInclude Include="Sources\ActorsManager\ActorsManager.h" />
     <ClInclude Include="Sources\ActorsManager\Details\ActorsPresetHashEquals.hpp" />
     <ClInclude Include="Sources\ActorsManager\Details\PresetsGenerator.hpp" />
@@ -482,23 +481,24 @@
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Bodyhairs.h" />
     <ClInclude Include="Sources\Preset\Bodymorphs.h" />
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom0.h" />
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom1.h" />
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom2.h" />
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom3.h" />
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom4.h" />
+    <ClInclude Include="Sources\Preset\BodyOverlayCustomBase.h" />
+    <ClInclude Include="Sources\Preset\Details\Tint.h" />
+    <ClInclude Include="Sources\Preset\FaceTattoos.h" />
     <ClInclude Include="Sources\Preset\Nails.h" />
+    <ClInclude Include="Sources\Preset\NPCPreset.h" />
     <ClInclude Include="Sources\Preset\OverlayPreset.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
     <ClInclude Include="Sources\Preset\Details\PresetEnums.h" />
     <ClInclude Include="Sources\Preset\Preset.h" />
     <ClInclude Include="Sources\Preset\BodyTattoos.h" />
+    <ClInclude Include="Sources\Preset\TintPreset.h" />
     <ClInclude Include="Sources\PugiXML\pugiconfig.hpp" />
     <ClInclude Include="Sources\PugiXML\pugixml.hpp" />
     <ClInclude Include="Sources\Utils\RandomGenerator.hpp" />
     <ClInclude Include="Sources\Utils\utility.h" />
-    <ClInclude Include="Sources\ValidateOverlay\ValidateOverlay.h" />
+    <ClInclude Include="Sources\Validate\ValidateOverlay.h" />
+    <ClInclude Include="Sources\Validate\ValidateTint.h" />
     <ClInclude Include="Sources\Version.h" />
   </ItemGroup>
   <ItemGroup>
@@ -551,12 +551,11 @@
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom0.cpp" />
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom1.cpp" />
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom2.cpp" />
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom3.cpp" />
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom4.cpp" />
+    <ClCompile Include="Sources\Preset\BodyOverlayCustomBase.cpp" />
+    <ClCompile Include="Sources\Preset\Details\Tint.cpp" />
+    <ClCompile Include="Sources\Preset\FaceTattoos.cpp" />
     <ClCompile Include="Sources\Preset\Nails.cpp" />
+    <ClCompile Include="Sources\Preset\NPCPreset.cpp" />
     <ClCompile Include="Sources\Preset\OverlayPreset.cpp" />
     <ClCompile Include="Sources\Preset\Details\Conditions.cpp" />
     <ClCompile Include="Sources\Preset\Details\Overlay.cpp" />
@@ -564,7 +563,8 @@
     <ClCompile Include="Sources\Preset\BodyTattoos.cpp" />
     <ClCompile Include="Sources\PugiXML\pugixml.cpp" />
     <ClCompile Include="Sources\Utils\utility.cpp" />
-    <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp" />
+    <ClCompile Include="Sources\Validate\ValidateOverlay.cpp" />
+    <ClCompile Include="Sources\Validate\ValidateTint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\Boost\lib\libboost_json-vc143-mt-x64-1_88.lib" />

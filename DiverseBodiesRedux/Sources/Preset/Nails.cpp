@@ -8,9 +8,9 @@ std::set<std::string> NailsPreset::ALL_ITEMS_F{};
 
 void NailsPreset::addOverlaysFromThisToPossibleOverlays() {
 	if (!empty()) {
-		auto& overlay_store = m_conditions.gender() == RE::Actor::Sex::Male ? ALL_ITEMS_M : ALL_ITEMS_F;
-		for (auto& overlay : m_overlays)
-			overlay_store.emplace(overlay.id());
+		auto& store = m_conditions.gender() == RE::Actor::Sex::Male ? ALL_ITEMS_M : ALL_ITEMS_F;
+		for (auto& el : m_overlays)
+			store.emplace(el.id());
 	}
 }
 

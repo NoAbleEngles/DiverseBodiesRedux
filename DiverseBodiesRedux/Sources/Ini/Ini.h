@@ -54,12 +54,19 @@ namespace ini
 		 * @return true если успешно, иначе false.
 		 */
 		bool readFile(const std::filesystem::path& path);
+
 		/**
 		 * @brief Считывает ini-файл в карту.
 		 * @param path Путь к ini-файлу.
 		 * @return true если успешно, иначе false.
 		 */
 		bool readFile(const std::string& path);
+
+		/**
+		 * @brief Обновляет карту повторно считывая ini-файл.
+		 * @return true если успешно, иначе false.
+		 */
+		bool reload();
 
 		/**
 		 * @brief Проверяет, существует ли ini-файл.
@@ -318,7 +325,6 @@ namespace ini
 		bool key_found = false;
 		std::string section_header = "[" + section + "]";
 		int insert_section_pos = -1;
-		int insert_key_pos = -1;
 		int last_section_pos = -1;
 		int i = 0;
 
@@ -393,9 +399,16 @@ namespace ini
 	template <class T>
 	inline bool map::set(const std::string& section_slash_key, const T& val)
 	{
-		auto section_key = split_section_key(section_slash_key);  // Разделяем строку на секцию и ключ
-		set<T>(section_key[1], section_key[0], val);              // Используем метод set для установки значения
+		auto section_key = split_section_key(section_slash_key);		 // Разделяем строку на секцию и ключ
+		return set<T>(section_key[1], section_key[0], val);              // Используем метод set для установки значения
 	}
 
 	std::ostream& operator<<(std::ostream& os, const ini::map& m);
+
+	template <>
+	inline bool map::set<bool>(const std::string& key, const std::string& section, const bool& val)
+	{
+		// Преобразуем bool в строку "true"/"false"
+		return set<std::string>(key, section, val ? "true" : "false");
+	}
 }

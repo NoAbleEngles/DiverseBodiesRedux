@@ -88,9 +88,6 @@
     <Filter Include="DiverseBodies\PresetsManager">
       <UniqueIdentifier>{b5856623-b994-4936-8e64-9642120b7b5a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DiverseBodies\ValidateOverlay">
-      <UniqueIdentifier>{b0ad3710-59d0-4e70-ba9e-420cf5e95c38}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DiverseBodies\ActorsManager">
       <UniqueIdentifier>{5b0e7a38-99e2-4a8e-9774-fd9d5fd3c8c6}</UniqueIdentifier>
     </Filter>
@@ -168,6 +165,12 @@
     </Filter>
     <Filter Include="DiverseBodies\Preset\OverlayPresets\Custom">
       <UniqueIdentifier>{2abf2812-8979-4e84-98fc-07bb678c5471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\Validate">
+      <UniqueIdentifier>{b0ad3710-59d0-4e70-ba9e-420cf5e95c38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\Preset\NPCPresets">
+      <UniqueIdentifier>{0aa2fd90-1754-4bc9-b1e6-dee3a55c3051}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1152,9 +1155,6 @@
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h">
       <Filter>DiverseBodies\PresetsManager</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\ValidateOverlay\ValidateOverlay.h">
-      <Filter>DiverseBodies\ValidateOverlay</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\ActorsManager\ActorsManager.h">
       <Filter>DiverseBodies\ActorsManager</Filter>
     </ClInclude>
@@ -1200,26 +1200,29 @@
     <ClInclude Include="Sources\Preset\BodyTattoos.h">
       <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom0.h">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom1.h">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom2.h">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom3.h">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Preset\BodyOverlayCustom4.h">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Preset\Nails.h">
       <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\f4se\f4se\GameCustomization.h">
-      <Filter>CommonLib\RE\Bethesda</Filter>
+    <ClInclude Include="Sources\Preset\TintPreset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\NPCPreset.h">
+      <Filter>DiverseBodies\Preset</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\Details\Tint.h">
+      <Filter>DiverseBodies\Preset\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Validate\ValidateOverlay.h">
+      <Filter>DiverseBodies\Validate</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Validate\ValidateTint.h">
+      <Filter>DiverseBodies\Validate</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\FaceTattoos.h">
+      <Filter>DiverseBodies\Preset\NPCPresets</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\BodyOverlayCustomBase.h">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1252,9 +1255,6 @@
     </ClCompile>
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp">
       <Filter>DiverseBodies\PresetsManager</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\ValidateOverlay\ValidateOverlay.cpp">
-      <Filter>DiverseBodies\ValidateOverlay</Filter>
     </ClCompile>
     <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp">
       <Filter>DiverseBodies\ActorsManager</Filter>
@@ -1394,23 +1394,26 @@
     <ClCompile Include="Sources\Preset\BodyTattoos.cpp">
       <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom0.cpp">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom1.cpp">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom2.cpp">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom3.cpp">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Preset\BodyOverlayCustom4.cpp">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Preset\Nails.cpp">
       <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\NPCPreset.cpp">
+      <Filter>DiverseBodies\Preset</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\Details\Tint.cpp">
+      <Filter>DiverseBodies\Preset\Details</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Validate\ValidateOverlay.cpp">
+      <Filter>DiverseBodies\Validate</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Validate\ValidateTint.cpp">
+      <Filter>DiverseBodies\Validate</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\FaceTattoos.cpp">
+      <Filter>DiverseBodies\Preset\NPCPresets</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Preset\BodyOverlayCustomBase.cpp">
+      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
