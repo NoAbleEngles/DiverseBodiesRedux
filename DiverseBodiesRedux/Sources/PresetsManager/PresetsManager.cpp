@@ -12,12 +12,7 @@ PresetsManager::PresetsManager() {
     loadPresets<BodyhairsPreset>("PATH/sBodyhairsFolders");
     loadPresets<BodyTattoosPreset>("PATH/sBodyTattoosFolders"); 
     loadPresets<NailsPreset>("PATH/sNailsFolders");
-	loadPresets<FaceTattoosPreset>("PATH/sFaceTattoosFolders");
-    /*loadPresets<BodyOverlayCustom0>("PATH/sBodyOverlaysCustom0Folders");
-    loadPresets<BodyOverlayCustom1>("PATH/sBodyOverlaysCustom1Folders");
-    loadPresets<BodyOverlayCustom2>("PATH/sBodyOverlaysCustom2Folders");
-    loadPresets<BodyOverlayCustom3>("PATH/sBodyOverlaysCustom3Folders");
-    loadPresets<BodyOverlayCustom4>("PATH/sBodyOverlaysCustom4Folders");*/
+	loadPresets<NPCPreset>("PATH/sNPCPresetsFolders");
 }
 
 PresetsManager& PresetsManager::get() {

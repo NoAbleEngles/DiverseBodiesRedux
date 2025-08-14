@@ -76,6 +76,12 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		logger::info("BodyMorphs Apply no actor provided!");
 		return false;
 	}
+
+	static std::unordered_set<RE::Actor*> processingActors{};
+	if (processingActors.contains(actor)) {
+		return false; // Предотвращаем повторную обработку одного и того же актёра
+	}
+	processingActors.insert(actor); // Добавляем актёра в список обрабатываемых
 	
 	// здесь не нужна проверка, т.к. иначе не будут работать пресеты применяемые вручную. Можно только пол проверять.
 	//if (check(actor) == CoincidenceLevel::NONE) {
@@ -84,12 +90,14 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 	//}
 	if (check(actor, Filter{ Filter::Gender }) == CoincidenceLevel::NONE) {
 		logger::info("BodyMorphs Apply gender check failed for actor: {:#x}", actor->formID);
+		processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 		return false;
 	}
 
 	remove(actor);
 
 	if (!actor->GetFullyLoaded3D()) {
+		processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 		return false;
 	}
 
@@ -97,6 +105,7 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		auto Interface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
 		if (!Interface) {
 			logger::critical("BodyMorphInterface is nullptr!");
+			processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 			return false;
 		}
 		Interface->SetMorph(actor, actor->GetSex() == RE::Actor::Sex::Female, morphName, globals::kwd_diversed, morphValue);
@@ -104,6 +113,7 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 
 
 	if (!actor->GetFullyLoaded3D()) {
+		processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 		return true;
 	}
 
@@ -111,28 +121,35 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 	using R3D = RE::RESET_3D_FLAGS;
 	actor->Reset3D(false, R3D::kModel | R3D::kSkeleton, true, R3D::kNone);
 
+	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 	return true;
 }
 
 // @brief Удаляет морфы тела у актера, если они были применены ранее. Используется для очистки морфов перед применением нового пресета. Убирает только морфы этого мода.
 bool BodymorphsPreset::remove(RE::Actor* actor) const
 {
-	if (!actor || !actor->GetFullyLoaded3D())
+	if (!actor) {
+		logger::info("BodyMorphs Remove no actor provided!");
 		return false;
+	}
+
+	static std::unordered_set<RE::Actor*> processingActors{};
+	if (processingActors.contains(actor)) {
+		return false; // Предотвращаем повторную обработку одного и того же актёра
+	}
+	processingActors.insert(actor); // Добавляем актёра в список обрабатываемых
 
 	auto Interface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
 	if (!Interface) {
-		logger::error("BodyMorphInterface is nullptr!");
+		logger::critical("BodyMorphInterface is nullptr!");
+		processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 		return false;
 	}
 
-	if (auto sex = actor->GetSex(); sex == RE::Actor::Sex::Female || sex == RE::Actor::Sex::Male) {
-		Interface->RemoveMorphsByKeyword(actor, sex == RE::Actor::Sex::Female, const_cast<RE::BGSKeyword*>(globals::kwd_diversed));
-		return true;
-	} else {
-		logger::error("BodyMorphs Remove called on actor with unknown sex: {:#x}", actor->formID);
-		return false;  
-	}
+	Interface->RemoveMorphsByKeyword(actor, actor->GetSex() == RE::Actor::Sex::Female, globals::kwd_diversed);
+
+	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
+	return true;
 }
 
 // @brief Возвращает true, если пресет пустой или не валидный. Пустой пресет - это пресет без имени.
@@ -157,6 +174,14 @@ std::future<bool> BodymorphsPreset::isValidAsync() const noexcept {
 // Даже если файл не был загружен, обнуляет старые данные.
 bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 {
+	// виртуальный clear может вызвать проблемы, если он вызывается в деструкторе или конструкторе.
+	auto clear = [this]() {
+		m_bodytype = BodyType::NONE;
+		m_morphs.clear();
+		m_id.clear();
+		m_conditions.clear();
+	};
+
 	this->clear();  // Очищаем предыдущие данные, чтобы избежать конфликтов
 	if (presetFile.ends_with("_conds.json")) {
 		// Если файл - это условия, то не загружаем его как пресет
@@ -292,9 +317,9 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 
 // @breif Очищает объект
 void BodymorphsPreset::clear() noexcept {
-	Preset::clear();
 	m_bodytype = BodyType::NONE;
 	m_morphs.clear();
+	Preset::clear();
 }
 
 // DiverseBodiesRedux\Sources\Preset\Bodymorphs.cpp

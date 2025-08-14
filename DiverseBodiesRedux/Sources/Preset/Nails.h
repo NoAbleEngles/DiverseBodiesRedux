@@ -2,7 +2,10 @@
 #include "OverlayPreset.h"
 
 /**
- * @brief Пресет волос для ногтей (NailsPreset).
+ * @brief Пресет ногтей для актёров.
+ * 
+ * Наследуется от OverlayPreset и применяет текстурные оверлеи ногтей на актёров
+ * через LooksMenu интерфейс. Включает защиту от двойной обработки и валидацию оверлеев.
  */
 class NailsPreset final : public OverlayPreset
 {
@@ -54,11 +57,11 @@ public:
 	 */
 	PresetType type() const noexcept override;
 
-	/// @copydoc Preset::clear
-	void clear() noexcept override;
-
 	/// @copydoc OverlayPreset::clear
 	bool remove(RE::Actor* actor) const override;
+
+	/// @copydoc OverlayPreset::apply
+	bool apply(RE::Actor* actor, bool reset3d = true) const override;
 
 	/**
 	* @brief Добавляет все оверлеи из этого пресета в ALL_ITEMS_M и ALL_ITEMS_F. После всех добавлений нужно ревалидировать ALL_ITEMS_M и ALL_ITEMS_F с помощью revalidateAllPossibleOverlays. Метод создан для использования в конструкторе при создании объекта.

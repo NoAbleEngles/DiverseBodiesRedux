@@ -26,6 +26,7 @@ public:
 
 	// @brief Применяет наложение к актеру. 
 	// * Не проверяет интерфейс, актёра и наложение на валидность.
+	void remove(RE::Actor* actor) const; ///< Удаляет наложение с актёра
 	void apply(RE::Actor* actor) const;
 	const std::string& id() const noexcept;
 	bool empty() const noexcept;

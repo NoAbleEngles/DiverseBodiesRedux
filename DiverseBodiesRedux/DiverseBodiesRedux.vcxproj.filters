@@ -163,14 +163,8 @@
     <Filter Include="DiverseBodies\Preset\OverlayPresets">
       <UniqueIdentifier>{4f50bb67-f33c-4629-8d04-983329219ec1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="DiverseBodies\Preset\OverlayPresets\Custom">
-      <UniqueIdentifier>{2abf2812-8979-4e84-98fc-07bb678c5471}</UniqueIdentifier>
-    </Filter>
     <Filter Include="DiverseBodies\Validate">
       <UniqueIdentifier>{b0ad3710-59d0-4e70-ba9e-420cf5e95c38}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="DiverseBodies\Preset\NPCPresets">
-      <UniqueIdentifier>{0aa2fd90-1754-4bc9-b1e6-dee3a55c3051}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1218,12 +1212,6 @@
     <ClInclude Include="Sources\Validate\ValidateTint.h">
       <Filter>DiverseBodies\Validate</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Preset\FaceTattoos.h">
-      <Filter>DiverseBodies\Preset\NPCPresets</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Preset\BodyOverlayCustomBase.h">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1408,12 +1396,6 @@
     </ClCompile>
     <ClCompile Include="Sources\Validate\ValidateTint.cpp">
       <Filter>DiverseBodies\Validate</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Preset\FaceTattoos.cpp">
-      <Filter>DiverseBodies\Preset\NPCPresets</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Preset\BodyOverlayCustomBase.cpp">
-      <Filter>DiverseBodies\Preset\OverlayPresets\Custom</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

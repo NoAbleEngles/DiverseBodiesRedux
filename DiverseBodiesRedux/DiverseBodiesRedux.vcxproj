@@ -481,9 +481,7 @@
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Bodyhairs.h" />
     <ClInclude Include="Sources\Preset\Bodymorphs.h" />
-    <ClInclude Include="Sources\Preset\BodyOverlayCustomBase.h" />
     <ClInclude Include="Sources\Preset\Details\Tint.h" />
-    <ClInclude Include="Sources\Preset\FaceTattoos.h" />
     <ClInclude Include="Sources\Preset\Nails.h" />
     <ClInclude Include="Sources\Preset\NPCPreset.h" />
     <ClInclude Include="Sources\Preset\OverlayPreset.h" />
@@ -551,9 +549,7 @@
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
-    <ClCompile Include="Sources\Preset\BodyOverlayCustomBase.cpp" />
     <ClCompile Include="Sources\Preset\Details\Tint.cpp" />
-    <ClCompile Include="Sources\Preset\FaceTattoos.cpp" />
     <ClCompile Include="Sources\Preset\Nails.cpp" />
     <ClCompile Include="Sources\Preset\NPCPreset.cpp" />
     <ClCompile Include="Sources\Preset\OverlayPreset.cpp" />

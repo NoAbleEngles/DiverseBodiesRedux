@@ -8,6 +8,7 @@
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <unordered_set>
 #include <future>
 #include "Details/PresetEnums.h"
 #include "LooksMenu/LooksMenuInterfaces.h"
@@ -16,16 +17,15 @@ class BodymorphsPreset;
 class BodyhairsPreset;
 class BodyTattoosPreset;
 class NailsPreset;
-class BodyOverlayCustom0;
-class BodyOverlayCustom1;
-class BodyOverlayCustom2;
-class BodyOverlayCustom3;
-class BodyOverlayCustom4;
+class NPCPreset;
 
 /**
  * @brief Абстрактный базовый класс для всех пресетов.
  * 
- * Определяет интерфейс для работы с пресетами (загрузка, сравнение, применение и т.д.).
+ * Определяет общий интерфейс для работы с пресетами различных типов: загрузка из файлов,
+ * сравнение, применение к актёрам, проверка условий и валидация. Все конкретные типы 
+ * пресетов (морфы тела, оверлеи, тинты лица) наследуются от этого класса.
+ * Включает встроенную защиту от двойной обработки одного и того же актёра.
  */
 class Preset
 {
@@ -82,7 +82,7 @@ public:
 	virtual CoincidenceLevel check(const RE::Actor* actor, Filter filter = AllFilters) const noexcept;
 
 	/**
-	 * @brief Применить пресет к актеру.
+	 * @brief Применить пресет к актеру с защитой от двойной обработки.
 	 * @param actor Указатель на актера.
 	 * @param reset3d Если true, сбрасывает 3D актёра после применения пресетов.
 	 * @return true, если успешно.
@@ -90,7 +90,7 @@ public:
 	virtual bool apply(RE::Actor* actor, bool reset3d = true) const = 0;
 
 	/**
-	 * @brief Удалить эффекты пресета с актера.
+	 * @brief Удалить эффекты пресета с актера с защитой от двойной обработки.
 	 * @param actor Указатель на актера.
 	 * @return true, если успешно.
 	 */
@@ -124,6 +124,12 @@ public:
 	 * @return Строка с информацией о пресете.
 	 */
 	virtual std::string print() const = 0;
+	
+	/**
+	 * @brief Проверить, является ли пресет пресетом LooksMenu.
+	 * @return true, если пресет является пресетом LooksMenu.
+	 */
+	bool isLooksMenuPreset() const noexcept;
 
 protected:
 	/**
@@ -142,6 +148,41 @@ protected:
 	 * @brief Уникальный идентификатор пресета. Соответствует имени файла.
 	 */
 	std::string m_id{};
+
+	bool m_isLooksMenuPreset{ false }; ///< Флаг, указывающий, является ли пресет LooksMenu пресетом
+
+	/**
+	 * @brief Утилитарный класс для защиты от двойной обработки одного актёра.
+	 */
+	class ProcessingGuard {
+	public:
+		ProcessingGuard(RE::Actor* actor, std::unordered_set<RE::Actor*>& processingSet) 
+			: m_actor(actor), m_processingSet(processingSet), m_isActive(false) {
+			if (actor && !m_processingSet.contains(actor)) {
+				m_processingSet.insert(actor);
+				m_isActive = true;
+			}
+		}
+
+		~ProcessingGuard() {
+			if (m_isActive && m_actor) {
+				m_processingSet.erase(m_actor);
+			}
+		}
+
+		bool isActive() const { return m_isActive; }
+
+		// Запрещаем копирование и перемещение
+		ProcessingGuard(const ProcessingGuard&) = delete;
+		ProcessingGuard& operator=(const ProcessingGuard&) = delete;
+		ProcessingGuard(ProcessingGuard&&) = delete;
+		ProcessingGuard& operator=(ProcessingGuard&&) = delete;
+
+	private:
+		RE::Actor* m_actor;
+		std::unordered_set<RE::Actor*>& m_processingSet;
+		bool m_isActive;
+	};
 
 	Preset(const Preset& other) = delete;
 	Preset& operator=(const Preset& other) = delete;
