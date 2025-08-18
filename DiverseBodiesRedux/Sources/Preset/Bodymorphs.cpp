@@ -1,6 +1,7 @@
 #include "Bodymorphs.h"
 #include "PugiXML/pugixml.hpp"
 #include "LooksMenu/LooksMenuInterfaces.h"
+#include "LooksMenu/ParseLooksMenuPreset.h"
 #include "Ini/ini.h"
 #include "globals.h"
 
@@ -194,65 +195,66 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 		return false;
 	}
 
-	auto condsPath = path.parent_path() / (path.stem().string() + "_conds.json");
-	auto externalConds = std::filesystem::exists(condsPath);
-	if (externalConds) {
-		try {
-			m_conditions = std::move(ConditionSettings(condsPath.string()));
-			logger::info("Loaded conditions from {}", condsPath.string());
-		} catch (const std::exception& e) {
-			logger::error("Failed to load conditions from {}: {}", condsPath.string(), e.what());
-			externalConds = false;
-		}
-	} /*else {
-		logger::info("No conditions file found for BodyMorphs preset: {}", condsPath.string());
-	}*/
-
 	auto gender = RE::Actor::Sex::None;
 
 	if (path.extension() == ".json") {
-		boost::json::object json_obj;
-		try {
-			json_obj = boost::json::parse(getJson(path)).as_object();
-		} catch (...) {
-			logger::info("...FAILED : {} wrong json format", presetFile);
+		ParseLMPreset preset(path);
+		if (!preset.isLoaded() || preset.isEmpty()) {
+			logger::error("BodymorphsPreset::loadFromFile: Failed to load preset from file: {}", presetFile);
+			clear();  
 			return false;
 		}
 
-		auto pValue = json_obj.if_contains("Gender");
-		if (pValue && pValue->is_int64()) {
-			gender = pValue->as_int64() == 0 ? RE::Actor::Sex::Male : RE::Actor::Sex::Female;
+		// Первым делом проверяем есть ли условия, т.к. если их нет, то и загружать дальше нет смысла
+		auto conditions_path = path.parent_path() / (path.stem().string() + "_conds.json");
+		if (std::filesystem::exists(conditions_path)) {
+			LoadConditions(conditions_path);
 		}
 
-		auto morphsValue = json_obj.if_contains("BodyMorphs");
-		if (!morphsValue || !morphsValue->is_object()) {
-			logger::info("...FAILED : no morphs found in {}", presetFile);
-		} else {
-			json_obj = morphsValue->as_object();
+		if (m_conditions.empty()) {
+			m_conditions = std::move(preset.conditions());  // Загружаем условия из основного файла, если нет отдельного файла с условиями
 		}
 
-		if (!json_obj.empty()) {
-			int i = 0;
-			std::for_each(json_obj.begin(), json_obj.end(), [&](const auto& o) {
-				std::string key = o.key();
-				float value;
-				if (o.value().is_double()) {
-					value = static_cast<float>(o.value().as_double());
-				}
-				else if (o.value().is_int64()) {
-					value = static_cast<float>(o.value().as_int64());
-				}
-				else {
-					logger::info("...FAILED : wrong value type {}", (o.value().is_string() ? o.value().as_string().c_str() : ""));
-					return;
-				}
-				m_morphs.emplace(key, std::move(value));
-				++i;
-			});
-		} else {
-			logger::info("...FAILED : no morphs found in {}", presetFile);
+		if (m_conditions.empty()) {
+			conditions_path = path.parent_path() / "conds.json"; // Пробуем загрузить условия из файла "conds.json" в той же папке
+			if (std::filesystem::exists(conditions_path)) {
+				LoadConditions(conditions_path);
+			}
+		} 
+
+		if (m_conditions.empty()) {
+			logger::warn("BodymorphsPreset::loadFromFile: No conditions found in preset file: {}", presetFile);
+			clear();  // Очищаем данные, если пресет не валиден
+			return false;
 		}
+			
+		if (auto sex = preset.gender(); sex != RE::Actor::None) {
+			m_conditions.setGender(sex); // Устанавливаем пол из пресета, т.к. пресет не может быть применён к актёру другого пола.
+		}
+
+		m_morphs = preset.bodyMorphs();
+		
 	} else if (path.extension() == ".xml") {
+
+		// Первым делом проверяем есть ли условия, т.к. если их нет, то и загружать дальше нет смысла
+		auto conditions_path = path.parent_path() / (path.stem().string() + "_conds.json");
+		if (std::filesystem::exists(conditions_path)) {
+			LoadConditions(conditions_path);
+		}
+
+		if (m_conditions.empty()) {
+			conditions_path = path.parent_path() / "conds.json"; // Пробуем загрузить условия из файла "conds.json" в той же папке
+			if (std::filesystem::exists(conditions_path)) {
+				LoadConditions(conditions_path);
+			}
+		}
+
+		if (m_conditions.empty()) {
+			logger::warn("BodymorphsPreset::loadFromFile: No conditions found in preset file: {}", presetFile);
+			clear();  // Очищаем данные, если пресет не валиден
+			return false;
+		}
+
 		pugi::xml_document doc;
 		pugi::xml_parse_result result = doc.load_file(path.string().c_str());
 
@@ -275,37 +277,10 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 				m_morphs.emplace(std::move(key), value);
 			}
 		}
-
-		if (m_morphs.size() && isCondtionsEmpty()) {
-			if (!path.filename().empty()) {
-				if (*path.filename().string().begin() == 'F')
-					gender = RE::Actor::Sex::Female;
-				else if (*path.filename().string().begin() == 'M')
-					gender = RE::Actor::Sex::Male;
-			} else {
-				logger::info("...FAILED : empty filename in {}", presetFile);
-			}
-		}
 	}
 
-	if (!externalConds && gender != RE::Actor::Sex::None)
-		m_conditions = ConditionSettings(gender);
-
-	if (!m_conditions.empty() && m_morphs.size()) {
-		if (presetFile.find("!FAT!") != std::string::npos)
-			m_bodytype = BodyType::FAT;
-		else if (presetFile.find("!SLIM!") != std::string::npos)
-			m_bodytype = BodyType::SLIM;
-		else if (presetFile.find("!SEXY!") != std::string::npos)
-			m_bodytype = BodyType::SEXY;
-		else if (presetFile.find("!ATHL!") != std::string::npos)
-			m_bodytype = BodyType::ATHL;
-		else {
-			logger::info("{} no body type found, setting to SEXY", presetFile);
-		}
-		
-	} else {
-		logger::critical("BodymorphsPreset::loadFromFile: Unsupported file format: {}", presetFile);
+	if (m_morphs.empty() || m_conditions.empty()) {
+		logger::warn("BodymorphsPreset::loadFromFile: Preset is empty or conditions are missing in file: {}", presetFile);
 		clear();  // Очищаем данные, если пресет не валиден
 		return false;
 	}

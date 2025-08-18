@@ -69,12 +69,6 @@ public:
 	virtual bool operator<(const Preset& other) const noexcept;
 
 	/**
-	 * @brief Проверить существуют ли условия.
-	 * вернёт false даже если задан только пол.
-	 */
-	virtual bool isCondtionsEmpty() const noexcept;
-
-	/**
 	 * @brief Проверить валиден ли пресет для актёра.
 	 * @param actor Указатель на актера.
 	 * @return возвращает CoincidenceLevel - enum отражающий уровень совпадения. 0 (NONE) - не соответствует условиям, ABSOLUTE - совпадение по formId или editorId. Проваленная проверка пола всегда вернёт NONE, не продолжая других проверок. Совпадение по FormId или EditorID всегда вернут true, не доходя до прочих проверок. KEYWORDS и FACTIONS имеют по одному флагу для has и hasNot, но проваленная проверка hasNot всё равно вернёт NONE, даже если есть совпадение по has.
@@ -124,12 +118,6 @@ public:
 	 * @return Строка с информацией о пресете.
 	 */
 	virtual std::string print() const = 0;
-	
-	/**
-	 * @brief Проверить, является ли пресет пресетом LooksMenu.
-	 * @return true, если пресет является пресетом LooksMenu.
-	 */
-	bool isLooksMenuPreset() const noexcept;
 
 protected:
 	/**
@@ -149,7 +137,20 @@ protected:
 	 */
 	std::string m_id{};
 
-	bool m_isLooksMenuPreset{ false }; ///< Флаг, указывающий, является ли пресет LooksMenu пресетом
+	/**
+	 * @brief Загружает условия из JSON-файла.
+	 */
+	void LoadConditions(const std::string& path);
+
+	/**
+	 * @brief Загружает условия из JSON-файла.
+	 */
+	void LoadConditions(const std::filesystem::path& path);
+
+	/**
+	 * @brief Загружает условия из JSON-объекта.
+	 */
+	void LoadConditions(boost::json::object& jsonConditionObject);
 
 	/**
 	 * @brief Утилитарный класс для защиты от двойной обработки одного актёра.

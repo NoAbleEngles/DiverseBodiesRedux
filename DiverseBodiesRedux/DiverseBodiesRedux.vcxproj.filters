@@ -1212,6 +1212,9 @@
     <ClInclude Include="Sources\Validate\ValidateTint.h">
       <Filter>DiverseBodies\Validate</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h">
+      <Filter>DiverseBodies\LooksMenu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1396,6 +1399,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Validate\ValidateTint.cpp">
       <Filter>DiverseBodies\Validate</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp">
+      <Filter>DiverseBodies\LooksMenu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

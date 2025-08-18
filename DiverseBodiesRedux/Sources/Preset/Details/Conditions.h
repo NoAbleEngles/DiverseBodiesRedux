@@ -155,6 +155,12 @@ public:
 	RE::Actor::Sex gender() const noexcept;
 
 	/**
+	 * @brief Установить условие пола актёра.
+	 * @param sex Пола актёра.
+	 */
+	void setGender(RE::Actor::Sex sex) noexcept;
+
+	/**
 	 * @brief Печать информации об условиях в строку.
 	 * @return Строка с информацией об условиях.
 	 */

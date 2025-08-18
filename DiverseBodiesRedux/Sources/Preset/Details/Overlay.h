@@ -2,6 +2,7 @@
 #include "F4SE/F4SE.h"
 #include "RE/Fallout.h"
 #include <boost/json.hpp>
+#include <functional>
 
 class Overlay
 {
@@ -41,4 +42,25 @@ private:
 	int m_priority{};                               ///< Приоритет наложения (более высокий перекрывает видимость более низкого)
 
 	bool loadFromJsonObject(const boost::json::object& jsonObject) noexcept; ///< Загружает данные из JSON-объекта
+
+	friend struct std::hash<Overlay>; ///< Дружественная функция для хеширования
 };
+
+namespace std {
+	template<>
+	struct hash<Overlay> {
+		std::size_t operator()(const Overlay& o) const noexcept {
+			std::size_t h = std::hash<std::string>{}(o.id());
+			h ^= std::hash<int>{}(o.m_priority) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_tint.r) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_tint.g) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_tint.b) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_tint.a) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_offsetUV.x) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_offsetUV.y) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_scaleUV.x) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			h ^= std::hash<float>{}(o.m_scaleUV.y) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			return h;
+		}
+	};
+}

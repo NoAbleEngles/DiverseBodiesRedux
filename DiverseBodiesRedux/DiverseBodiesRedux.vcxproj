@@ -476,6 +476,7 @@
     <ClInclude Include="Sources\LooksMenu\FixedString.h" />
     <ClInclude Include="Sources\LooksMenu\LooksMenuHooks.hpp" />
     <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
+    <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h" />
     <ClInclude Include="Sources\Patches\Patches.hpp" />
     <ClInclude Include="Sources\PCH.h" />
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
@@ -545,6 +546,7 @@
     <ClCompile Include="Sources\Hooks\Hooks.cpp" />
     <ClCompile Include="Sources\Ini\Ini.cpp" />
     <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp" />
+    <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp" />
     <ClCompile Include="Sources\main.cpp" />
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
