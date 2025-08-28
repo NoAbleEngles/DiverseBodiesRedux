@@ -1,7 +1,6 @@
 #include "Bodymorphs.h"
 #include "PugiXML/pugixml.hpp"
 #include "LooksMenu/LooksMenuInterfaces.h"
-#include "LooksMenu/ParseLooksMenuPreset.h"
 #include "Ini/ini.h"
 #include "globals.h"
 
@@ -78,6 +77,12 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		return false;
 	}
 
+	auto npc = actor->GetNPC();
+	if (!npc) {
+		logger::info("BodyMorphs Apply no NPC provided for actor: {:#x}", actor->formID);
+		return false;
+	}
+
 	static std::unordered_set<RE::Actor*> processingActors{};
 	if (processingActors.contains(actor)) {
 		return false; // Предотвращаем повторную обработку одного и того же актёра
@@ -111,16 +116,29 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		}
 		Interface->SetMorph(actor, actor->GetSex() == RE::Actor::Sex::Female, morphName, globals::kwd_diversed, morphValue);
 	}
+	
+	{
+		static std::unordered_map<uint32_t, std::mutex> npc_mutexes;
+		std::mutex& mtx = npc_mutexes[npc->formID];
+		std::lock_guard<std::mutex> lock(mtx);
 
+		if (npc->morphWeight != m_morphWeight) {
+			npc->morphWeight = m_morphWeight;
+		}
 
-	if (!actor->GetFullyLoaded3D()) {
-		processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
-		return true;
+		if (!actor->GetFullyLoaded3D()) {
+			processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
+			return true;
+		}
+
+		// Сброс 3D модели актера
+		using R3D = RE::RESET_3D_FLAGS;
+		if (actor->GetFullyLoaded3D()) {
+			actor->Reset3D(false, R3D::kModel | R3D::kSkeleton, true, R3D::kNone);
+		}
+
+		npc_mutexes.erase(npc->formID); // Удаляем мьютекс для этого NPC, чтобы избежать утечек памяти
 	}
-
-	// Сброс 3D модели актера
-	using R3D = RE::RESET_3D_FLAGS;
-	actor->Reset3D(false, R3D::kModel | R3D::kSkeleton, true, R3D::kNone);
 
 	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 	return true;
@@ -175,44 +193,32 @@ std::future<bool> BodymorphsPreset::isValidAsync() const noexcept {
 // Даже если файл не был загружен, обнуляет старые данные.
 bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 {
-	// виртуальный clear может вызвать проблемы, если он вызывается в деструкторе или конструкторе.
-	auto clear = [this]() {
-		m_bodytype = BodyType::NONE;
-		m_morphs.clear();
-		m_id.clear();
-		m_conditions.clear();
-	};
-
-	this->clear();  // Очищаем предыдущие данные, чтобы избежать конфликтов
+	BodymorphsPreset::clear();  // Очищаем предыдущие данные, чтобы избежать конфликтов
 	if (presetFile.ends_with("_conds.json")) {
 		// Если файл - это условия, то не загружаем его как пресет
 		return false;
 	}
 
 	auto path = std::filesystem::path(presetFile);
+	if (path.filename().string() == "conds.json") {
+		// Если файл - это условия, то не загружаем его как пресет
+		return false;
+	}
+
 	if (!std::filesystem::exists(path)) {
 		logger::error("BodyMorphs preset file does not exist: {}", presetFile);
 		return false;
 	}
 
-	auto gender = RE::Actor::Sex::None;
-
-	if (path.extension() == ".json") {
-		ParseLMPreset preset(path);
-		if (!preset.isLoaded() || preset.isEmpty()) {
-			logger::error("BodymorphsPreset::loadFromFile: Failed to load preset from file: {}", presetFile);
-			clear();  
-			return false;
-		}
-
+	auto getConditions = [&, this](ParseLMPreset* preset = nullptr) {
 		// Первым делом проверяем есть ли условия, т.к. если их нет, то и загружать дальше нет смысла
 		auto conditions_path = path.parent_path() / (path.stem().string() + "_conds.json");
 		if (std::filesystem::exists(conditions_path)) {
 			LoadConditions(conditions_path);
 		}
 
-		if (m_conditions.empty()) {
-			m_conditions = std::move(preset.conditions());  // Загружаем условия из основного файла, если нет отдельного файла с условиями
+		if (preset && m_conditions.empty()) {
+			m_conditions = std::move(preset->conditions());  // Загружаем условия из основного файла, если нет отдельного файла с условиями
 		}
 
 		if (m_conditions.empty()) {
@@ -220,11 +226,22 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 			if (std::filesystem::exists(conditions_path)) {
 				LoadConditions(conditions_path);
 			}
-		} 
+		}
+	};
+
+	if (path.extension() == ".json") {
+		ParseLMPreset preset(path);
+		if (!preset.isLoaded() || preset.isEmpty()) {
+			logger::error("BodymorphsPreset::loadFromFile: Failed to load preset from file: {}", presetFile);
+			BodymorphsPreset::clear();
+			return false;
+		}
+
+		getConditions(&preset); // Загружаем условия из пресета
 
 		if (m_conditions.empty()) {
 			logger::warn("BodymorphsPreset::loadFromFile: No conditions found in preset file: {}", presetFile);
-			clear();  // Очищаем данные, если пресет не валиден
+			BodymorphsPreset::clear();  // Очищаем данные, если пресет не валиден
 			return false;
 		}
 			
@@ -233,25 +250,15 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 		}
 
 		m_morphs = preset.bodyMorphs();
+		m_morphWeight = preset.morphWeight();
 		
 	} else if (path.extension() == ".xml") {
 
-		// Первым делом проверяем есть ли условия, т.к. если их нет, то и загружать дальше нет смысла
-		auto conditions_path = path.parent_path() / (path.stem().string() + "_conds.json");
-		if (std::filesystem::exists(conditions_path)) {
-			LoadConditions(conditions_path);
-		}
-
-		if (m_conditions.empty()) {
-			conditions_path = path.parent_path() / "conds.json"; // Пробуем загрузить условия из файла "conds.json" в той же папке
-			if (std::filesystem::exists(conditions_path)) {
-				LoadConditions(conditions_path);
-			}
-		}
+		getConditions(); // Загружаем условия из пресета
 
 		if (m_conditions.empty()) {
 			logger::warn("BodymorphsPreset::loadFromFile: No conditions found in preset file: {}", presetFile);
-			clear();  // Очищаем данные, если пресет не валиден
+			BodymorphsPreset::clear();  // Очищаем данные, если пресет не валиден
 			return false;
 		}
 
@@ -281,18 +288,17 @@ bool BodymorphsPreset::loadFromFile(const std::string& presetFile)
 
 	if (m_morphs.empty() || m_conditions.empty()) {
 		logger::warn("BodymorphsPreset::loadFromFile: Preset is empty or conditions are missing in file: {}", presetFile);
-		clear();  // Очищаем данные, если пресет не валиден
+		BodymorphsPreset::clear();  // Очищаем данные, если пресет не валиден
 		return false;
 	}
 
 	m_id = path.stem().string();  // Устанавливаем имя пресета из имени файла
-	logger::info("BodymorphsPreset::loadFromFile: {}. Loaded body type: {}", id(), static_cast<int>(m_bodytype));
+	logger::info("BodymorphsPreset::loadFromFile: {}", id());
 	return true;
 }
 
 // @breif Очищает объект
 void BodymorphsPreset::clear() noexcept {
-	m_bodytype = BodyType::NONE;
 	m_morphs.clear();
 	Preset::clear();
 }

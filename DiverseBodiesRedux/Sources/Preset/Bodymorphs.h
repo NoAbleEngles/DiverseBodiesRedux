@@ -81,14 +81,10 @@ public:
 private:
 
 	/**
-	 * @brief Тип тела, определяемый пресетом.
-	 */
-	BodyType m_bodytype;
-
-	/**
 	 * @brief Морфы тела (имя морфа -> значение).
 	 */
 	std::unordered_map<std::string, float> m_morphs;
+	RE::NiPoint3 m_morphWeight{};
 
 	/// @copydoc Preset::loadFromFile
 	bool loadFromFile(const std::string& presetFile) override;

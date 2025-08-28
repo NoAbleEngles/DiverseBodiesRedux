@@ -1215,6 +1215,15 @@
     <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h">
       <Filter>DiverseBodies\LooksMenu</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTriShape.h">
+      <Filter>CommonLib\RE\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFaceGenAnimationData.h">
+      <Filter>CommonLib\RE\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFaceGenNiNode.h">
+      <Filter>CommonLib\RE\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1402,6 +1411,15 @@
     </ClCompile>
     <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp">
       <Filter>DiverseBodies\LooksMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSTriShape.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSFaceGenAnimationData.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSFaceGenNiNode.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

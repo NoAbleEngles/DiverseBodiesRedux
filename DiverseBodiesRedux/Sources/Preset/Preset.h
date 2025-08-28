@@ -12,6 +12,7 @@
 #include <future>
 #include "Details/PresetEnums.h"
 #include "LooksMenu/LooksMenuInterfaces.h"
+#include "LooksMenu/ParseLooksMenuPreset.h"
 
 class BodymorphsPreset;
 class BodyhairsPreset;

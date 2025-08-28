@@ -1,5 +1,6 @@
 #include "Overlay.h"
 #include "LooksMenu/LooksMenuInterfaces.h"
+#include "LooksMenu/ParseLooksMenuPreset.h"
 
 Overlay::Overlay(const boost::json::object& jsonObject) {
 	loadFromJsonObject(jsonObject);
@@ -22,12 +23,26 @@ bool Overlay::operator<(const Overlay& other) const noexcept {
 	}
 }
 
+constexpr float EPSILON = 1e-5f;
+
 inline bool operator==(const RE::NiColorA& lhs, const RE::NiColorA& rhs) noexcept {
-	return lhs.r == rhs.r && lhs.g == rhs.g && lhs.b == rhs.b && lhs.a == rhs.a;
+	auto float_eq = [](float a, float b)->bool { return std::fabs(a - b) < EPSILON; };
+
+	auto point2_eq = [float_eq](const RE::NiColorA& a, const RE::NiColorA& b)->bool {
+		return float_eq(a.r, b.r) && float_eq(a.g, b.g) && float_eq(a.b, b.b);
+	};
+
+	return  point2_eq(lhs, rhs);
 }
 
 inline bool operator==(const RE::NiPoint2& lhs, const RE::NiPoint2& rhs) noexcept {
-	return lhs.x == rhs.x && lhs.y == rhs.y;
+	auto float_eq = [](float a, float b)->bool { return std::fabs(a - b) < EPSILON; };
+
+	auto point2_eq = [float_eq](const RE::NiPoint2& a, const RE::NiPoint2& b)->bool {
+		return float_eq(a.x, b.x) && float_eq(a.y, b.y);
+		};
+
+	return point2_eq(lhs,rhs);
 }
 
 bool Overlay::operator==(const Overlay& other) const noexcept {
@@ -65,10 +80,10 @@ void Overlay::clear() noexcept {
 bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 
 	if (!this->empty()) {
-		this->clear();
+		Overlay::clear();
 	}
 
-	auto it = obj.find("id");
+	auto it = find_ci(obj, "template");
 
 	if (it != obj.end()) {
 		auto& value = it->value();
@@ -82,7 +97,7 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 		return false; // ID is required
 	}
 
-	it = obj.find("tint");
+	it = find_ci(obj, "tint");
 	bool success = false;
 
 	//"tint": [ 0.0, 0.0, 0.0, 1.0 ]
@@ -120,7 +135,7 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 		m_tint = RE::NiColorA{ 0.0f, 0.0f, 0.0f, 1.0f }; // Default tint value
 	}
 	
-	it = obj.find("offsetUV");
+	it = find_ci(obj, "offsetUV");
 	success = false;
 
 	//"offsetUV": [ 0.0, 0.0 ]
@@ -154,7 +169,7 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 		m_offsetUV = RE::NiPoint2{}; // Default offset value
 	}
 
-	it = obj.find("scaleUV");
+	it = find_ci(obj, "scaleUV");
 	success = false;
 
 	//"scaleUV": [ 1.0, 1.0 ]
@@ -188,7 +203,7 @@ bool Overlay::loadFromJsonObject(const boost::json::object& obj) noexcept {
 		m_scaleUV = RE::NiPoint2{ 1.0f, 1.0f }; // Default scale value
 	}
 
-	it = obj.find("priority");
+	it = find_ci(obj, "priority");
 	success = false;
 	//"priority": 0
 

@@ -187,6 +187,8 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSBTreeFile.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSContainer.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSExtraData.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFaceGenAnimationData.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFaceGenNiNode.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFadeNode.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFixedString.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSGraphics.h" />
@@ -287,6 +289,7 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTOptional.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTPoint.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTPointerAndFlags.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTriShape.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTSingleton.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTSmallIndexScatterTable.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSTSmartPointer.h" />
@@ -511,6 +514,8 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\Actor.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSInventoryItem.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSExtraData.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSFaceGenAnimationData.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSFaceGenNiNode.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResourceNiBinaryStream.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSResource\Stream.cpp" />
@@ -527,6 +532,7 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\StructTypeInfo.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\TypeInfo.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSScript\Variable.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSTriShape.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\Calendar.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\CRC.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\FormComponents.cpp" />
