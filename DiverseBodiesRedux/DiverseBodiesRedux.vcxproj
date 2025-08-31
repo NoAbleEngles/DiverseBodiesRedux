@@ -167,7 +167,7 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSBaseAliases.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSBodyPartDefs.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterMorph.h" />
-    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterTint.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSChargenUtils.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCreatedObjectManager.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSDefaultObjectManager.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSDynamicPersistenceManager.h" />
@@ -512,6 +512,8 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\F4SE\Trampoline.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\REL\Relocation.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\Actor.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSCharacterTint.cpp" />
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSChargenUtils.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSInventoryItem.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSExtraData.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSFaceGenAnimationData.cpp" />

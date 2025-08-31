@@ -228,9 +228,6 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterMorph.h">
       <Filter>CommonLib\RE\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterTint.h">
-      <Filter>CommonLib\RE\Bethesda</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCreatedObjectManager.h">
       <Filter>CommonLib\RE\Bethesda</Filter>
     </ClInclude>
@@ -1224,6 +1221,9 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BSFaceGenNiNode.h">
       <Filter>CommonLib\RE\Bethesda</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSChargenUtils.h">
+      <Filter>CommonLib\RE\Bethesda</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1419,6 +1419,12 @@
       <Filter>CommonLib\SRC\RE\Bethesda</Filter>
     </ClCompile>
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BSFaceGenNiNode.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSCharacterTint.cpp">
+      <Filter>CommonLib\SRC\RE\Bethesda</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSChargenUtils.cpp">
       <Filter>CommonLib\SRC\RE\Bethesda</Filter>
     </ClCompile>
   </ItemGroup>
