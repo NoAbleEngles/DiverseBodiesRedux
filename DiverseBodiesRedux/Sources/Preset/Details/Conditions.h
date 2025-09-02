@@ -184,6 +184,9 @@ private:
 	std::unordered_set<RE::TESFaction*> m_inFaction{};
 	std::unordered_set<RE::TESFaction*> m_notInFaction{};
 
+	//только для NPCPreset
+	bool m_onlyTints{};
+
 	/**
      * @brief Загрузить условия из файла.
      * @param path Путь к JSON-файлу.

@@ -1,5 +1,6 @@
 #include "PresetsManager.h"
 #include "Ini/ini.h"
+#include "MainMenuHandler/MainMenuHandler.h"
 #include <sstream>
 
 
@@ -13,6 +14,9 @@ PresetsManager::PresetsManager() {
     loadPresets<BodyTattoosPreset>("PATH/sBodyTattoosFolders"); 
     loadPresets<NailsPreset>("PATH/sNailsFolders");
 	loadPresets<NPCPreset>("PATH/sNPCPresetsFolders");
+    MenuLoaderListener::get().AddFunction("PresetsManager::clearNPCMap", []() {
+        NPCPreset::clearNpcMap();
+    });
 }
 
 PresetsManager& PresetsManager::get() {

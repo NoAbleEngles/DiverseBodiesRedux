@@ -133,7 +133,7 @@
       <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
       <ForcedIncludeFiles>cstdint;cstddef</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -167,6 +167,7 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSBaseAliases.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSBodyPartDefs.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterMorph.h" />
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterTint.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSChargenUtils.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCreatedObjectManager.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSDefaultObjectManager.h" />
@@ -480,6 +481,7 @@
     <ClInclude Include="Sources\LooksMenu\LooksMenuHooks.hpp" />
     <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
     <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h" />
+    <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h" />
     <ClInclude Include="Sources\Patches\Patches.hpp" />
     <ClInclude Include="Sources\PCH.h" />
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
@@ -488,13 +490,13 @@
     <ClInclude Include="Sources\Preset\Details\Tint.h" />
     <ClInclude Include="Sources\Preset\Nails.h" />
     <ClInclude Include="Sources\Preset\NPCPreset.h" />
+    <ClInclude Include="Sources\Preset\NPCPresetHelpers.h" />
     <ClInclude Include="Sources\Preset\OverlayPreset.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
     <ClInclude Include="Sources\Preset\Details\PresetEnums.h" />
     <ClInclude Include="Sources\Preset\Preset.h" />
     <ClInclude Include="Sources\Preset\BodyTattoos.h" />
-    <ClInclude Include="Sources\Preset\TintPreset.h" />
     <ClInclude Include="Sources\PugiXML\pugiconfig.hpp" />
     <ClInclude Include="Sources\PugiXML\pugixml.hpp" />
     <ClInclude Include="Sources\Utils\RandomGenerator.hpp" />
@@ -556,6 +558,7 @@
     <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp" />
     <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp" />
     <ClCompile Include="Sources\main.cpp" />
+    <ClCompile Include="Sources\MainMenuHandler\MainMenuHandler.cpp" />
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
@@ -597,6 +600,7 @@
     <None Include="Sources\DiverseBodiesMenu\src\view\ScrollableMenu.as" />
     <None Include="Sources\DiverseBodiesMenu\src\view\ThemeEvent.as" />
     <None Include="Sources\DiverseBodiesMenu\src\view\ThemeManager.as" />
+    <None Include="Sources\Preset\NPCPresetHelpers.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

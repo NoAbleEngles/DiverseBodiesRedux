@@ -166,6 +166,9 @@
     <Filter Include="DiverseBodies\Validate">
       <UniqueIdentifier>{b0ad3710-59d0-4e70-ba9e-420cf5e95c38}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DiverseBodies\MainMenuHandler">
+      <UniqueIdentifier>{11260cd9-aa75-406c-b79b-04289c4ce9b9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\F4SE\API.h">
@@ -1194,9 +1197,6 @@
     <ClInclude Include="Sources\Preset\Nails.h">
       <Filter>DiverseBodies\Preset\OverlayPresets</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Preset\TintPreset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Preset\NPCPreset.h">
       <Filter>DiverseBodies\Preset</Filter>
     </ClInclude>
@@ -1223,6 +1223,15 @@
     </ClInclude>
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSChargenUtils.h">
       <Filter>CommonLib\RE\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterTint.h">
+      <Filter>CommonLib\RE\Bethesda</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\NPCPresetHelpers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h">
+      <Filter>DiverseBodies\MainMenuHandler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1427,6 +1436,9 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Bethesda\BGSChargenUtils.cpp">
       <Filter>CommonLib\SRC\RE\Bethesda</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\MainMenuHandler\MainMenuHandler.cpp">
+      <Filter>DiverseBodies\MainMenuHandler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib">
@@ -1496,6 +1508,9 @@
     </None>
     <None Include="Sources\DiverseBodiesMenu\bin\dbMenu.swf">
       <Filter>DiverseBodies\AS3\bin</Filter>
+    </None>
+    <None Include="Sources\Preset\NPCPresetHelpers.inl">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>
