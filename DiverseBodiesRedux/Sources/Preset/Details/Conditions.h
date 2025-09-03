@@ -155,6 +155,12 @@ public:
 	RE::Actor::Sex gender() const noexcept;
 
 	/**
+	 * @brief Параметр используется только для NPCPreset: если true, то из всех полей пресета будут использоваться только тинты, остальные игнорируются.
+	 * @return true, если нужно применять только тинты.
+	 */
+	bool onlyTints() const noexcept;
+
+	/**
 	 * @brief Установить условие пола актёра.
 	 * @param sex Пола актёра.
 	 */

@@ -174,7 +174,7 @@ namespace ini
 	inline std::optional<T> map::get(const std::string& key, const std::string& section) const noexcept
 	{
 		if (contains(key, section)) {
-			std::string value_str = std::string(m_inimap[section][key]);  // Получаем значение как строку
+			std::string value_str = std::string(m_inimap.at(section).at(key));  // Получаем значение как строку
 			std::istringstream iss(value_str);                          // Создаем поток для преобразования
 			T value;
 			if (!(iss >> value)) {    // Пробуем считать значение
