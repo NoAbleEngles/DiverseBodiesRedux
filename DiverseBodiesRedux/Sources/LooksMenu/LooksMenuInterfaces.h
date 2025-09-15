@@ -23,6 +23,21 @@ namespace logger = F4SE::log;
 class OverlayInterface;
 typedef uint32_t UniqueID;
 
+class F4EEUpdateOverlays : public F4SE::ITaskDelegate
+{
+public:
+	F4EEUpdateOverlays(RE::TESForm* form);
+	virtual ~F4EEUpdateOverlays();
+	virtual void Run() override;
+	uint32_t formID();
+
+	// Создание копии оригинального объекта через функцию из f4ee.dll
+	static F4EEUpdateOverlays* CreateCopy(F4EEUpdateOverlays* src);
+
+protected:
+	uint32_t m_formId;
+};
+
 namespace looksMenuHooks {
 	bool HookedRemoveOverlay(OverlayInterface* overlayInterface, RE::Actor* actor, bool isFemale, UniqueID uid);
 };
@@ -68,7 +83,9 @@ public:
 	virtual bool UpdateMorphs(RE::Actor* actor);
 };
 
-class OverlayInterface : public RE::BSTEventSink<RE::TESObjectLoadedEvent>, public RE::BSTEventSink<RE::TESLoadGameEvent>
+class OverlayInterface : 
+	public RE::BSTEventSink<RE::TESObjectLoadedEvent>, 
+	public RE::BSTEventSink<RE::TESLoadGameEvent>
 {
 public:
 	OverlayInterface() :
@@ -346,8 +363,9 @@ public:
 	ActorUpdateManager();
 	virtual ~ActorUpdateManager();
 
-	virtual RE::BSEventNotifyControl ReceiveEvent(RE::TESObjectLoadedEvent* evn, RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_source);
-	virtual RE::BSEventNotifyControl ReceiveEvent(RE::TESInitScriptEvent* evn, RE::BSTEventSource<RE::TESInitScriptEvent>* a_source);
+	RE::BSEventNotifyControl ProcessEvent(const RE::TESObjectLoadedEvent& evn, RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_source) override;
+	RE::BSEventNotifyControl ProcessEvent(const RE::TESLoadGameEvent& evn, RE::BSTEventSource<RE::TESLoadGameEvent>* a_source) override;
+	RE::BSEventNotifyControl ProcessEvent(const RE::TESInitScriptEvent& evn, RE::BSTEventSource<RE::TESInitScriptEvent>* a_source) override;
 
 	virtual void Flush();
 	virtual void PushUpdate(RE::Actor* actor);
@@ -362,122 +380,6 @@ public:
 	std::unordered_set<uint64_t> m_pendingActors;   // Stores the pending actors while loading (Populated while loading, erased during load, remaining actors get new morphs, cleared after)
 	std::unordered_set<uint64_t> m_pendingUpdates;  // Stores the actors for update
 };
-
-//class CharGenTintObject
-//{
-//public:
-//	CharGenTintObject(uint32_t id) : categoryId(id), modified(0) {}
-//
-//	virtual bool Apply(const RE::TESRace* race, uint8_t gender);
-//	virtual bool Parse(const char&/*Json::Value& entry*/);
-//
-//	virtual RE::CharacterCreation::TintData* CreateCategory();
-//	virtual void SetCategory(RE::CharacterCreation::TintData* category);
-//
-//	virtual RE::BGSCharacterTint::Template::Entry* Create() { return nullptr; }
-//	virtual void Set(RE::BGSCharacterTint::Template::Entry* entry) {}
-//
-//	static void ForEachGender(const RE::TESRace* race, uint8_t gender, std::function<void(RE::BSTArray<RE::CharacterCreation::TintData*>*, uint8_t)> func);
-//	static RE::CharacterCreation::TintData* GetCategoryByID(const RE::BSTArray<RE::CharacterCreation::TintData*>* data, uint32_t id);
-//	static RE::CharacterCreation::TintData* GetCategoryByName(const RE::BSTArray<RE::CharacterCreation::TintData*>* data, const char* name);
-//	static RE::BGSCharacterTint::Template::Entry* GetTemplateByID(const RE::BSTArray<RE::BGSCharacterTint::Template::Entry*>* data, uint32_t id);
-//
-//	static uint32_t ParseSlot(const std::string& slotName);
-//	static std::string WriteSlot(uint32_t blendOp);
-//
-//	static uint32_t ParseBlendOp(const std::string& blendName);
-//	static std::string WriteBlendOp(uint32_t blendOp);
-//
-//	static uint32_t ParseFlags(const Json::Value& value);
-//	static void WriteFlags(uint32_t flags, Json::Value& value);
-//
-//	enum ModifiedFlag
-//	{
-//		kModified_Name = (1 << 0),
-//		kModified_Slot = (1 << 1),
-//		kModified_Flags = (1 << 2),
-//		kModified_BlendOp = (1 << 3),
-//		kModified_Texture = (1 << 4),
-//		kModified_Diffuse = (1 << 5),
-//		kModified_Normal = (1 << 6),
-//		kModified_Specular = (1 << 7),
-//		kModified_Default = (1 << 8),
-//	};
-//
-//	bool IsFlagSet(uint32_t flag) { return (modified & flag) == flag; }
-//
-//	uint32_t modified;
-//	std::string name;
-//	uint32_t categoryId;
-//	std::string fixedCategory;
-//};
-//
-//class CharGenTintBase : public CharGenTintObject
-//{
-//public:
-//	CharGenTintBase(uint32_t id) : CharGenTintObject(0), templateId(id), slot(0), flags(0) {}
-//	virtual ~CharGenTintBase() {}
-//
-//	virtual RE::CharacterCreation::TintData* CreateCategory() { return nullptr; }
-//	virtual void SetCategory(RE::CharacterCreation::TintData* category) {}
-//
-//	virtual void Set(RE::BGSCharacterTint::Template::Entry* entry) {};
-//
-//	virtual bool Apply(const RE::TESRace* race, uint8_t gender) { return false; };
-//	//virtual bool Parse(const Json::Value& entry);
-//	virtual bool Parse(int& entry) { return false; };
-//
-//	uint32_t templateId;
-//	uint32_t slot;
-//	uint32_t flags;
-//};
-//
-//class CharGenTintMask : public CharGenTintBase
-//{
-//public:
-//	CharGenTintMask(uint32_t id) : CharGenTintBase(id), blendOp(0) {}
-//	virtual ~CharGenTintMask() {}
-//
-//	//virtual bool Parse(const Json::Value& entry);
-//	virtual bool Parse(const int& entry) { return false; };
-//	virtual RE::BGSCharacterTint::Template::Entry* Create() { return nullptr; };
-//	virtual void Set(RE::BGSCharacterTint::Template::Entry* entry) {};
-//
-//	std::string		texture;
-//	uint32_t		blendOp;
-//};
-//
-//class CharGenTintPalette : public CharGenTintBase
-//{
-//public:
-//	CharGenTintPalette(uint32_t id) : CharGenTintBase(id) {}
-//	virtual ~CharGenTintPalette() {}
-//
-//	//virtual bool Parse(const Json::Value& entry);
-//	virtual bool Parse(const int& entry) { return false; };
-//	virtual RE::BGSCharacterTint::Template::Entry* Create() { return nullptr; };
-//	virtual void Set(RE::BGSCharacterTint::Template::Entry* entry) {};
-//
-//	std::string		texture;
-//	std::vector<RE::BGSCharacterTint::Template::Palette::ColorData> colors;
-//};
-//
-//class CharGenTintTextureSet : public CharGenTintBase
-//{
-//public:
-//	CharGenTintTextureSet(uint32_t id) : CharGenTintBase(id), blendOp(0), defaultValue(0.0f) {}
-//	virtual ~CharGenTintTextureSet() {}
-//
-//	virtual bool Parse(const Json::Value& entry);
-//	virtual RE::BGSCharacterTint::Template::Entry* Create();
-//	virtual void Set(RE::BGSCharacterTint::Template::Entry* entry);
-//
-//	std::string diffuse;
-//	std::string normal;
-//	std::string specular;
-//	uint32_t	blendOp;
-//	float	defaultValue;
-//};
 
 RE::BSEventNotifyControl HookedReceiveEventObjectLoaded(ActorUpdateManager* manager, RE::TESObjectLoadedEvent* evn, void* dispatcher);
 RE::BSEventNotifyControl HookedReceiveEventInitScript(ActorUpdateManager* manager, RE::TESInitScriptEvent* evn, void* dispatcher);
@@ -517,27 +419,6 @@ RETURN_PTR:
 	}
 
 private:
-	// Статическая функция для получения смещения
-	inline static uint32_t get_offset()
-	{
-		static_assert(std::is_same<T, BodyMorphInterface>::value || std::is_same<T, OverlayInterface>::value || std::is_same<T, SkinInterface>::value || std::is_same<T, CharGenInterface>::value || std::is_same<T, ActorUpdateManager>::value,
-			"Template type must be either BodyMorphInterface/OverlayInterface/SkinInterface/CharGenInterface/ActorUpdateManager.");
-
-		if constexpr (std::is_same<T, BodyMorphInterface>::value) {
-			return offset_g_bodyMorphInterface;
-		} else if constexpr (std::is_same<T, OverlayInterface>::value) {
-			return offset_g_OverlayInterface;
-		} else if constexpr (std::is_same<T, SkinInterface>::value) {
-			return offset_g_SkinInterface;
-		} else if constexpr (std::is_same<T, CharGenInterface>::value) {
-			return offset_g_CharGenInterface;
-		} else if constexpr (std::is_same<T, ActorUpdateManager>::value) {
-			return offset_g_ActorUpdateManager;
-		}
-
-		return 0;  // Не должно происходить, но добавлено для избежания предупреждений компилятора
-	}
-
 	inline static void InitializeInterfaces()
 	{
 		if (isInitialized_)

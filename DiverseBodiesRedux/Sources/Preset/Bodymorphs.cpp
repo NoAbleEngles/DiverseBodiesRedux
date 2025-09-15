@@ -133,7 +133,7 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 
 		// Сброс 3D модели актера
 		using R3D = RE::RESET_3D_FLAGS;
-		if (actor->GetFullyLoaded3D()) {
+		if (reset3d && actor->GetFullyLoaded3D()) {
 			actor->Reset3D(false, R3D::kModel | R3D::kSkeleton, true, R3D::kNone);
 		}
 

@@ -470,6 +470,7 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\VTABLE_IDs.h" />
     <ClInclude Include="Sources\ActorsManager\ActorsManager.h" />
     <ClInclude Include="Sources\ActorsManager\Details\ActorsPresetHashEquals.hpp" />
+    <ClInclude Include="Sources\ActorsManager\Details\ExcludedActors.h" />
     <ClInclude Include="Sources\ActorsManager\Details\PresetsGenerator.hpp" />
     <ClInclude Include="Sources\ActorsManager\Details\ThreadSafeWaitingActors.hpp" />
     <ClInclude Include="Sources\detourxs\detourxs.h" />
@@ -551,6 +552,7 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiRect.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Scaleform\GFx\GFx_Player.cpp" />
     <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp" />
+    <ClCompile Include="Sources\ActorsManager\Details\ExcludedActors.cpp" />
     <ClCompile Include="Sources\detourxs\detourxs.cpp" />
     <ClCompile Include="Sources\DirectApply\DirectApply.cpp" />
     <ClCompile Include="Sources\Hooks\Hooks.cpp" />

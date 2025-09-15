@@ -1233,6 +1233,9 @@
     <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h">
       <Filter>DiverseBodies\MainMenuHandler</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\ActorsManager\Details\ExcludedActors.h">
+      <Filter>DiverseBodies\ActorsManager\Details</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1438,6 +1441,9 @@
     </ClCompile>
     <ClCompile Include="Sources\MainMenuHandler\MainMenuHandler.cpp">
       <Filter>DiverseBodies\MainMenuHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ActorsManager\Details\ExcludedActors.cpp">
+      <Filter>DiverseBodies\ActorsManager\Details</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

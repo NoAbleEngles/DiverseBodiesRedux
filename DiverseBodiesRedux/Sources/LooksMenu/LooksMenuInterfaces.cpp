@@ -4,6 +4,25 @@
 #pragma warning(push)
 #pragma warning(disable: 4100)
 
+extern uintptr_t GetModule(const std::string& pluginName);
+
+F4EEUpdateOverlays::F4EEUpdateOverlays(RE::TESForm* form) { m_formId = form ? form->formID : 0; };
+F4EEUpdateOverlays::~F4EEUpdateOverlays() {};
+void F4EEUpdateOverlays::Run() {};
+uint32_t F4EEUpdateOverlays::formID() { return m_formId; };
+F4EEUpdateOverlays* F4EEUpdateOverlays::CreateCopy(F4EEUpdateOverlays* src)
+{
+	using CopyCtorFunc = F4EEUpdateOverlays * (*)(F4EEUpdateOverlays*);
+	auto f4eePlugin = GetModule("f4ee.dll");
+	if (!f4eePlugin) {
+		logger::error("F4EEUpdateOverlays::CreateCopy: f4ee.dll module not found!");
+		return nullptr;
+	}
+	uintptr_t kCopyCtorAddr = f4eePlugin + 0x4BA50; // RVA из f4ee.dll
+	auto func = reinterpret_cast<CopyCtorFunc>(kCopyCtorAddr);
+	return func(src);
+}
+
 void BodyMorphInterface::Save(const F4SE::SerializationInterface*, uint32_t) {}
 bool BodyMorphInterface::Load(const F4SE::SerializationInterface*, bool, uint32_t, const std::unordered_map<uint32_t, std::string>&) { return false; }
 void BodyMorphInterface::Revert() {}
@@ -173,8 +192,9 @@ ActorUpdateManager::ActorUpdateManager() :
 	m_loading(false){}
 ActorUpdateManager::~ActorUpdateManager() {}
 
-RE::BSEventNotifyControl ActorUpdateManager::ReceiveEvent(RE::TESObjectLoadedEvent* evn, RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_source) { return RE::BSEventNotifyControl{}; }
-RE::BSEventNotifyControl ActorUpdateManager::ReceiveEvent(RE::TESInitScriptEvent* evn, RE::BSTEventSource<RE::TESInitScriptEvent>* a_source) { return RE::BSEventNotifyControl{}; }
+RE::BSEventNotifyControl ActorUpdateManager::ProcessEvent(const RE::TESObjectLoadedEvent& evn, RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_source) { return RE::BSEventNotifyControl::kContinue; };
+RE::BSEventNotifyControl ActorUpdateManager::ProcessEvent(const RE::TESLoadGameEvent& evn, RE::BSTEventSource<RE::TESLoadGameEvent>* a_source) { return RE::BSEventNotifyControl::kContinue; };
+RE::BSEventNotifyControl ActorUpdateManager::ProcessEvent(const RE::TESInitScriptEvent& evn, RE::BSTEventSource<RE::TESInitScriptEvent>* a_source) { return RE::BSEventNotifyControl::kContinue; };
 
 void ActorUpdateManager::Flush() {}
 void ActorUpdateManager::PushUpdate(RE::Actor* actor) {}
