@@ -133,10 +133,10 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 
 		// Вызывает T-позу пока отключу.
 		// Сброс 3D модели актера
-		/*using R3D = RE::RESET_3D_FLAGS;
+		using R3D = RE::RESET_3D_FLAGS;
 		if (reset3d && actor->GetFullyLoaded3D()) {
 			actor->Reset3D(false, R3D::kModel | R3D::kSkeleton, true, R3D::kNone);
-		}*/
+		}
 
 		npc_mutexes.erase(npc->formID); // Удаляем мьютекс для этого NPC, чтобы избежать утечек памяти
 	}
