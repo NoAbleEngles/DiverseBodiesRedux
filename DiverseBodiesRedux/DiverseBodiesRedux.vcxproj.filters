@@ -1227,14 +1227,14 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Bethesda\BGSCharacterTint.h">
       <Filter>CommonLib\RE\Bethesda</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Preset\NPCPresetHelpers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h">
       <Filter>DiverseBodies\MainMenuHandler</Filter>
     </ClInclude>
     <ClInclude Include="Sources\ActorsManager\Details\ExcludedActors.h">
       <Filter>DiverseBodies\ActorsManager\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Patches\x-cell_patch.h">
+      <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1445,6 +1445,9 @@
     <ClCompile Include="Sources\ActorsManager\Details\ExcludedActors.cpp">
       <Filter>DiverseBodies\ActorsManager\Details</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Patches\x-cell_patch.cpp">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib">
@@ -1514,9 +1517,6 @@
     </None>
     <None Include="Sources\DiverseBodiesMenu\bin\dbMenu.swf">
       <Filter>DiverseBodies\AS3\bin</Filter>
-    </None>
-    <None Include="Sources\Preset\NPCPresetHelpers.inl">
-      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
 </Project>

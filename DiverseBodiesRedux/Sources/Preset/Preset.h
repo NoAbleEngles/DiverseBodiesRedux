@@ -19,6 +19,7 @@ class BodyhairsPreset;
 class BodyTattoosPreset;
 class NailsPreset;
 class NPCPreset;
+class DirectApply;
 
 /**
  * @brief Абстрактный базовый класс для всех пресетов.

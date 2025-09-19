@@ -131,7 +131,7 @@
       <DisableSpecificWarnings>4200;4201;4324;4251;4275;4996;4100</DisableSpecificWarnings>
       <UseFullPaths>false</UseFullPaths>
       <AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
-      <ForcedIncludeFiles>cstdint;cstddef</ForcedIncludeFiles>
+      <ForcedIncludeFiles>cstdint;cstddef;C:/cpp/CommonLibF4/build/CommonLibF4/CMakeFiles/CommonLibF4.dir/Release/cmake_pch.hxx</ForcedIncludeFiles>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <Optimization>MaxSpeed</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -484,6 +484,7 @@
     <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h" />
     <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h" />
     <ClInclude Include="Sources\Patches\Patches.hpp" />
+    <ClInclude Include="Sources\Patches\x-cell_patch.h" />
     <ClInclude Include="Sources\PCH.h" />
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Bodyhairs.h" />
@@ -491,7 +492,6 @@
     <ClInclude Include="Sources\Preset\Details\Tint.h" />
     <ClInclude Include="Sources\Preset\Nails.h" />
     <ClInclude Include="Sources\Preset\NPCPreset.h" />
-    <ClInclude Include="Sources\Preset\NPCPresetHelpers.h" />
     <ClInclude Include="Sources\Preset\OverlayPreset.h" />
     <ClInclude Include="Sources\Preset\Details\Conditions.h" />
     <ClInclude Include="Sources\Preset\Details\Overlay.h" />
@@ -553,7 +553,9 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Scaleform\GFx\GFx_Player.cpp" />
     <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp" />
     <ClCompile Include="Sources\ActorsManager\Details\ExcludedActors.cpp" />
-    <ClCompile Include="Sources\detourxs\detourxs.cpp" />
+    <ClCompile Include="Sources\detourxs\detourxs.cpp">
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cstdint;cstddef;</ForcedIncludeFiles>
+    </ClCompile>
     <ClCompile Include="Sources\DirectApply\DirectApply.cpp" />
     <ClCompile Include="Sources\Hooks\Hooks.cpp" />
     <ClCompile Include="Sources\Ini\Ini.cpp" />
@@ -561,6 +563,7 @@
     <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp" />
     <ClCompile Include="Sources\main.cpp" />
     <ClCompile Include="Sources\MainMenuHandler\MainMenuHandler.cpp" />
+    <ClCompile Include="Sources\Patches\x-cell_patch.cpp" />
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
     <ClCompile Include="Sources\Preset\Bodymorphs.cpp" />
@@ -602,7 +605,6 @@
     <None Include="Sources\DiverseBodiesMenu\src\view\ScrollableMenu.as" />
     <None Include="Sources\DiverseBodiesMenu\src\view\ThemeEvent.as" />
     <None Include="Sources\DiverseBodiesMenu\src\view\ThemeManager.as" />
-    <None Include="Sources\Preset\NPCPresetHelpers.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
