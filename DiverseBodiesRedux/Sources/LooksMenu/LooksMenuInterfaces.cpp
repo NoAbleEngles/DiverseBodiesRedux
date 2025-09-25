@@ -10,18 +10,37 @@ F4EEUpdateOverlays::F4EEUpdateOverlays(RE::TESForm* form) { m_formId = form ? fo
 F4EEUpdateOverlays::~F4EEUpdateOverlays() {};
 void F4EEUpdateOverlays::Run() {};
 uint32_t F4EEUpdateOverlays::formID() { return m_formId; };
+
 F4EEUpdateOverlays* F4EEUpdateOverlays::CreateCopy(F4EEUpdateOverlays* src)
 {
-	using CopyCtorFunc = F4EEUpdateOverlays * (*)(F4EEUpdateOverlays*);
 	auto f4eePlugin = GetModule("f4ee.dll");
 	if (!f4eePlugin) {
 		logger::error("F4EEUpdateOverlays::CreateCopy: f4ee.dll module not found!");
 		return nullptr;
 	}
-	uintptr_t kCopyCtorAddr = f4eePlugin + 0x4BA50; // RVA из f4ee.dll
-	auto func = reinterpret_cast<CopyCtorFunc>(kCopyCtorAddr);
-	return func(src);
+
+	// Адрес vftable F4EEUpdateOverlays из f4ee.dll
+	uintptr_t kVtableAddr = f4eePlugin + 0xC1538;
+
+	// Выделяем память через стандартный operator new (CRT)
+	void* mem = ::operator new(sizeof(F4EEUpdateOverlays));
+	if (!mem)
+		return nullptr;
+
+	// Прописываем vtable из f4ee.dll (ВАЖНО!)
+	*(uintptr_t*)mem = kVtableAddr;
+
+	// Копируем полезные поля с учетом смещения (vtable на 0, m_formId на +8)
+	// Можно memcpy кроме vtable, если объект простой:
+	memcpy((char*)mem + sizeof(uintptr_t), (char*)src + sizeof(uintptr_t), sizeof(F4EEUpdateOverlays) - sizeof(uintptr_t));
+
+	return reinterpret_cast<F4EEUpdateOverlays*>(mem);
 }
+
+F4EESkinUpdate::F4EESkinUpdate(RE::TESForm* form, bool doFace) { m_formId = form ? form->formID : 0; m_doFace = doFace; };
+F4EESkinUpdate::~F4EESkinUpdate() {};
+void F4EESkinUpdate::Run() {};
+inline uint32_t F4EESkinUpdate::formID() { return m_formId; };
 
 void BodyMorphInterface::Save(const F4SE::SerializationInterface*, uint32_t) {}
 bool BodyMorphInterface::Load(const F4SE::SerializationInterface*, bool, uint32_t, const std::unordered_map<uint32_t, std::string>&) { return false; }
@@ -52,6 +71,46 @@ void BodyMorphInterface::GetMorphableShapes(RE::NiAVObject* node, std::vector<st
 bool BodyMorphInterface::ApplyMorphsToShapes(RE::Actor* actor, RE::NiAVObject* slotNode) { return false; }
 bool BodyMorphInterface::ApplyMorphsToShape(RE::Actor* actor, const std::shared_ptr<uint8_t>& morphableShape) { return false; }
 bool BodyMorphInterface::UpdateMorphs(RE::Actor* actor) { return false; }
+
+bool VisitObjects(RE::NiAVObject* parent, std::function<bool(RE::NiAVObject*)> functor)
+{
+	if (functor(parent))
+		return true;
+
+	RE::NiPointer<RE::NiNode> node(parent->IsNode());
+	if (node) {
+		for (uint32_t i = 0; i < node->children.size(); i++) {
+			RE::NiPointer<RE::NiAVObject> object(node->children[i]);
+			if (object) {
+				if (VisitObjects(object.get(), functor))
+					return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool IsNodeMorphable(RE::NiAVObject* rootNode) {
+	
+	return VisitObjects(rootNode, [&](RE::NiAVObject* node) {
+		RE::BSTriShape* trishape = node->IsTriShape();
+		if (trishape)
+		{
+			RE::NiPointer<RE::NiExtraData> bodyMorph(trishape->GetExtraData("MORPH_SHAPE"));
+			if (!bodyMorph)
+				return false;
+
+			RE::NiPointer<RE::NiExtraData> morphPath(trishape->GetExtraData("MORPH_FILE"));
+			if (!morphPath)
+				return false;
+
+			return true;
+		}
+
+		return false;
+	});
+}
 
 void OverlayInterface::OverlayData::UpdateFlags() {}
 void OverlayInterface::OverlayData::Save(const F4SESerializationInterface* intfc, uint32_t kVersion){};
@@ -202,5 +261,26 @@ void ActorUpdateManager::Revert() {}
 
 void ActorUpdateManager::SetLoading(bool loading) { m_loading = loading; }
 void ActorUpdateManager::ResolvePendingBodyGen() {}
+
+RE::NiNode* GetRootNode(RE::Actor* actor, RE::NiAVObject* object)
+{
+	if (!actor)
+		return nullptr;
+
+	// Получаем root для 3-го лица
+	RE::NiNode* rootNode = actor->Get3D(false) ? actor->Get3D(false)->IsNode() : nullptr;
+
+	// Для игрока проверяем, относится ли object к скелету 1-го лица
+	if (actor == RE::PlayerCharacter::GetSingleton()) {
+		RE::NiNode* node1P = actor->Get3D(true) ? actor->Get3D(true)->IsNode() : nullptr;
+		for (RE::NiNode* parent = object ? object->parent : nullptr; parent; parent = parent->parent) {
+			if (parent == node1P) {
+				return node1P;
+			}
+		}
+	}
+
+	return rootNode;
+}
 
 #pragma warning(pop)

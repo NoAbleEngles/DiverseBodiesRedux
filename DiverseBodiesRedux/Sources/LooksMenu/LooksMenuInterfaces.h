@@ -270,6 +270,22 @@ public:
 	void Release(void);
 };
 
+class F4EESkinUpdate : public F4SE::ITaskDelegate
+{
+public:
+	F4EESkinUpdate(RE::TESForm* form, bool doFace);
+	virtual ~F4EESkinUpdate();
+	virtual void Run() override;
+
+	uint32_t formID();
+
+	// Создание копии оригинального объекта через функцию из f4ee.dll
+	static F4EESkinUpdate* CreateCopy(F4EESkinUpdate* src);
+protected:
+	uint32_t				m_formId;
+	bool					m_doFace;
+};
+
 class SkinInterface
 {
 public:
@@ -531,5 +547,9 @@ private:
 	inline constinit static uint32_t offset_g_SkinInterface = 0xF4F60;
 	inline constinit static uint32_t offset_g_ActorUpdateManager = 0xF4C70; 
 };
-#pragma warning(pop)
 
+bool IsNodeMorphable(RE::NiAVObject* rootNode);
+
+RE::NiNode* GetRootNode(RE::Actor* actor, RE::NiAVObject* object);
+
+#pragma warning(pop)

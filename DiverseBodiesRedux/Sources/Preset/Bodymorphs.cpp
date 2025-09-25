@@ -134,11 +134,16 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 
 		// Вызывает T-позу пока отключу.
 		// Сброс 3D модели актера
-		using R3D = RE::RESET_3D_FLAGS;
-		if (reset3d && actor->GetFullyLoaded3D()) {
-			if (!RE::UI::GetSingleton()->GetMenuOpen(DirectApply::MENU_NAME)) actor->EvaluatePackageAfter3DLoaded(true);
-			actor->Reset3D(true, R3D::kModel | R3D::kScale, true, R3D::kNone);
-		}
+		//using R3D = RE::RESET_3D_FLAGS;
+		//if (reset3d && actor->GetFullyLoaded3D()) {
+		//	if (!RE::UI::GetSingleton()->GetMenuOpen(DirectApply::MENU_NAME)) actor->EvaluatePackageAfter3DLoaded(true);
+		//	//actor->Reset3D(true, R3D::kModel | R3D::kScale, true, R3D::kNone);
+		//	if (actor->currentProcess) {
+		//		actor->currentProcess->Set3DUpdateFlag(actor->currentProcess->GetAll3DUpdateFlags() | R3D::kModel | R3D::kScale);
+		//	}
+		//}
+
+		F4SE::GetTaskInterface()->AddTask(new ResetBodyMorphs(actor, true, reset3d));
 
 		npc_mutexes.erase(npc->formID); // Удаляем мьютекс для этого NPC, чтобы избежать утечек памяти
 	}
@@ -332,4 +337,73 @@ std::string BodymorphsPreset::print() const
 		oss << m_conditions.print();
 	}
 	return oss.str();
+}
+
+ResetBodyMorphs::ResetBodyMorphs(RE::Actor* actor, bool doDetach, bool doReset) noexcept {
+	m_actor = actor;
+	m_doDetach = doDetach;
+	m_doReset = doReset;
+}
+
+ResetBodyMorphs::~ResetBodyMorphs() {};
+
+void ResetBodyMorphs::Run() {
+	/*static auto f4eeAddr = GetModule("f4ee.dll");
+	if (!f4eeAddr) {
+		return;
+	}
+
+	static auto* g_bEnableOverlays = reinterpret_cast<bool*>(f4eeAddr + 0xDEF04);
+	if (!*g_bEnableOverlays) {
+		return;
+	}*/
+	if (!m_actor) return;
+
+	// Отсоединение узла приведет к перегенерированию игрой при вызове UpdateEquipment.
+	// Нам нужно отсоединить только броню и броню, которая подходит для морфинга.
+	if (m_doDetach) {
+		auto isPlayer = (m_actor == RE::PlayerCharacter::GetSingleton());
+
+		RE::BipedAnim* equipData[2];
+		equipData[0] = m_actor->GetBiped().get();
+		equipData[1] = isPlayer ? RE::PlayerCharacter::GetSingleton()->GetBiped(true).get() : nullptr;
+
+		auto bodyMorphInterface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
+		if (!bodyMorphInterface) return;
+
+		for (uint32_t s = 0; s < (isPlayer ? 2 : 1); ++s) {
+			if (equipData[s]) {
+				for(uint32_t i = 0; i <32; ++i) {
+					RE::NiPointer<RE::NiAVObject> slotNode = equipData[s]->object[i].partClone ? equipData[s]->object[i].partClone : nullptr;
+					if (slotNode)
+					{
+						if (IsNodeMorphable(slotNode.get())) {
+							RE::NiPointer<RE::NiNode> parent(slotNode->parent);
+
+							auto overlayInterface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
+							if (!bodyMorphInterface) return;
+
+							if (parent) {
+								RE::NiNode* rootNode = GetRootNode(m_actor, slotNode.get());
+								if (rootNode) {
+									RE::NiNode* overlayRoot = overlayInterface->GetOverlayRoot(m_actor, rootNode);
+									if (overlayRoot)
+										overlayInterface->DestroyOverlaySlot(m_actor, overlayRoot, i);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (auto npc = m_actor->GetNPC(); npc) {
+			npc->AddChange(0x4000);
+		}
+
+		if (m_doReset && m_actor->GetFullyLoaded3D()) {
+			using R3D = RE::RESET_3D_FLAGS;
+			m_actor->Reset3D(false, R3D::kNone, true, R3D::kNone);
+		}
+	}
 }

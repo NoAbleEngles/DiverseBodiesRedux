@@ -94,3 +94,16 @@ private:
 	BodymorphsPreset(BodymorphsPreset&& other) = delete;
 	BodymorphsPreset& operator=(BodymorphsPreset&& other) = delete;
 };
+
+class ResetBodyMorphs : public F4SE::ITaskDelegate
+{
+public:
+	ResetBodyMorphs(RE::Actor* actor, bool doDetach, bool doReset) noexcept;
+	virtual ~ResetBodyMorphs();
+	virtual void Run() override;
+
+protected:
+	RE::Actor* m_actor{nullptr};
+	bool m_doDetach;
+	bool m_doReset;
+};
