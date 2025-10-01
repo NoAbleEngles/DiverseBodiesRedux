@@ -1176,7 +1176,7 @@
     <ClInclude Include="Sources\Hooks\Hooks.h">
       <Filter>DiverseBodies\Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Patches\Patches.hpp">
+    <ClInclude Include="Sources\Patches\Patches.h">
       <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
     <ClInclude Include="Sources\DirectApply\DirectApply.h">
@@ -1234,6 +1234,15 @@
       <Filter>DiverseBodies\ActorsManager\Details</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Patches\x-cell_patch.h">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Patches\PatchesMemUtils.h">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Preset\Details\ProcessingGuard.hpp">
+      <Filter>DiverseBodies\Preset\Details</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Patches\ClothWorldFix.h">
       <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1446,6 +1455,15 @@
       <Filter>DiverseBodies\ActorsManager\Details</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Patches\x-cell_patch.cpp">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Patches\Patches.cpp">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Patches\PatchesMemUtils.cpp">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Patches\ClothWorldFix.cpp">
       <Filter>DiverseBodies\Patches</Filter>
     </ClCompile>
   </ItemGroup>

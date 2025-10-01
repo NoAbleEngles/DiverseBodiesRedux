@@ -20,3 +20,9 @@ using namespace std::literals;
 
 #include "Version.h"
 #include "RE/Bethesda/FormUtil.h"
+
+#include <ppl.h>
+#include <concurrent_unordered_map.h>
+#include <concurrent_unordered_set.h>
+
+namespace ppl = concurrency;

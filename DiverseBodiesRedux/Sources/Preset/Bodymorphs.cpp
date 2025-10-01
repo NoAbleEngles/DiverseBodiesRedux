@@ -2,7 +2,7 @@
 #include "PugiXML/pugixml.hpp"
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include "Ini/ini.h"
-#include "globals.h"
+#include "Details/ProcessingGuard.hpp"
 
 #include "DirectApply/DirectApply.h" // только для DirectApply::MENU_NAME
 
@@ -84,11 +84,10 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		return false;
 	}
 
-	static std::unordered_set<RE::Actor*> processingActors{};
-	if (processingActors.contains(actor)) {
-		return false; // Предотвращаем повторную обработку одного и того же актёра
-	}
-	processingActors.insert(actor); // Добавляем актёра в список обрабатываемых
+	auto guard = std::make_shared<ProcessingGuard<std::set<uint32_t>>>(actor->GetFormID(), m_processingActors, m_processingActorsMtx);
+	if (!guard->acquire_sync_for(std::chrono::seconds{})) {
+	    return false; // таймаут
+    }
 	
 	// здесь не нужна проверка, т.к. иначе не будут работать пресеты применяемые вручную. Можно только пол проверять.
 	//if (check(actor) == CoincidenceLevel::NONE) {
@@ -97,14 +96,12 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 	//}
 	if (check(actor, Filter{ Filter::Gender }) == CoincidenceLevel::NONE) {
 		logger::info("BodyMorphs Apply gender check failed for actor: {:#x}", actor->formID);
-		processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 		return false;
 	}
 
 	remove(actor);
 
 	if (!actor->GetFullyLoaded3D()) {
-		processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 		return false;
 	}
 
@@ -112,43 +109,29 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		auto Interface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
 		if (!Interface) {
 			logger::critical("BodyMorphInterface is nullptr!");
-			processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 			return false;
 		}
 		Interface->SetMorph(actor, actor->GetSex() == RE::Actor::Sex::Female, morphName, globals::kwd_diversed, morphValue);
 	}
-	
-	{
-		static std::unordered_map<uint32_t, std::mutex> npc_mutexes;
-		std::mutex& mtx = npc_mutexes[npc->formID];
-		std::lock_guard<std::mutex> lock(mtx);
 
-		if (npc->morphWeight != m_morphWeight) {
-			npc->morphWeight = m_morphWeight;
-		}
-
-		if (!actor->GetFullyLoaded3D()) {
-			processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
-			return true;
-		}
-
-		// Вызывает T-позу пока отключу.
-		// Сброс 3D модели актера
-		//using R3D = RE::RESET_3D_FLAGS;
-		//if (reset3d && actor->GetFullyLoaded3D()) {
-		//	if (!RE::UI::GetSingleton()->GetMenuOpen(DirectApply::MENU_NAME)) actor->EvaluatePackageAfter3DLoaded(true);
-		//	//actor->Reset3D(true, R3D::kModel | R3D::kScale, true, R3D::kNone);
-		//	if (actor->currentProcess) {
-		//		actor->currentProcess->Set3DUpdateFlag(actor->currentProcess->GetAll3DUpdateFlags() | R3D::kModel | R3D::kScale);
-		//	}
-		//}
-
-		F4SE::GetTaskInterface()->AddTask(new ResetBodyMorphs(actor, true, reset3d));
-
-		npc_mutexes.erase(npc->formID); // Удаляем мьютекс для этого NPC, чтобы избежать утечек памяти
+	if (!npc) return false;
+	auto npcGuard = std::make_shared<ProcessingGuard<std::set<uint32_t>>>(npc->GetFormID(), m_processingNpc, m_processingNpcMtx);
+	if (!npcGuard->acquire_sync_for(std::chrono::seconds{5})) {
+		return false; // таймаут
 	}
 
-	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
+	if (npc->morphWeight != m_morphWeight) {
+		npc->morphWeight = m_morphWeight;
+	}
+
+	if (!actor->GetFullyLoaded3D()) {
+		return true;
+	}
+
+	F4SE::GetTaskInterface()->AddTask(new ResetBodyMorphs(actor, [this, actor, guard, npcGuard]() {
+		if (!actor) return;
+	}, true, reset3d));
+	
 	return true;
 }
 
@@ -339,28 +322,23 @@ std::string BodymorphsPreset::print() const
 	return oss.str();
 }
 
-ResetBodyMorphs::ResetBodyMorphs(RE::Actor* actor, bool doDetach, bool doReset) noexcept {
+ResetBodyMorphs::ResetBodyMorphs(RE::Actor* actor, std::function<void()> doAfterAll, bool doDetach, bool doReset) noexcept {
 	m_actor = actor;
 	m_doDetach = doDetach;
 	m_doReset = doReset;
+	m_doAfterAll = doAfterAll; 
 }
 
 ResetBodyMorphs::~ResetBodyMorphs() {};
 
 void ResetBodyMorphs::Run() {
-	/*static auto f4eeAddr = GetModule("f4ee.dll");
-	if (!f4eeAddr) {
+	if (!m_actor) {
+		if (m_doAfterAll) {
+			m_doAfterAll(); // Вызываем функцию удаления мьютекса
+		}
 		return;
 	}
 
-	static auto* g_bEnableOverlays = reinterpret_cast<bool*>(f4eeAddr + 0xDEF04);
-	if (!*g_bEnableOverlays) {
-		return;
-	}*/
-	if (!m_actor) return;
-
-	// Отсоединение узла приведет к перегенерированию игрой при вызове UpdateEquipment.
-	// Нам нужно отсоединить только броню и броню, которая подходит для морфинга.
 	if (m_doDetach) {
 		auto isPlayer = (m_actor == RE::PlayerCharacter::GetSingleton());
 
@@ -369,7 +347,12 @@ void ResetBodyMorphs::Run() {
 		equipData[1] = isPlayer ? RE::PlayerCharacter::GetSingleton()->GetBiped(true).get() : nullptr;
 
 		auto bodyMorphInterface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
-		if (!bodyMorphInterface) return;
+		if (!bodyMorphInterface) {
+			if (m_doAfterAll) {
+				m_doAfterAll(); // Вызываем функцию удаления мьютекса
+			}
+			return;
+		}
 
 		for (uint32_t s = 0; s < (isPlayer ? 2 : 1); ++s) {
 			if (equipData[s]) {
@@ -381,7 +364,12 @@ void ResetBodyMorphs::Run() {
 							RE::NiPointer<RE::NiNode> parent(slotNode->parent);
 
 							auto overlayInterface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
-							if (!bodyMorphInterface) return;
+							if (!bodyMorphInterface) {
+								if (m_doAfterAll) {
+									m_doAfterAll(); // Вызываем функцию удаления мьютекса
+								}
+								return;
+							}
 
 							if (parent) {
 								RE::NiNode* rootNode = GetRootNode(m_actor, slotNode.get());
@@ -397,13 +385,16 @@ void ResetBodyMorphs::Run() {
 			}
 		}
 
-		if (auto npc = m_actor->GetNPC(); npc) {
-			npc->AddChange(0x4000);
-		}
-
 		if (m_doReset && m_actor->GetFullyLoaded3D()) {
+			if (auto npc = m_actor->GetNPC(); npc) {
+				npc->AddChange(0x4000);
+			}
 			using R3D = RE::RESET_3D_FLAGS;
 			m_actor->Reset3D(false, R3D::kNone, true, R3D::kNone);
 		}
+	}
+
+	if (m_doAfterAll) {
+		m_doAfterAll(); // Вызываем функцию удаления мьютекса
 	}
 }

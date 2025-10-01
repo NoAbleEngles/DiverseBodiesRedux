@@ -83,6 +83,68 @@ public:
 	virtual bool UpdateMorphs(RE::Actor* actor);
 };
 
+class BodyGenMorphData
+{
+public:
+	F4EEFixedString	name;
+	float			lower;
+	float			upper;
+};
+
+class BodyGenMorphSelector : public std::vector<BodyGenMorphData>
+{
+public:
+	uint32_t Evaluate(std::function<void(const F4EEFixedString&, float)> eval);
+};
+
+class BodyGenMorphs : public std::vector<BodyGenMorphSelector>
+{
+public:
+	uint32_t Evaluate(std::function<void(const F4EEFixedString&, float)> eval);
+};
+
+class BodyGenTemplate : public std::vector<BodyGenMorphs>
+{
+public:
+	uint32_t Evaluate(std::function<void(const F4EEFixedString&, float)> eval);
+};
+
+typedef std::shared_ptr<BodyGenTemplate> BodyGenTemplatePtr;
+
+typedef std::unordered_map<F4EEFixedString, BodyGenTemplatePtr> BodyGenTemplates;
+
+class BodyTemplateList : public std::vector<BodyGenTemplatePtr>
+{
+public:
+	uint32_t Evaluate(std::function<void(const F4EEFixedString&, float)> eval);
+};
+
+class BodyGenDataTemplates : public std::vector<BodyTemplateList>
+{
+public:
+	uint32_t Evaluate(std::function<void(const F4EEFixedString&, float)> eval);
+};
+typedef std::shared_ptr<BodyGenDataTemplates> BodyGenDataTemplatesPtr;
+
+typedef std::unordered_map<RE::TESNPC*, BodyGenDataTemplatesPtr> BodyGenData;
+
+class BodyGenInterface
+{
+public:
+	void LoadBodyGenMods();
+
+	virtual bool ReadBodyMorphs(const std::string& filePath);
+	virtual bool ReadBodyMorphTemplates(const std::string& filePath);
+	virtual uint32_t EvaluateBodyMorphs(RE::Actor* actor, bool isFemale);
+	virtual void ClearBodyGenMods();
+	void GetFilteredNPCList(std::vector<RE::TESNPC*> activeNPCs[], uint8_t modIndex, uint16_t lightIndex, uint32_t gender, RE::TESRace* raceFilter);
+
+
+protected:
+	BodyGenTemplates bodyGenTemplates;
+	BodyGenData	bodyGenData[2];
+};
+
 class OverlayInterface : 
 	public RE::BSTEventSink<RE::TESObjectLoadedEvent>, 
 	public RE::BSTEventSink<RE::TESLoadGameEvent>

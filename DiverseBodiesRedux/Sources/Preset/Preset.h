@@ -13,6 +13,7 @@
 #include "Details/PresetEnums.h"
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include "LooksMenu/ParseLooksMenuPreset.h"
+#include "globals.h"
 
 class BodymorphsPreset;
 class BodyhairsPreset;
@@ -154,43 +155,14 @@ protected:
 	 */
 	void LoadConditions(boost::json::object& jsonConditionObject);
 
-	/**
-	 * @brief Утилитарный класс для защиты от двойной обработки одного актёра.
-	 */
-	class ProcessingGuard {
-	public:
-		ProcessingGuard(RE::Actor* actor, std::unordered_set<RE::Actor*>& processingSet) 
-			: m_actor(actor), m_processingSet(processingSet), m_isActive(false) {
-			if (actor && !m_processingSet.contains(actor)) {
-				m_processingSet.insert(actor);
-				m_isActive = true;
-			}
-		}
-
-		~ProcessingGuard() {
-			if (m_isActive && m_actor) {
-				m_processingSet.erase(m_actor);
-			}
-		}
-
-		bool isActive() const { return m_isActive; }
-
-		// Запрещаем копирование и перемещение
-		ProcessingGuard(const ProcessingGuard&) = delete;
-		ProcessingGuard& operator=(const ProcessingGuard&) = delete;
-		ProcessingGuard(ProcessingGuard&&) = delete;
-		ProcessingGuard& operator=(ProcessingGuard&&) = delete;
-
-	private:
-		RE::Actor* m_actor;
-		std::unordered_set<RE::Actor*>& m_processingSet;
-		bool m_isActive;
-	};
-
 	Preset(const Preset& other) = delete;
 	Preset& operator=(const Preset& other) = delete;
 	Preset(Preset&& other) = delete;
 	Preset& operator=(Preset&& other) = delete;
+
+	// Т.к. npc может быть одинаковый для разных актёров и изменяться из разных пресетов, то защита от одновременной обработки должна быть глобальная для всех пресетов.
+	mutable std::set<uint32_t> m_processingNpc;
+	mutable std::shared_mutex m_processingNpcMtx;
 };
 
 /**

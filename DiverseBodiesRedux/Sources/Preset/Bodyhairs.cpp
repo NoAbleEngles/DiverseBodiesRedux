@@ -80,31 +80,16 @@ bool BodyhairsPreset::remove(RE::Actor* actor) const {
 	}
 
 	bool once = false;
-	static std::unordered_set<RE::Actor*> processingActors{};
-	if (processingActors.contains(actor)) {
-		return false; // Предотвращаем повторную обработку одного и того же актёра
-	}
-	processingActors.insert(actor); // Добавляем актёра в список обрабатываемых
 
 	for (const auto& uid : overlaysUIDs) {
 		if (Interface->RemoveOverlay(actor, actor->GetSex() == RE::Actor::Female, uid) && !once) once = true;
 	}
 
-	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
-
 	return once;
 }
 
 bool BodyhairsPreset::apply(RE::Actor* actor, bool reset3d) const {
-	static std::unordered_set<RE::Actor*> processingActors{};
-	if (processingActors.contains(actor)) {
-		return false; // Предотвращаем повторную обработку одного и того же актёра
-	}
-	processingActors.insert(actor); // Добавляем актёра в список обрабатываемых
-
 	auto res = OverlayPreset::apply(actor, reset3d); // Используем базовый метод для применения оверлеев
-
-	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 
 	return res;
 }

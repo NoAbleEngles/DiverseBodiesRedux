@@ -73,6 +73,7 @@ void PresetsManager::validatePresets() {
                 m_validationCallbacks.end()
             );
         }
+        
         // validPresets уничтожается вне lock'а
         }).detach();
 }
@@ -97,6 +98,7 @@ bool PresetsManager::unsubscribeFromValidated(CallbackId id) {
         ),
         m_validationCallbacks.end()
     );
+    return true;
 }
 
 inline std::shared_ptr<Preset> PresetsManager::getPreset(const std::string& id) const noexcept {
@@ -106,8 +108,6 @@ inline std::shared_ptr<Preset> PresetsManager::getPreset(const std::string& id) 
 	});
 	return (it != m_presets.end()) ? *it : nullptr;
 }
-
-
 
 std::shared_ptr<Preset> PresetsManager::operator[](const std::string& id) const noexcept {
     return getPreset(id);

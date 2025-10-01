@@ -283,4 +283,11 @@ RE::NiNode* GetRootNode(RE::Actor* actor, RE::NiAVObject* object)
 	return rootNode;
 }
 
+void BodyGenInterface::LoadBodyGenMods() {};
+bool BodyGenInterface::ReadBodyMorphs(const std::string& filePath) { return false; }
+bool BodyGenInterface::ReadBodyMorphTemplates(const std::string& filePath) { return false; }
+uint32_t BodyGenInterface::EvaluateBodyMorphs(RE::Actor* actor, bool isFemale) { return uint32_t{}; }
+void BodyGenInterface::ClearBodyGenMods() {}
+void BodyGenInterface::GetFilteredNPCList(std::vector<RE::TESNPC*> activeNPCs[], uint8_t modIndex, uint16_t lightIndex, uint32_t gender, RE::TESRace* raceFilter) {}
+
 #pragma warning(pop)

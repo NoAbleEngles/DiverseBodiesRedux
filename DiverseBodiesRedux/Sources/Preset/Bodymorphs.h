@@ -93,12 +93,15 @@ private:
 	BodymorphsPreset& operator=(const BodymorphsPreset& other) = delete;
 	BodymorphsPreset(BodymorphsPreset&& other) = delete;
 	BodymorphsPreset& operator=(BodymorphsPreset&& other) = delete;
+
+	mutable std::set<uint32_t> m_processingActors;  ///< Защита от двойной обработки актёра.
+	mutable std::shared_mutex m_processingActorsMtx;  ///< Мьютекс для потокобезопасного доступа к m_processingActors.
 };
 
 class ResetBodyMorphs : public F4SE::ITaskDelegate
 {
 public:
-	ResetBodyMorphs(RE::Actor* actor, bool doDetach, bool doReset) noexcept;
+	ResetBodyMorphs(RE::Actor* actor, std::function<void()> doAfterAll,  bool doDetach, bool doReset) noexcept;
 	virtual ~ResetBodyMorphs();
 	virtual void Run() override;
 
@@ -106,4 +109,5 @@ protected:
 	RE::Actor* m_actor{nullptr};
 	bool m_doDetach;
 	bool m_doReset;
+	std::function<void()> m_doAfterAll{ nullptr };
 };

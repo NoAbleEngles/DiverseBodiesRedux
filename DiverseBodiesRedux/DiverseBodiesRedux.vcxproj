@@ -483,12 +483,15 @@
     <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
     <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h" />
     <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h" />
-    <ClInclude Include="Sources\Patches\Patches.hpp" />
+    <ClInclude Include="Sources\Patches\ClothWorldFix.h" />
+    <ClInclude Include="Sources\Patches\Patches.h" />
+    <ClInclude Include="Sources\Patches\PatchesMemUtils.h" />
     <ClInclude Include="Sources\Patches\x-cell_patch.h" />
     <ClInclude Include="Sources\PCH.h" />
     <ClInclude Include="Sources\PresetsManager\PresetsManager.h" />
     <ClInclude Include="Sources\Preset\Bodyhairs.h" />
     <ClInclude Include="Sources\Preset\Bodymorphs.h" />
+    <ClInclude Include="Sources\Preset\Details\ProcessingGuard.hpp" />
     <ClInclude Include="Sources\Preset\Details\Tint.h" />
     <ClInclude Include="Sources\Preset\Nails.h" />
     <ClInclude Include="Sources\Preset\NPCPreset.h" />
@@ -563,6 +566,9 @@
     <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp" />
     <ClCompile Include="Sources\main.cpp" />
     <ClCompile Include="Sources\MainMenuHandler\MainMenuHandler.cpp" />
+    <ClCompile Include="Sources\Patches\ClothWorldFix.cpp" />
+    <ClCompile Include="Sources\Patches\Patches.cpp" />
+    <ClCompile Include="Sources\Patches\PatchesMemUtils.cpp" />
     <ClCompile Include="Sources\Patches\x-cell_patch.cpp" />
     <ClCompile Include="Sources\PresetsManager\PresetsManager.cpp" />
     <ClCompile Include="Sources\Preset\Bodyhairs.cpp" />
