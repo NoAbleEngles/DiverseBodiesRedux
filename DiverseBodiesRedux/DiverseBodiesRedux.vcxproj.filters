@@ -1245,6 +1245,9 @@
     <ClInclude Include="Sources\Patches\ClothWorldFix.h">
       <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\ActorsManager\ActorResetQueue.h">
+      <Filter>DiverseBodies\ActorsManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\main.cpp">
@@ -1466,18 +1469,12 @@
     <ClCompile Include="Sources\Patches\ClothWorldFix.cpp">
       <Filter>DiverseBodies\Patches</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\ActorsManager\ActorResetQueue.cpp">
+      <Filter>DiverseBodies\ActorsManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib">
-      <Filter>DiverseBodies\libs</Filter>
-    </Library>
     <Library Include="Sources\zlib\lib\zlibstatic.lib">
-      <Filter>DiverseBodies\libs</Filter>
-    </Library>
-    <Library Include="..\..\vcpkg\installed\x64-windows\lib\mmio.lib">
-      <Filter>DiverseBodies\libs</Filter>
-    </Library>
-    <Library Include="..\..\vcpkg\installed\x64-windows\lib\spdlog.lib">
       <Filter>DiverseBodies\libs</Filter>
     </Library>
     <Library Include="..\..\Boost\lib\libboost_json-vc143-mt-x64-1_88.lib">

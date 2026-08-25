@@ -111,3 +111,30 @@ protected:
 	bool m_doReset;
 	std::function<void()> m_doAfterAll{ nullptr };
 };
+
+/**
+ * @brief F4SE-таск: выполняет Actor::Reset3D с заданными флагами.
+ *
+ * Используется для HEAD-reset после Detach оверлеев в ResetBodyMorphs::Run().
+ * Постановка через AddTask гарантирует FIFO-порядок внутри F4SE-очереди:
+ * сначала ResetBodyMorphs (Detach), затем ResetActor (Reset3D).
+ */
+class ResetActor : public F4SE::ITaskDelegate
+{
+public:
+	/**
+	 * @param actor         Актёр для сброса. Должен оставаться валидным к моменту Run().
+	 * @param flags         additionalFlags для Reset3D (что перестроить).
+	 * @param excludeFlags  excludeFlags для Reset3D (что не трогать).
+	 * @param doAfterAll    Коллбэк после выполнения (освобождение гардов).
+	 */
+	ResetActor(RE::Actor* actor, RE::RESET_3D_FLAGS flags, RE::RESET_3D_FLAGS excludeFlags, std::function<void()> doAfterAll) noexcept;
+	virtual ~ResetActor() = default;
+	virtual void Run() override;
+
+protected:
+	RE::Actor* m_actor{ nullptr };
+	RE::RESET_3D_FLAGS m_flags;
+	RE::RESET_3D_FLAGS m_excludeFlags;
+	std::function<void()> m_doAfterAll{ nullptr };
+};

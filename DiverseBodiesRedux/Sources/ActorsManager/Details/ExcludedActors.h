@@ -24,6 +24,11 @@ public:
 	*/
 	std::optional<std::shared_ptr<std::unordered_set<PresetType>>> getExcludedTypes(const RE::Actor* actor) const noexcept;
 
+	/**
+	* @brief Возвращает строку с описанием всех загруженных исключений и их флагов.
+	*/
+	std::string print() const noexcept;
+
 private:
 	/// FormID актёра и его базовой формы (NPC), флаги PresetType.
 	std::map<uint32_t, std::shared_ptr<std::unordered_set<PresetType>>> m_excludedForms;

@@ -3,6 +3,7 @@
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include "Ini/ini.h"
 #include "Details/ProcessingGuard.hpp"
+#include "ActorsManager/ActorResetQueue.h"
 
 #include "DirectApply/DirectApply.h" // только для DirectApply::MENU_NAME
 
@@ -84,24 +85,23 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		return false;
 	}
 
+	logger::info("[BM] apply start: actor={:#x} preset='{}' reset3d={}", actor->formID, id(), reset3d);
+
 	auto guard = std::make_shared<ProcessingGuard<std::set<uint32_t>>>(actor->GetFormID(), m_processingActors, m_processingActorsMtx);
 	if (!guard->acquire_sync_for(std::chrono::seconds{})) {
-	    return false; // таймаут
-    }
-	
-	// здесь не нужна проверка, т.к. иначе не будут работать пресеты применяемые вручную. Можно только пол проверять.
-	//if (check(actor) == CoincidenceLevel::NONE) {
-	//	logger::info("BodyMorphs Apply check failed for actor: {:#x}", actor->formID);
-	//	return false;
-	//}
+		logger::warn("[BM] apply BLOCKED by actorGuard: actor={:#x}", actor->formID);
+		return false; // таймаут
+	}
+
 	if (check(actor, Filter{ Filter::Gender }) == CoincidenceLevel::NONE) {
-		logger::info("BodyMorphs Apply gender check failed for actor: {:#x}", actor->formID);
+		logger::info("[BM] apply gender check FAILED: actor={:#x}", actor->formID);
 		return false;
 	}
 
 	remove(actor);
 
 	if (!actor->GetFullyLoaded3D()) {
+		logger::warn("[BM] apply: actor={:#x} GetFullyLoaded3D=false (before SetMorph)", actor->formID);
 		return false;
 	}
 
@@ -114,9 +114,20 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		Interface->SetMorph(actor, actor->GetSex() == RE::Actor::Sex::Female, morphName, globals::kwd_diversed, morphValue);
 	}
 
+	// UpdateMorphs применяет записанные значения к геометрии 3D-нода.
+	// Без этого вызова SetMorph только обновляет внутреннюю таблицу LooksMenu,
+	// но Reset3D ниже получит устаревшие/нулевые значения из кэша.
+	{
+		auto Interface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
+		if (Interface) {
+			Interface->UpdateMorphs(actor);
+		}
+	}
+
 	if (!npc) return false;
 	auto npcGuard = std::make_shared<ProcessingGuard<std::set<uint32_t>>>(npc->GetFormID(), m_processingNpc, m_processingNpcMtx);
 	if (!npcGuard->acquire_sync_for(std::chrono::seconds{5})) {
+		logger::warn("[BM] apply BLOCKED by npcGuard: npc={:#x} actor={:#x}", npc->formID, actor->formID);
 		return false; // таймаут
 	}
 
@@ -125,13 +136,23 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 	}
 
 	if (!actor->GetFullyLoaded3D()) {
+		logger::warn("[BM] apply: actor={:#x} GetFullyLoaded3D=false (after SetMorph) — returning true without task", actor->formID);
 		return true;
 	}
 
-	F4SE::GetTaskInterface()->AddTask(new ResetBodyMorphs(actor, [this, actor, guard, npcGuard]() {
-		if (!actor) return;
-	}, true, reset3d));
-	
+	if (reset3d) {
+		// Планируем DetachOverlays + body Reset3D через единую очередь.
+		// needsBodyReset=true: Reset3D(excludeFlags=kHead|kFace) — голова не трогается.
+		// needsDetach=true: DetachOverlays перед reset.
+		logger::info("[BM] apply: schedule ActorResetQueue actor={:#x}", actor->formID);
+		ActorResetQueue::GetSingleton().Schedule(actor, ActorResetQueue::ResetEntry{
+			.needsBodyReset = true,
+			.needsHeadReset = false,
+			.needsDetach    = true,
+			.needsHeadFix   = false,
+		});
+	}
+
 	return true;
 }
 
@@ -332,7 +353,12 @@ ResetBodyMorphs::ResetBodyMorphs(RE::Actor* actor, std::function<void()> doAfter
 ResetBodyMorphs::~ResetBodyMorphs() {};
 
 void ResetBodyMorphs::Run() {
+	auto actorIdStr = m_actor ? fmt::format("{:#x}", m_actor->formID) : std::string("null");
+	logger::info("[BM] ResetBodyMorphs::Run start: actor={} m_doDetach={} m_doReset={}",
+		actorIdStr, m_doDetach, m_doReset);
+
 	if (!m_actor) {
+		logger::warn("[BM] ResetBodyMorphs::Run: actor is null, aborting");
 		if (m_doAfterAll) {
 			m_doAfterAll(); // Вызываем функцию удаления мьютекса
 		}
@@ -389,12 +415,59 @@ void ResetBodyMorphs::Run() {
 			if (auto npc = m_actor->GetNPC(); npc) {
 				npc->AddChange(0x4000);
 			}
+			logger::info("[BM] ResetBodyMorphs::Run: calling Reset3D for actor={:#x}", m_actor->formID);
 			using R3D = RE::RESET_3D_FLAGS;
-			m_actor->Reset3D(false, R3D::kNone, true, R3D::kNone);
+			// excludeFlags = kHead|kFace: не трогаем голову при сбросе тела.
+			// kKeepHead — отдельный control-флаг, не excludeFlag.
+			// kHead и kFace в excludeFlags говорят движку пропустить перестройку головы/лица,
+			// оставив результат doReset3D нетронутым.
+			m_actor->Reset3D(false, R3D::kNone, true, R3D::kHead | R3D::kFace);
+		} else {
+			logger::warn("[BM] ResetBodyMorphs::Run: SKIP Reset3D — m_doReset={} GetFullyLoaded3D={}",
+				m_doReset, m_actor->GetFullyLoaded3D() != nullptr);
 		}
 	}
 
+	logger::info("[BM] ResetBodyMorphs::Run: done, releasing guards");
 	if (m_doAfterAll) {
-		m_doAfterAll(); // Вызываем функцию удаления мьютекса
+		m_doAfterAll(); // Вызываем коллбэк (добавление HEAD-таска или освобождение гардов)
 	}
+}
+
+ResetActor::ResetActor(RE::Actor* actor, RE::RESET_3D_FLAGS flags, RE::RESET_3D_FLAGS excludeFlags, std::function<void()> doAfterAll) noexcept
+	: m_actor(actor), m_flags(flags), m_excludeFlags(excludeFlags), m_doAfterAll(std::move(doAfterAll))
+{
+}
+
+void ResetActor::Run()
+{
+	if (!m_actor) {
+		logger::warn("[ResetActor] Run: actor is null, aborting");
+		if (m_doAfterAll) m_doAfterAll();
+		return;
+	}
+
+	if (!m_actor->Get3D() || !m_actor->currentProcess || !m_actor->extraList) {
+		logger::warn("[ResetActor] Run: actor={:#x} не готов к Reset3D (нет 3D/process/extraList)", m_actor->formID);
+		if (m_doAfterAll) m_doAfterAll();
+		return;
+	}
+
+	// Сообщаем движку какие части геометрии нужно перестроить.
+	// 0x800 = CHANGE_ACTOR_FACE_MORPHS — перестройка головы/морфов лица.
+	if (auto npc = m_actor->GetNPC(); npc) {
+		if (auto face = npc->GetRootFaceNPC(); face) {
+			face->AddChange(0x800);
+			npc->AddChange(0x800);
+		}
+	}
+
+	logger::info("[ResetActor] Run: actor={:#x} flags={:#x} excludeFlags={:#x}",
+		m_actor->formID,
+		static_cast<uint32_t>(m_flags),
+		static_cast<uint32_t>(m_excludeFlags));
+
+	m_actor->Reset3D(false, m_flags, true, m_excludeFlags);
+
+	if (m_doAfterAll) m_doAfterAll();
 }

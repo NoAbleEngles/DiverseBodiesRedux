@@ -161,8 +161,10 @@ protected:
 	Preset& operator=(Preset&& other) = delete;
 
 	// Т.к. npc может быть одинаковый для разных актёров и изменяться из разных пресетов, то защита от одновременной обработки должна быть глобальная для всех пресетов.
-	mutable std::set<uint32_t> m_processingNpc;
-	mutable std::shared_mutex m_processingNpcMtx;
+	// static: один общий set/mutex на все экземпляры Preset — иначе два разных экземпляра
+	// одновременно модифицируют одну и ту же TESNPC без взаимной блокировки.
+	static std::set<uint32_t> m_processingNpc;
+	static std::shared_mutex m_processingNpcMtx;
 };
 
 /**

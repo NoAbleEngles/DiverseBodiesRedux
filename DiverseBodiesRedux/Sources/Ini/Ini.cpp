@@ -30,8 +30,11 @@ namespace ini
 
 	map& map::operator=(const map& m)
 	{
-		m_path = m.m_path;
-		m_inimap = m.m_inimap;
+		if (this != &m) {  // Проверяем на самоприсваивание
+			m_path = m.m_path;
+			m_inimap = m.m_inimap;
+		}
+		return *this;  // Возвращаем ссылку на текущий объект
 	}
 
 	map& map::operator=(map&& m) noexcept

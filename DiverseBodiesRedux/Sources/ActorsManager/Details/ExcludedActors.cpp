@@ -1,6 +1,8 @@
 #include "ExcludedActors.h"
 #include <Utils/utility.h>
 #include "LooksMenu/ParseLooksMenuPreset.h" // для find_ci
+#include <sstream>
+#include <iomanip>
 
 extern std::string getJson(const std::filesystem::path& filepath);
 
@@ -200,4 +202,31 @@ std::optional<std::shared_ptr<std::unordered_set<PresetType>>> ExcludedActors::g
     }
 
     return std::nullopt;
+}
+
+std::string ExcludedActors::print() const noexcept
+{
+    std::ostringstream oss;
+    oss << "ExcludedActors: " << m_excludedForms.size() << " exclusions loaded\n";
+    for (const auto& [formID, flags] : m_excludedForms) {
+        oss << "  FormID: 0x" << std::uppercase << std::hex << std::setw(8) << std::setfill('0') << formID;
+        if (!flags) {
+            oss << "  Flags: All\n";
+        } else {
+            oss << "  Flags: ";
+            bool first = true;
+            for (PresetType type = PresetType::BODYMORPHS; type != PresetType::END;
+                type = static_cast<PresetType>(static_cast<char>(type) + 1))
+            {
+                if (flags->count(type)) {
+                    if (!first) oss << ", ";
+                    oss << GetPresetTypeString(type);
+                    first = false;
+                }
+            }
+            if (first) oss << "None";
+            oss << "\n";
+        }
+    }
+    return oss.str();
 }

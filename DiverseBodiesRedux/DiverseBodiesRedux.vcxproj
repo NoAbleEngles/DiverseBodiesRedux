@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
@@ -73,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>$(ProjectName)</TargetName>
-    <OutDir>E:\Games\Fallout 4\MO2\mods\DBR2.0\F4SE\Plugins\</OutDir>
+    <OutDir>E:\Games\Fallout 4\September2026\mods\DBR2.0\F4SE\Plugins\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -468,6 +468,7 @@
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Types2D.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\Scaleform\Render\Render_Viewport.h" />
     <ClInclude Include="..\..\CommonLibF4\CommonLibF4\include\RE\VTABLE_IDs.h" />
+    <ClInclude Include="Sources\ActorsManager\ActorResetQueue.h" />
     <ClInclude Include="Sources\ActorsManager\ActorsManager.h" />
     <ClInclude Include="Sources\ActorsManager\Details\ActorsPresetHashEquals.hpp" />
     <ClInclude Include="Sources\ActorsManager\Details\ExcludedActors.h" />
@@ -554,6 +555,7 @@
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiObjectNET.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\NetImmerse\NiRect.cpp" />
     <ClCompile Include="..\..\CommonLibF4\CommonLibF4\src\RE\Scaleform\GFx\GFx_Player.cpp" />
+    <ClCompile Include="Sources\ActorsManager\ActorResetQueue.cpp" />
     <ClCompile Include="Sources\ActorsManager\ActorsManager.cpp" />
     <ClCompile Include="Sources\ActorsManager\Details\ExcludedActors.cpp" />
     <ClCompile Include="Sources\detourxs\detourxs.cpp">
@@ -589,9 +591,6 @@
   <ItemGroup>
     <Library Include="..\..\Boost\lib\libboost_json-vc143-mt-x64-1_88.lib" />
     <Library Include="..\..\CommonLibF4\build\CommonLibF4\Release\CommonLibF4.lib" />
-    <Library Include="..\..\CommonLibF4\build\f4se_runtime\Release\f4se_runtime.lib" />
-    <Library Include="..\..\vcpkg\installed\x64-windows\lib\mmio.lib" />
-    <Library Include="..\..\vcpkg\installed\x64-windows\lib\spdlog.lib" />
     <Library Include="Sources\fmt\lib\fmt.lib" />
     <Library Include="Sources\zlib\lib\zlibstatic.lib" />
   </ItemGroup>
