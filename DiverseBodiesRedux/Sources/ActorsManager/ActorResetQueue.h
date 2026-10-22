@@ -33,12 +33,16 @@ public:
 		bool needsHeadReset = false; // Reset3D для головы (flags=kHead|kFace, excludeFlags=kNone)
 		bool needsDetach    = false; // DetachOverlays перед body Reset3D
 		bool needsHeadFix   = false; // AddChange(0x800) для faceNPC перед head Reset3D
+		bool needsOverlayUpdate = false; // OverlayInterface::UpdateOverlays(actor) после body Reset3D (применить таблицу оверлеев к текущему 3D)
+		bool needsSkinTintRefresh = false; // пересчитать TESNPC::bodyTintColor из tintingData и перекрасить кожу текущего 3D (тело/ладони)
 
 		ResetEntry& merge(const ResetEntry& other) noexcept {
 			needsBodyReset = needsBodyReset || other.needsBodyReset;
 			needsHeadReset = needsHeadReset || other.needsHeadReset;
 			needsDetach    = needsDetach    || other.needsDetach;
 			needsHeadFix   = needsHeadFix   || other.needsHeadFix;
+			needsOverlayUpdate = needsOverlayUpdate || other.needsOverlayUpdate;
+			needsSkinTintRefresh = needsSkinTintRefresh || other.needsSkinTintRefresh;
 			return *this;
 		}
 	};
@@ -80,6 +84,9 @@ private:
 
 	// Вспомогательный: DetachOverlays для актёра
 	static void DoDetachOverlays(RE::Actor* actor);
+
+	// Вспомогательный: синхронизация цвета кожи тела/ладоней с тинтами лица (см. .cpp)
+	static void DoRefreshSkinTint(RE::Actor* actor);
 
 	std::mutex m_mutex;
 

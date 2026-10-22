@@ -2,8 +2,44 @@
 #include "LooksMenu/LooksMenuInterfaces.h"
 #include <F4SE/F4SE.h>
 #include <RE/Fallout.h>
+#include <chrono>
+#include <thread>
 
 namespace logger = F4SE::log;
+
+namespace
+{
+	// TESNPC::GetBodyTintColor (Fallout4.exe 1.10.163, RVA 0x5B58E0).
+	// Возвращает цвет кожи NPC в out. force=true — заново найти в tintingData запись слота
+	// kSkinTone и пересчитать кэш TESNPC::bodyTintColor{R,G,B,A}; force=false — вернуть кэш.
+	// Голова зовёт её с force=true (поэтому берёт свежие тинты), тело и ладони — с force=false.
+	// 5-й аргумент (байт на стеке) во всех вызовах движка равен 0.
+	using GetBodyTintColor_t = void* (*)(RE::TESNPC*, RE::NiColorA*, void*, bool, bool);
+
+	// Fallout4.exe RVA 0x68C530: рекурсивно красит skin-tint шейдеры (тип 5) поддерева в цвет color.
+	using ApplySkinTintToTree_t = void* (*)(RE::NiAVObject*, const RE::NiColorA*);
+
+	inline bool getBodyTintColor(RE::TESNPC* npc, RE::NiColorA& out, bool force) {
+		if (!npc) return false;
+		REL::Relocation<GetBodyTintColor_t> func{ REL::Module::get().base() + 0x5B58E0 };
+		out = RE::NiColorA{};
+		func(npc, &out, nullptr, force, false);
+		return true;
+	}
+
+	inline void applySkinTintToTree(RE::NiAVObject* root, const RE::NiColorA& color) {
+		if (!root) return;
+		REL::Relocation<ApplySkinTintToTree_t> func{ REL::Module::get().base() + 0x68C530 };
+		func(root, &color);
+	}
+
+	inline uint32_t packBodyTint(const RE::TESNPC* npc) {
+		return (static_cast<uint32_t>(static_cast<uint8_t>(npc->bodyTintColorA)) << 24) |
+		       (static_cast<uint32_t>(static_cast<uint8_t>(npc->bodyTintColorR)) << 16) |
+		       (static_cast<uint32_t>(static_cast<uint8_t>(npc->bodyTintColorG)) << 8) |
+		        static_cast<uint32_t>(static_cast<uint8_t>(npc->bodyTintColorB));
+	}
+}
 
 // ---------------------------------------------------------------------------
 // RunTask: выполняется на игровом потоке (F4SE task queue)
@@ -145,6 +181,11 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 		return;
 	}
 
+	// --- Цвет кожи тела/ладоней: делаем до проверки 3D — кэш bodyTintColor нужен и при будущей сборке ---
+	if (entry.needsSkinTintRefresh) {
+		DoRefreshSkinTint(actor);
+	}
+
 	if (!actor->GetFullyLoaded3D()) {
 		// Get3D=false: движок ещё строит геометрию для этого актёра.
 		// Reset3D здесь не нужен — движок сам прочитает уже обновлённые данные TESNPC
@@ -158,11 +199,12 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 	}
 
 	logger::info("[ActorResetQueue] ExecuteReset START: actor={:#x} name='{}' "
-		"body={} head={} detach={} headFix={}",
+		"body={} head={} detach={} headFix={} overlayUpdate={} flags3D=0x{:x}",
 		formID,
 		actor->GetDisplayFullName() ? actor->GetDisplayFullName() : "?",
 		entry.needsBodyReset, entry.needsHeadReset,
-		entry.needsDetach, entry.needsHeadFix);
+		entry.needsDetach, entry.needsHeadFix, entry.needsOverlayUpdate,
+		actor->currentProcess ? static_cast<uint32_t>(actor->currentProcess->GetAll3DUpdateFlags()) : 0u);
 
 	using R3D = RE::RESET_3D_FLAGS;
 
@@ -180,6 +222,35 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 		}
 		logger::info("[ActorResetQueue] Body Reset3D: actor={:#x}", formID);
 		actor->Reset3D(false, R3D::kNone, true, R3D::kHead | R3D::kFace);
+		logger::info("[ActorResetQueue] Body Reset3D called: actor={:#x} flags3D=0x{:x}",
+			formID,
+			actor->currentProcess ? static_cast<uint32_t>(actor->currentProcess->GetAll3DUpdateFlags()) : 0u);
+	}
+
+	// --- UpdateOverlays: применить таблицу оверлеев LooksMenu к текущему 3D ---
+	// AddOverlay/RemoveOverlay правят только данные; геометрию строит UpdateOverlays
+	// (аналог UpdateMorphs для морфов). Выполняется на игровом потоке.
+	if (entry.needsOverlayUpdate) {
+		if (auto* overlayInterface = LooksMenuInterfaces<OverlayInterface>::GetInterface(); overlayInterface) {
+			const bool ok = overlayInterface->UpdateOverlays(actor);
+			logger::info("[ActorResetQueue] UpdateOverlays: actor={:#x} result={}", formID, ok);
+		}
+	}
+
+	// Диагностика: отложенный Reset3D должен быть обработан движком — смотрим, остались ли флаги.
+	if (entry.needsBodyReset) {
+		std::thread([formID]() {
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			F4SE::GetTaskInterface()->AddTask([formID]() {
+				auto* form = RE::TESForm::GetFormByID(formID);
+				auto* a = form ? RE::fallout_cast<RE::Actor*>(form) : nullptr;
+				if (!a) return;
+				logger::info("[ActorResetQueue] +1s: actor={:#x} flags3D=0x{:x} fullyLoaded3D={}",
+					formID,
+					a->currentProcess ? static_cast<uint32_t>(a->currentProcess->GetAll3DUpdateFlags()) : 0u,
+					a->GetFullyLoaded3D() != nullptr);
+			});
+		}).detach();
 	}
 
 	// --- Head Reset3D: flags=kHead|kFace, excludeFlags=kNone ---
@@ -202,6 +273,55 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 }
 
 // ---------------------------------------------------------------------------
+// DoRefreshSkinTint
+//
+// HEAD-пресет перезаписывает tintingData у faceNPC (в т.ч. тинт kSkinTone), и голова,
+// которую движок собирает с force=true, получает новый цвет кожи. Тело и ладони читают
+// кэш TESNPC::bodyTintColor, который никто не обновлял, — отсюда разный цвет кожи.
+// Пересчитываем цвет из тинтов faceNPC, переносим в кэш базового NPC актёра и красим
+// skin-tint шейдеры уже загруженного 3D (если Reset3D позже пересоберёт тело, оно
+// прочитает уже обновлённый кэш).
+// ---------------------------------------------------------------------------
+
+void ActorResetQueue::DoRefreshSkinTint(RE::Actor* actor)
+{
+	if (!actor) return;
+
+	auto* npc = actor->GetNPC();
+	if (!npc) return;
+	auto* face = npc->GetRootFaceNPC();
+	auto* source = face ? face : npc;
+
+	const uint32_t npcBefore = packBodyTint(npc);
+	const uint32_t faceBefore = packBodyTint(source);
+
+	RE::NiColorA color{};
+	if (!getBodyTintColor(source, color, true)) return;
+
+	// Базовый NPC актёра (для NPC с шаблоном лица он отличается от faceNPC) должен выдавать
+	// тот же цвет: переносим пересчитанный кэш.
+	if (npc != source) {
+		npc->bodyTintColorR = source->bodyTintColorR;
+		npc->bodyTintColorG = source->bodyTintColorG;
+		npc->bodyTintColorB = source->bodyTintColorB;
+		npc->bodyTintColorA = source->bodyTintColorA;
+	}
+
+	logger::info("[SkinTint] actor={:#x} npc={:#x} face={:#x} cache npc 0x{:08x}->0x{:08x}, face 0x{:08x}->0x{:08x}, color=({:.3f},{:.3f},{:.3f},{:.3f})",
+		actor->GetFormID(), npc->GetFormID(), source->GetFormID(),
+		npcBefore, packBodyTint(npc), faceBefore, packBodyTint(source),
+		color.r, color.g, color.b, color.a);
+
+	if (actor->GetFullyLoaded3D()) {
+		applySkinTintToTree(actor->Get3D(false), color);
+		if (actor == RE::PlayerCharacter::GetSingleton()) {
+			applySkinTintToTree(actor->Get3D(true), color);
+		}
+		logger::info("[SkinTint] actor={:#x} applied to loaded 3D", actor->GetFormID());
+	}
+}
+
+// ---------------------------------------------------------------------------
 // DoDetachOverlays — портирован из ResetBodyMorphs::Run
 // ---------------------------------------------------------------------------
 
@@ -214,6 +334,7 @@ void ActorResetQueue::DoDetachOverlays(RE::Actor* actor)
 	if (!bodyMorphInterface || !overlayInterface) return;
 
 	const bool isPlayer = (actor == RE::PlayerCharacter::GetSingleton());
+	uint32_t seenSlots = 0, morphableSlots = 0, destroyedSlots = 0;
 	RE::BipedAnim* equipData[2];
 	equipData[0] = actor->GetBiped().get();
 	equipData[1] = isPlayer ? RE::PlayerCharacter::GetSingleton()->GetBiped(true).get() : nullptr;
@@ -224,7 +345,9 @@ void ActorResetQueue::DoDetachOverlays(RE::Actor* actor)
 			RE::NiPointer<RE::NiAVObject> slotNode =
 				equipData[s]->object[i].partClone ? equipData[s]->object[i].partClone : nullptr;
 			if (!slotNode) continue;
+			++seenSlots;
 			if (!IsNodeMorphable(slotNode.get())) continue;
+			++morphableSlots;
 
 			RE::NiPointer<RE::NiNode> parent(slotNode->parent);
 			if (!parent) continue;
@@ -235,7 +358,11 @@ void ActorResetQueue::DoDetachOverlays(RE::Actor* actor)
 			RE::NiNode* overlayRoot = overlayInterface->GetOverlayRoot(actor, rootNode);
 			if (overlayRoot) {
 				overlayInterface->DestroyOverlaySlot(actor, overlayRoot, i);
+				++destroyedSlots;
 			}
 		}
 	}
+
+	logger::info("[ActorResetQueue] DetachOverlays: actor={:#x} slots(seen={} morphable={} destroyed={})",
+		actor->GetFormID(), seenSlots, morphableSlots, destroyedSlots);
 }

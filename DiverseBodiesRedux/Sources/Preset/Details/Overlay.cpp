@@ -54,7 +54,12 @@ bool Overlay::operator==(const Overlay& other) const noexcept {
 }
 
 void Overlay::apply(RE::Actor* actor) const {
-	LooksMenuInterfaces<OverlayInterface>::GetInterface()->AddOverlay(
+	auto* overlayInterface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
+	if (!overlayInterface) {
+		logger::critical("Overlay::apply: OverlayInterface is nullptr!");
+		return;
+	}
+	const auto uid = overlayInterface->AddOverlay(
 		actor,
 		actor->GetSex() == RE::Actor::Sex::Female,
 		m_priority,
@@ -63,6 +68,8 @@ void Overlay::apply(RE::Actor* actor) const {
 		m_offsetUV,
 		m_scaleUV
 	);
+	logger::info("[Overlay] AddOverlay: actor={:#x} template='{}' priority={} -> uid={}",
+		actor->formID, m_id, m_priority, uid);
 }
 
 const std::string& Overlay::id() const noexcept {
