@@ -476,6 +476,15 @@
     <ClInclude Include="Sources\ActorsManager\Details\ThreadSafeWaitingActors.hpp" />
     <ClInclude Include="Sources\detourxs\detourxs.h" />
     <ClInclude Include="Sources\DirectApply\DirectApply.h" />
+    <ClInclude Include="Sources\PrismaMenu\ActorHighlight.h" />
+    <ClInclude Include="Sources\PrismaMenu\MenuLocales.h" />
+    <ClInclude Include="Sources\PrismaMenu\PrismaMenu.h" />
+    <ClInclude Include="Sources\PrismaMenu\PrismaUI_Compat.h" />
+    <ClInclude Include="Sources\PrismaMenu\PrismaUI_F4_API.h" />
+    <ClInclude Include="Sources\PrismaMenu\PrismaViewHost.h" />
+    <ClInclude Include="Sources\Overrides\SessionOverrides.h" />
+    <ClInclude Include="Sources\PrismaMenu\PreviewCopy.h" />
+    <ClInclude Include="Sources\PrismaMenu\Ticker.h" />
     <ClInclude Include="Sources\globals.h" />
     <ClInclude Include="Sources\Hooks\Hooks.h" />
     <ClInclude Include="Sources\Ini\Ini.h" />
@@ -562,6 +571,12 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|x64'">cstdint;cstddef;</ForcedIncludeFiles>
     </ClCompile>
     <ClCompile Include="Sources\DirectApply\DirectApply.cpp" />
+    <ClCompile Include="Sources\PrismaMenu\ActorHighlight.cpp" />
+    <ClCompile Include="Sources\PrismaMenu\MenuLocales.cpp" />
+    <ClCompile Include="Sources\PrismaMenu\PrismaMenu.cpp" />
+    <ClCompile Include="Sources\PrismaMenu\PrismaViewHost.cpp" />
+    <ClCompile Include="Sources\Overrides\SessionOverrides.cpp" />
+    <ClCompile Include="Sources\PrismaMenu\PreviewCopy.cpp" />
     <ClCompile Include="Sources\Hooks\Hooks.cpp" />
     <ClCompile Include="Sources\Ini\Ini.cpp" />
     <ClCompile Include="Sources\LooksMenu\LooksMenuInterfaces.cpp" />

@@ -8,6 +8,8 @@
 #include <boost/json.hpp>
 #include <memory>
 #include <optional>
+#include <set>
+#include <vector>
 
 class ExcludedActors {
 public:
@@ -23,6 +25,22 @@ public:
 	* @return Указатель на набор типов пресетов, по которым актёр исключён, если набор пуст - значит актёр полностью исключён. std::nullopt, если актёр не в списке исключённых.
 	*/
 	std::optional<std::shared_ptr<std::unordered_set<PresetType>>> getExcludedTypes(const RE::Actor* actor) const noexcept;
+
+	/**
+	* @brief То же, что getExcludedTypes, но только по правилам из JSON, без оверрайдов сессии (SessionOverrides).
+	*/
+	std::optional<std::shared_ptr<std::unordered_set<PresetType>>> getBaseExcludedTypes(const RE::Actor* actor) const noexcept;
+
+	/// Правило исключения из JSON: ключ (FormID актёра или базового NPC) и исключённые типы.
+	struct Rule {
+		uint32_t key{ 0 };
+		std::set<PresetType> types;  ///< все типы, если правило исключает актёра целиком
+	};
+
+	/**
+	* @brief Все правила исключения, загруженные из JSON (без оверрайдов).
+	*/
+	std::vector<Rule> rules() const noexcept;
 
 	/**
 	* @brief Возвращает строку с описанием всех загруженных исключений и их флагов.

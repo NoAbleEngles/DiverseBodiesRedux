@@ -148,6 +148,12 @@
     <Filter Include="DiverseBodies\DirectApply">
       <UniqueIdentifier>{5cc2073b-94f5-4ced-91d5-47fc75fdd954}</UniqueIdentifier>
     </Filter>
+    <Filter Include="DiverseBodies\PrismaMenu">
+      <UniqueIdentifier>{3b1f6c52-9a0e-4d7e-8f2a-5c4e7d1a9b30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DiverseBodies\Overrides">
+      <UniqueIdentifier>{6d2a9e14-3c7b-4f58-a1d0-8b5e2f9c4a71}</UniqueIdentifier>
+    </Filter>
     <Filter Include="DiverseBodies\AS3\bin">
       <UniqueIdentifier>{186cf5a8-a0a4-4ffa-b498-ad3da0aa17d1}</UniqueIdentifier>
     </Filter>
@@ -1182,6 +1188,33 @@
     <ClInclude Include="Sources\DirectApply\DirectApply.h">
       <Filter>DiverseBodies\DirectApply</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\ActorHighlight.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\MenuLocales.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\PrismaMenu.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\PrismaUI_Compat.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\PrismaUI_F4_API.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\PrismaViewHost.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Overrides\SessionOverrides.h">
+      <Filter>DiverseBodies\Overrides</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\PreviewCopy.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\PrismaMenu\Ticker.h">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClInclude>
     <ClInclude Include="Sources\Preset\Bodymorphs.h">
       <Filter>DiverseBodies\Preset</Filter>
     </ClInclude>
@@ -1408,6 +1441,24 @@
     </ClCompile>
     <ClCompile Include="Sources\DirectApply\DirectApply.cpp">
       <Filter>DiverseBodies\DirectApply</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\PrismaMenu\ActorHighlight.cpp">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\PrismaMenu\MenuLocales.cpp">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\PrismaMenu\PrismaMenu.cpp">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\PrismaMenu\PrismaViewHost.cpp">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Overrides\SessionOverrides.cpp">
+      <Filter>DiverseBodies\Overrides</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\PrismaMenu\PreviewCopy.cpp">
+      <Filter>DiverseBodies\PrismaMenu</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Preset\OverlayPreset.cpp">
       <Filter>DiverseBodies\Preset</Filter>

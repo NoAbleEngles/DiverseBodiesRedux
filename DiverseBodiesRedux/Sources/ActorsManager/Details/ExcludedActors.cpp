@@ -1,5 +1,6 @@
 #include "ExcludedActors.h"
 #include <Utils/utility.h>
+#include "Overrides/SessionOverrides.h"
 #include "LooksMenu/ParseLooksMenuPreset.h" // для find_ci
 #include <sstream>
 #include <iomanip>
@@ -12,6 +13,11 @@ inline std::unordered_set<std::uint32_t> getActorAndTesNPCFormIDsFromJsonArray(b
         if (formID.is_string()) {
             std::string str = formID.as_string().c_str();
             auto tesform = functions::getFormFromString(str, plugin);
+            if (!tesform) {
+                // Плагина нет в сборке или в нём нет такой формы: правило для неё просто пропускается.
+                logger::info("Exclusion form {} not found in plugin: {}", str, plugin.empty() ? "Fallout4.esm" : plugin);
+                continue;
+            }
             if (tesform->As<RE::Actor>() || tesform->As<RE::TESNPC>()) {
                 set.insert(tesform->GetFormID());
             }
@@ -177,7 +183,80 @@ bool ExcludedActors::loadExclusionsFromJsonObject(boost::json::object& obj) noex
 	return true;
 }
 
+namespace {
+    std::set<PresetType> allTypes() {
+        std::set<PresetType> result;
+        for (auto type = PresetType::BODYMORPHS; type < PresetType::END; type = static_cast<PresetType>(static_cast<int>(type) + 1)) {
+            result.insert(type);
+        }
+        return result;
+    }
+}
+
+std::vector<ExcludedActors::Rule> ExcludedActors::rules() const noexcept
+{
+    std::vector<Rule> result;
+    result.reserve(m_excludedForms.size());
+    for (const auto& [key, flags] : m_excludedForms) {
+        Rule rule;
+        rule.key = key;
+        if (flags && !flags->empty()) {
+            rule.types.insert(flags->begin(), flags->end());
+        } else {
+            rule.types = allTypes();  // null или пустой набор = исключён целиком
+        }
+        result.push_back(std::move(rule));
+    }
+    return result;
+}
+
+// Правила JSON + оверрайды этой сессии (SessionOverrides): allow снимает исключение типа, deny
+// добавляет. Оверрайды ищутся по обоим ключам, как и сами правила: по актёру и по его базовому NPC.
 std::optional<std::shared_ptr<std::unordered_set<PresetType>>> ExcludedActors::getExcludedTypes(const RE::Actor* actor) const noexcept
+{
+    auto base = getBaseExcludedTypes(actor);
+    auto& overrides = SessionOverrides::get();
+    if (!actor || !overrides.any()) {
+        return base;
+    }
+
+    std::set<PresetType> effective;
+    if (base.has_value()) {
+        if (*base && !(*base)->empty()) {
+            effective.insert((*base)->begin(), (*base)->end());
+        } else {
+            effective = allTypes();
+        }
+    }
+
+    std::vector<uint32_t> keys{ actor->formID };
+    auto* leveledForm = functions::getLeveledForm(actor);
+    if (!leveledForm) {
+        leveledForm = actor->GetNPC();
+    }
+    if (leveledForm && leveledForm->GetFormID() != actor->formID) {
+        keys.push_back(leveledForm->GetFormID());
+    }
+    for (const auto key : keys) {
+        const auto entry = overrides.exclusionFor(key);
+        for (const auto type : entry.allow) {
+            effective.erase(type);
+        }
+        for (const auto type : entry.deny) {
+            effective.insert(type);
+        }
+    }
+
+    if (effective.empty()) {
+        return std::nullopt;  // не исключён
+    }
+    if (effective.size() == allTypes().size()) {
+        return std::shared_ptr<std::unordered_set<PresetType>>{};  // исключён целиком (null = все типы)
+    }
+    return std::make_shared<std::unordered_set<PresetType>>(effective.begin(), effective.end());
+}
+
+std::optional<std::shared_ptr<std::unordered_set<PresetType>>> ExcludedActors::getBaseExcludedTypes(const RE::Actor* actor) const noexcept
 {
     if (!actor) {
         return std::nullopt;
