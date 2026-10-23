@@ -84,51 +84,67 @@ void ActorResetQueue::Schedule(RE::Actor* actor, ResetEntry entry, bool priority
 	if (!actor) return;
 	const uint32_t id = actor->GetFormID();
 
-	std::lock_guard lock(m_mutex);
+	// ВАЖНО: AddTask вызывается ПОСЛЕ освобождения m_mutex (см. ниже) — иначе AB-BA
+	// дедлок с внутренним локом самого F4SE: F4SE::TaskInterface::AddTask под капотом
+	// берёт свою критическую секцию, а её же держит F4SE, когда синхронно вызывает
+	// RunTask::Run() -> ActorResetQueue::ExecuteReset(), которому в свою очередь нужен
+	// этот самый m_mutex (в начале ExecuteReset). Если Schedule() вызывает AddTask,
+	// ещё держа m_mutex, а в этот момент F4SE-поток уже внутри RunTask::Run ждёт
+	// m_mutex — оба потока ждут друг друга навечно. Подтверждено снятыми стеками
+	// (2026-10-23): один поток стоял в ExecuteReset на std::lock_guard(m_mutex),
+	// другой — в этой функции на RtlEnterCriticalSection внутри AddTask.
+	bool needsTask = false;
+	{
+		std::lock_guard lock(m_mutex);
 
-	// Мержим флаги, если запись уже есть
-	auto it = m_pending.find(id);
-	if (it != m_pending.end()) {
-		logger::info("[ActorResetQueue] Schedule MERGE: actor={:#x} priority={} "
-			"before body={} head={} detach={} headFix={} "
-			"+ new body={} head={} detach={} headFix={}",
-			id, priority,
-			it->second.needsBodyReset, it->second.needsHeadReset,
-			it->second.needsDetach, it->second.needsHeadFix,
-			entry.needsBodyReset, entry.needsHeadReset,
-			entry.needsDetach, entry.needsHeadFix);
-		it->second.merge(entry);
-		logger::info("[ActorResetQueue] Schedule MERGE result: actor={:#x} "
-			"body={} head={} detach={} headFix={}",
-			id,
-			it->second.needsBodyReset, it->second.needsHeadReset,
-			it->second.needsDetach, it->second.needsHeadFix);
-	} else {
-		logger::info("[ActorResetQueue] Schedule NEW: actor={:#x} priority={} "
-			"body={} head={} detach={} headFix={}",
-			id, priority,
-			entry.needsBodyReset, entry.needsHeadReset,
-			entry.needsDetach, entry.needsHeadFix);
-		m_pending[id] = entry;
-	}
-
-	if (priority) {
-		// Поднимаем в начало deque (убираем старое вхождение, вставляем в front)
-		auto pos = std::find(m_order.begin(), m_order.end(), id);
-		if (pos != m_order.end()) {
-			m_order.erase(pos);
+		// Мержим флаги, если запись уже есть
+		auto it = m_pending.find(id);
+		if (it != m_pending.end()) {
+			logger::info("[ActorResetQueue] Schedule MERGE: actor={:#x} priority={} "
+				"before body={} head={} detach={} headFix={} "
+				"+ new body={} head={} detach={} headFix={}",
+				id, priority,
+				it->second.needsBodyReset, it->second.needsHeadReset,
+				it->second.needsDetach, it->second.needsHeadFix,
+				entry.needsBodyReset, entry.needsHeadReset,
+				entry.needsDetach, entry.needsHeadFix);
+			it->second.merge(entry);
+			logger::info("[ActorResetQueue] Schedule MERGE result: actor={:#x} "
+				"body={} head={} detach={} headFix={}",
+				id,
+				it->second.needsBodyReset, it->second.needsHeadReset,
+				it->second.needsDetach, it->second.needsHeadFix);
+		} else {
+			logger::info("[ActorResetQueue] Schedule NEW: actor={:#x} priority={} "
+				"body={} head={} detach={} headFix={}",
+				id, priority,
+				entry.needsBodyReset, entry.needsHeadReset,
+				entry.needsDetach, entry.needsHeadFix);
+			m_pending[id] = entry;
 		}
-		m_order.push_front(id);
-	} else {
-		// Добавляем в конец только если ещё не запланирован
+
+		if (priority) {
+			// Поднимаем в начало deque (убираем старое вхождение, вставляем в front)
+			auto pos = std::find(m_order.begin(), m_order.end(), id);
+			if (pos != m_order.end()) {
+				m_order.erase(pos);
+			}
+			m_order.push_front(id);
+		} else {
+			// Добавляем в конец только если ещё не запланирован
+			if (m_tasked.find(id) == m_tasked.end()) {
+				m_order.push_back(id);
+			}
+		}
+
+		// Решаем, нужен ли новый F4SE-таск — САМ вызов AddTask ниже, вне лока.
 		if (m_tasked.find(id) == m_tasked.end()) {
-			m_order.push_back(id);
+			m_tasked.insert(id);
+			needsTask = true;
 		}
-	}
+	} // m_mutex освобождён здесь
 
-	// Добавляем F4SE-таск только если его ещё нет
-	if (m_tasked.find(id) == m_tasked.end()) {
-		m_tasked.insert(id);
+	if (needsTask) {
 		F4SE::GetTaskInterface()->AddTask(new RunTask(id));
 		logger::info("[ActorResetQueue] AddTask for actor={:#x}", id);
 	}

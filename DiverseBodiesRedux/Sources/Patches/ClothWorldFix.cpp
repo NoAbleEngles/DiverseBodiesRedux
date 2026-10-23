@@ -7,30 +7,40 @@ namespace patches
 {
     void ClothDetachQueue::ScheduleDrain()
     {
-        std::scoped_lock lk(ClothDetachQueue::_mtx);
-        if (ClothDetachQueue::_drainScheduled) {
+        // ВАЖНО: AddTask вызывается ПОСЛЕ освобождения _mtx — тот же класс AB-BA
+        // дедлока, что нашли и исправили в ActorResetQueue::Schedule (2026-10-23):
+        // F4SE::TaskInterface::AddTask берёт свою внутреннюю критическую секцию,
+        // которую F4SE же держит, когда синхронно вызывает тело уже поставленной
+        // задачи — если держать здесь _mtx во время AddTask, а другой поток в этот
+        // момент ждёт _mtx изнутри такой задачи, оба зависнут навечно.
+        {
+            std::scoped_lock lk(ClothDetachQueue::_mtx);
+            if (ClothDetachQueue::_drainScheduled) {
+                return;
+            }
+            ClothDetachQueue::_drainScheduled = true;
+        }
+
+        auto ti = F4SE::GetTaskInterface();
+        if (!ti) {
+            std::scoped_lock lk(ClothDetachQueue::_mtx);
+            ClothDetachQueue::_drainScheduled = false;
             return;
         }
-        ClothDetachQueue::_drainScheduled = true;
 
-        if (auto ti = F4SE::GetTaskInterface()) {
-            ti->AddTask([]() {
-                // Должны выполняться на главном потоке; TLS проверим на всякий
-                if (!HasGameTLSGuardSlot()) {
-                    std::scoped_lock lk2(ClothDetachQueue::_mtx);
-                    ClothDetachQueue::_drainScheduled = false;
-                    return;
-                }
-
-                ClothDetachQueue::DrainOnce();
-
+        ti->AddTask([]() {
+            // Должны выполняться на главном потоке; TLS проверим на всякий
+            if (!HasGameTLSGuardSlot()) {
                 std::scoped_lock lk2(ClothDetachQueue::_mtx);
                 ClothDetachQueue::_drainScheduled = false;
-                });
-        }
-        else {
+                return;
+            }
+
+            ClothDetachQueue::DrainOnce();
+
+            std::scoped_lock lk2(ClothDetachQueue::_mtx);
             ClothDetachQueue::_drainScheduled = false;
-        }
+            });
     }
 
     void ClothDetachQueue::DrainOnce()

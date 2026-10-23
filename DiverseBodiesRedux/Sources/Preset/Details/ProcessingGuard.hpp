@@ -77,6 +77,15 @@ private:
     Container& container_;
     std::shared_mutex& mutex_;
     Key key_;
-    std::condition_variable_any cv_; // Ћокальна€ CV - проще и быстрее
+    // ¬ј∆Ќќ: static inline Ч одна обща€ на все экземпл€ры ProcessingGuard<Container>.
+    // –аньше каждый ProcessingGuard имел —¬ќё приватную cv_ Ч и release()'s notify_one()
+    // будил свою (другую) копию, а не ту, на которой ждЄт другой поток в
+    // acquire_sync_for Ч notify никогда не доходил до реального ожидающего, и тот
+    // всегда ждал полный timeout (до 5с на главном/игровом потоке при каждой
+    // конкуренции на одном npcGuard-ключе Ч именно это вызывало многосекундные
+    // зависани€ главного потока при смене локации с однотипными NPC).
+    // ќбщий cv_ на все пулы безопасен: ложные пробуждени€ чужого пула
+    // просто снова провер€ют своЄ условие и засыпают, если оно ещЄ не выполнено.
+    static inline std::condition_variable_any cv_;
     std::atomic<bool> acquired_{ false };
 };
