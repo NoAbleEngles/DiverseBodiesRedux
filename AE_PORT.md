@@ -21,10 +21,14 @@ Upstream **Diverse Bodies Redux (DBR)** (**v2.10.0**, commit `c5206ba`) targets 
        - `BSClothExtraData::SetSettleOnTransitionToSim` (`0x1DA7A40` -> `0x18A1B60`).
        - `BSClothUtils::BSTransformSet::QClothSupportsLOD` (`0x1DAF3B0` -> `0x18A79F0`).
        - `BSClothUtils::BSTransformSet::ResetPrediction` (`0x1DADA50` -> `0x18A6070`).
-       - `BSClothExtraData::SetWorld` (`0x1DA6C30` -> `0x18A0DA0`) with dynamic TLS index resolution (`ResolveGameTlsIndex` accepting valid TLS index `0`).
+       - `BSClothExtraData::SetWorld` (`0x1DA6C30` -> `0x18A0DA0`): native implementation with dynamic TLS index resolution (`ResolveGameTlsIndex` accepting valid TLS index `0`) and null transformSet guards.
        - `TESNPC::ChangeHeadPart` (`0x5B9B30` -> `0x6599B0`), `TESNPC::ChangeHeadPartRemovePart` (`0x5B5560` -> `0x6555A0`), and `TESNPC::AddHeadPart` (`0x5B52E0` -> `0x655350`).
+     - Engine Patches & Crash Guards:
+       - `FaceGenNullGuard.cpp`: Guards `BSFaceGenManager::PrepareHeadPartModel` (`0x6E0880`) against null `a_headPart` or `a_headData` dereferences, preventing cell transition crashes without corrupting facegen geometries.
+       - `FacialMorphIntensityFix.cpp`: Normalizes Facial Morph Intensity to 1.0f fleet-wide (NOPs `0x6503F2` `SetFacialBoneMorphIntensity` and overrides `0x654E20` `TESNPC::GetFacialBoneMorphIntensity` to return 1.0f), eliminating chargen face morph distortion across all 657 vanilla, DLC, and modded NPCs without requiring ESP/ESM plugin edits.
+       - `ClothMorphFilter.cpp`: Hooks into F4EE morph dispatch (`bStripClothBodyMorphs=true`) to detect Havok cloth physics meshes (`isClothPhysicsNode`) and prevent non-zero body morph deltas from deforming physics garments.
    - Updated direct engine call RVAs:
-     - `ActorResetQueue.cpp`: `TESNPC::GetBodyTintColor` (`0x5B58E0` -> `0x655910`), `ApplySkinTintToTree` (`0x68C530` -> `0x6EF070`).
+     - `ActorResetQueue.cpp`: `TESNPC::GetBodyTintColor` (`0x5B58E0` -> `0x655910`), `ApplySkinTintToTree` (`0x68C530` -> `0x6EF070`), native `paintNodeSkinTint` (`BSVisit::VisitSkinTint` at `0x6EF070` + `BSVisit::RefreshFaceAndSkinRenderState` at `0x6E1140`).
      - `ActorHighlight.cpp`: `TESObjectREFR::ApplyEffectShader` (`0x422180` -> `0x5E21A0` / `NG_ID 2205201`).
      - `ActorsManager.cpp`: `TESObjectREFR` event source RVAs (`0x436A40`/`0x436A70`/`0x436590`/`0x4365C0` -> `0x52D940`/`0x52D970`/`0x52D560`/`0x52D590`).
 

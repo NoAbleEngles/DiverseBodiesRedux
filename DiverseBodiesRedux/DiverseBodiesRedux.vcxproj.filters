@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
@@ -1275,7 +1275,16 @@
     <ClInclude Include="Sources\Preset\Details\ProcessingGuard.hpp">
       <Filter>DiverseBodies\Preset\Details</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Patches\ClothMorphFilter.h">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClInclude>
     <ClInclude Include="Sources\Patches\ClothWorldFix.h">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Patches\FaceGenNullGuard.h">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Patches\FacialMorphIntensityFix.h">
       <Filter>DiverseBodies\Patches</Filter>
     </ClInclude>
     <ClInclude Include="Sources\ActorsManager\ActorResetQueue.h">
@@ -1517,7 +1526,16 @@
     <ClCompile Include="Sources\Patches\PatchesMemUtils.cpp">
       <Filter>DiverseBodies\Patches</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Patches\ClothMorphFilter.cpp">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClCompile>
     <ClCompile Include="Sources\Patches\ClothWorldFix.cpp">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Patches\FaceGenNullGuard.cpp">
+      <Filter>DiverseBodies\Patches</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Patches\FacialMorphIntensityFix.cpp">
       <Filter>DiverseBodies\Patches</Filter>
     </ClCompile>
     <ClCompile Include="Sources\ActorsManager\ActorResetQueue.cpp">

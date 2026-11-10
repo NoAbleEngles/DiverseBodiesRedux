@@ -493,7 +493,10 @@
     <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
     <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h" />
     <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h" />
+    <ClInclude Include="Sources\Patches\ClothMorphFilter.h" />
     <ClInclude Include="Sources\Patches\ClothWorldFix.h" />
+    <ClInclude Include="Sources\Patches\FaceGenNullGuard.h" />
+    <ClInclude Include="Sources\Patches\FacialMorphIntensityFix.h" />
     <ClInclude Include="Sources\Patches\Patches.h" />
     <ClInclude Include="Sources\Patches\PatchesMemUtils.h" />
     <ClInclude Include="Sources\Patches\x-cell_patch.h" />
@@ -583,7 +586,10 @@
     <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp" />
     <ClCompile Include="Sources\main.cpp" />
     <ClCompile Include="Sources\MainMenuHandler\MainMenuHandler.cpp" />
+    <ClCompile Include="Sources\Patches\ClothMorphFilter.cpp" />
     <ClCompile Include="Sources\Patches\ClothWorldFix.cpp" />
+    <ClCompile Include="Sources\Patches\FaceGenNullGuard.cpp" />
+    <ClCompile Include="Sources\Patches\FacialMorphIntensityFix.cpp" />
     <ClCompile Include="Sources\Patches\Patches.cpp" />
     <ClCompile Include="Sources\Patches\PatchesMemUtils.cpp" />
     <ClCompile Include="Sources\Patches\x-cell_patch.cpp" />
