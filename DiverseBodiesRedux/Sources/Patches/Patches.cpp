@@ -28,7 +28,7 @@ namespace patches {
 	void Hooked_BSClothExtraData_SetSettle(RE::BSClothExtraData* thisPtr, bool enable)
 	{
 		__try {
-			if (!thisPtr || ClothGuard::IsQuarantined(thisPtr)) {
+			if (!thisPtr) {
 				return;
 			}
 			if (!IsReadableFast(thisPtr, sizeof(void*))) {
@@ -68,6 +68,41 @@ namespace patches {
 		}
 	}
 
+	static void HavokAddRef(void* obj) {
+		if (!obj) return;
+		auto* p16 = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(obj) + 0x0A);
+		if (*p16 == 0) return;
+		auto* p32 = reinterpret_cast<volatile uint32_t*>(reinterpret_cast<uint8_t*>(obj) + 0x08);
+		uint32_t cur = *p32;
+		while (true) {
+			uint32_t next = (cur & 0xFFFF0000) | ((cur + 1) & 0xFFFF);
+			uint32_t prev = _InterlockedCompareExchange(reinterpret_cast<volatile long*>(p32), next, cur);
+			if (prev == cur) break;
+			cur = prev;
+		}
+	}
+
+	static void HavokRelease(void* obj) {
+		if (!obj) return;
+		auto* p16 = reinterpret_cast<uint16_t*>(reinterpret_cast<uint8_t*>(obj) + 0x0A);
+		if (*p16 == 0) return;
+		auto* p32 = reinterpret_cast<volatile uint32_t*>(reinterpret_cast<uint8_t*>(obj) + 0x08);
+		uint32_t cur = *p32;
+		uint32_t next = 0;
+		while (true) {
+			next = (cur & 0xFFFF0000) | ((cur - 1) & 0xFFFF);
+			uint32_t prev = _InterlockedCompareExchange(reinterpret_cast<volatile long*>(p32), next, cur);
+			if (prev == cur) break;
+			cur = prev;
+		}
+		if ((next & 0xFFFF) == 0) {
+			auto** vtbl = *reinterpret_cast<void***>(obj);
+			using Dtor_t = void(__fastcall*)(void*);
+			auto dtor = reinterpret_cast<Dtor_t>(vtbl[3]); // [vtable + 0x18]
+			dtor(obj);
+		}
+	}
+
 	void Hooked_SetTransformSet2(void* instance, uint32_t index, void* transformSet) {
 		// Twin overload of hclClothInstance::setTransformSet at RVA 0x18C85F0.
 		// Dereferences transformSet at +0x0A (cmp word ptr [r8+0xA], 0).
@@ -79,7 +114,16 @@ namespace patches {
 				return;
 			}
 			if (!transformSet) {
-				logger::warn("Hooked_SetTransformSet2: transformSet is null. Skipping...");
+				// Safely set transformSets[index] = nullptr, releasing any old transformSet
+				auto** transformSets = *reinterpret_cast<uint8_t***>(reinterpret_cast<uint8_t*>(instance) + 0x40);
+				int32_t count = *reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(instance) + 0x48);
+				if (transformSets && static_cast<int32_t>(index) < count) {
+					void* oldTs = transformSets[index];
+					if (oldTs) {
+						HavokRelease(oldTs);
+					}
+					transformSets[index] = nullptr;
+				}
 				return;
 			}
 			if (!IsReadableFast(transformSet, 0x0C)) {
@@ -324,7 +368,15 @@ namespace patches {
 				return EXCEPTION_EXECUTE_HANDLER;
 			}(GetExceptionCode(), GetExceptionInformation())
 		) {
-			return false;
+			// CRITICAL FIX: Must mark *doneFlag = 1 and return true so the engine dequeues
+			// the invalid entry. Returning false causes the engine to endlessly retry the entry,
+			// causing an infinite loop, 100% CPU lockup, and game freeze.
+			__try {
+				if (self && reinterpret_cast<std::uintptr_t>(self) >= 0x10000) {
+					*reinterpret_cast<std::uint8_t*>(reinterpret_cast<std::uintptr_t>(self) + 0x82) = 1;
+				}
+			} __except (EXCEPTION_EXECUTE_HANDLER) {}
+			return true;
 		}
 	}
 
@@ -379,11 +431,62 @@ namespace patches {
 
 	void Hooked_BSClothExtraData__SetSettleOnTransitionToSim_Bool(RE::BSClothExtraData* thisPtr, bool enable)
 	{
-		if (!thisPtr || ClothGuard::IsQuarantined(thisPtr)) {
+		if (!thisPtr) {
 			return;
 		}
-		if (ValidateClothChain(thisPtr)) {
-			BSClothExtraData__SetSettleOnTransitionToSim_Bool_Handler.GetOriginal()(thisPtr, enable);
+
+		// Full clean native implementation of BSClothExtraData::SetSettleOnTransitionToSim (0x18A1B60).
+		// In vanilla Fallout4.exe, the loop over clothInstance->transformSets[0] at 0x18A1B90 dereferences
+		// the transformSet pointer without checking for nullptr (mov [rcx+0x1B7], r9b).
+		// When physics hair (e.g. AzarPonytailHairstyles) or cloth meshes with missing bones pass
+		// transformSet = nullptr via SetTransformSet2, vanilla 0x18A1B90 immediately crashes with
+		// EXCEPTION_ACCESS_VIOLATION writing to 0x0000000001B7.
+		// Furthermore, DetourXS cannot relocate the relative branch 'je 0x18a1ba0' at 0x18A1B69 into
+		// its heap trampoline, so calling GetOriginal() is unsafe.
+		// By implementing the full loop here with explicit null checks and without GetOriginal(),
+		// valid cloth (skirts, dresses, labcoats) receives the settle flag cleanly while null transformSets
+		// are safely skipped without crashing.
+		__try {
+			auto* thisBytes = reinterpret_cast<uint8_t*>(thisPtr);
+			if (!IsReadableFast(thisBytes + 0x70, sizeof(uint32_t))) {
+				return;
+			}
+			uint32_t count = *reinterpret_cast<uint32_t*>(thisBytes + 0x70);
+			if (count == 0) {
+				return;
+			}
+
+			if (!IsReadableFast(thisBytes + 0x60, sizeof(uintptr_t))) {
+				return;
+			}
+			auto** arr = *reinterpret_cast<uint8_t***>(thisBytes + 0x60);
+			if (!arr || !IsReadableFast(arr, count * sizeof(uintptr_t))) {
+				return;
+			}
+
+			for (uint32_t i = 0; i < count; ++i) {
+				auto* clothInstance = arr[i];
+				if (!clothInstance || !IsReadableFast(clothInstance + 0x48, sizeof(int32_t))) {
+					continue;
+				}
+
+				int32_t numTransformSets = *reinterpret_cast<int32_t*>(clothInstance + 0x48);
+				if (numTransformSets > 0) {
+					if (!IsReadableFast(clothInstance + 0x40, sizeof(uintptr_t))) {
+						continue;
+					}
+					auto** transformSets = *reinterpret_cast<uint8_t***>(clothInstance + 0x40);
+					if (transformSets && IsReadableFast(transformSets, sizeof(uintptr_t))) {
+						auto* transformSet = transformSets[0];
+						if (transformSet && IsWritableFast(transformSet + 0x1B7, 1)) {
+							transformSet[0x1B7] = enable ? 1 : 0;
+						}
+					}
+				}
+			}
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			logger::error("Hooked_BSClothExtraData__SetSettleOnTransitionToSim_Bool: exception handled");
 		}
 	}
 
@@ -512,28 +615,114 @@ namespace patches {
 			return;
 		}
 
-		// Уже в карантине (выставлен где-то ещё) — выходим без логов/работы.
-		if (ClothGuard::IsQuarantined(thisPtr)) {
-			return;
-		}
+		__try {
+			// Setup TLS task slot (0x32 = cloth task id)
+			uint32_t* taskSlot = nullptr;
+			uint32_t oldTask = 0;
+			const auto* tlsIdxPtr = GetGameTlsIndexPtr();
+			if (tlsIdxPtr) {
+				uint32_t tlsIndex = *tlsIdxPtr;
+				auto* tlsArray = reinterpret_cast<uint8_t**>(__readgsqword(0x58));
+				if (tlsArray && tlsArray[tlsIndex]) {
+					taskSlot = reinterpret_cast<uint32_t*>(tlsArray[tlsIndex] + 0x9C0);
+					oldTask = *taskSlot;
+					*taskSlot = 0x32;
+				}
+			}
 
-		// Вызов не с игрового потока (нет TLS) — физ-моды (CBP/OCBP и т.п.) легитимно
-		// дёргают cloth-функции со своего потока каждый кадр, это НЕ признак порчи
-		// объекта. Пропускаем этот вызов молча без спама в лог.
-		if (!HasGameTLSGuardSlot()) {
-			return;
-		}
+			auto* thisBytes = reinterpret_cast<uint8_t*>(thisPtr);
+			void* oldWorld = *reinterpret_cast<void**>(thisBytes + 0x78);
 
-		// Цепочка выглядит битой/ещё не собранной — тоже пропускаем этот вызов молча.
-		if (!ValidateAllBSTransformSets(thisPtr)) {
-			return;
-		}
+			if (newWorld == oldWorld) {
+				if (taskSlot) *taskSlot = oldTask;
+				return;
+			}
 
-		// Всё валидно и на верном потоке — вызываем оригинал
-		auto orig = BSClothExtraData_SetWorld_Handler.GetOriginal();
-		if (!orig) {
-			return;
+			uint32_t count = *reinterpret_cast<uint32_t*>(thisBytes + 0x70);
+			if (count == 0) {
+				if (taskSlot) *taskSlot = oldTask;
+				return;
+			}
+
+			if (oldWorld) {
+				using RemoveCloth_t = void(__fastcall*)(void*, void*);
+				REL::Relocation<RemoveCloth_t>{ 0x141871C90 }(oldWorld, thisBytes + 0x60);
+			}
+
+			HavokAddRef(newWorld);
+			HavokRelease(oldWorld);
+
+			*reinterpret_cast<void**>(thisBytes + 0x78) = newWorld;
+
+			if (!newWorld) {
+				if (taskSlot) *taskSlot = oldTask;
+				return;
+			}
+
+			using AddCloth_t = void(__fastcall*)(void*, void*);
+			REL::Relocation<AddCloth_t>{ 0x141871BD0 }(newWorld, thisBytes + 0x60);
+
+			count = *reinterpret_cast<uint32_t*>(thisBytes + 0x70);
+			if (count == 0) {
+				if (taskSlot) *taskSlot = oldTask;
+				return;
+			}
+
+			auto** arr = *reinterpret_cast<uint8_t***>(thisBytes + 0x60);
+			if (!arr) {
+				if (taskSlot) *taskSlot = oldTask;
+				return;
+			}
+
+			using SetLOD_t = void(__fastcall*)(void*, uint32_t);
+			REL::Relocation<SetLOD_t> SetLOD{ 0x1418C8370 };
+
+			using QClothSupportsLOD_t = bool(__fastcall*)(void*);
+			REL::Relocation<QClothSupportsLOD_t> QClothSupportsLOD{ 0x1418A79F0 };
+
+			using ResetPrediction_t = void(__fastcall*)(void*);
+			REL::Relocation<ResetPrediction_t> ResetPrediction{ 0x1418A6070 };
+
+			for (uint32_t i = 0; i < count; ++i) {
+				auto* clothInstance = arr[i];
+				if (!clothInstance) continue;
+
+				int32_t numTransformSets = *reinterpret_cast<int32_t*>(clothInstance + 0x48);
+				auto** transformSets = *reinterpret_cast<uint8_t***>(clothInstance + 0x40);
+
+				uint32_t lod = 0;
+				if (numTransformSets > 0 && transformSets) {
+					auto* ts0 = transformSets[0];
+					// CRITICAL NULL GUARD: Check ts0 before calling QClothSupportsLOD!
+					// In vanilla Fallout4.exe, physics hair (Dragonfly, KS Hairdos) or outfits
+					// with missing bones pass ts0 = nullptr, causing QClothSupportsLOD to dereference
+					// [rcx + 0x19C] at Fallout4.exe+18A79F0 with rcx=0 (EXCEPTION_ACCESS_VIOLATION).
+					if (ts0 && IsReadableFast(ts0 + 0x198, sizeof(uint32_t))) {
+						if (QClothSupportsLOD(ts0)) {
+							lod = *reinterpret_cast<uint32_t*>(ts0 + 0x198);
+						}
+					}
+				}
+
+				SetLOD(clothInstance, lod);
+
+				if (numTransformSets > 0 && transformSets) {
+					for (int32_t j = 0; j < numTransformSets; ++j) {
+						auto* ts = transformSets[j];
+						// CRITICAL NULL GUARD: Check ts before calling ResetPrediction
+						// and writing lodPrediction (0xFFFFFFFF) at ts + 0x1A0!
+						if (ts && IsWritableFast(ts + 0x1A0, sizeof(uint32_t))) {
+							ResetPrediction(ts);
+							*reinterpret_cast<uint32_t*>(ts + 0x1A0) = 0xFFFFFFFF;
+						}
+					}
+				}
+			}
+
+			if (taskSlot) *taskSlot = oldTask;
 		}
-		CallOriginalSafe(orig, thisPtr, newWorld);
+		__except (EXCEPTION_EXECUTE_HANDLER) {
+			logger::error("Hooked_BSClothExtraData_SetWorld: exception handled");
+		}
 	}
 }

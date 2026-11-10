@@ -5,6 +5,9 @@
 #include <filesystem>
 #include "LooksMenu/LooksMenuHooks.hpp"
 #include "Patches/Patches.h"
+#include "Patches/ClothMorphFilter.h"
+#include "Patches/FaceGenNullGuard.h"
+#include "Patches/FacialMorphIntensityFix.h"
 #include "DirectApply/DirectApply.h"
 #include "Patches/x-cell_patch.h"
 #include "PrismaMenu/PrismaMenu.h"
@@ -128,6 +131,12 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f
 		logger::critical("Failed to read ini file... closing plugin.");
 		return false;
 	}
+	if (auto log = spdlog::get("global log"); log && globals::g_ini) {
+		const auto logLevel = std::clamp(globals::g_ini->at("DEBUG/iLogLevel", 3), 0, 6);
+		const auto logFlush = std::clamp(globals::g_ini->at("DEBUG/iLogFlush", 3), 0, 6);
+		log->set_level(static_cast<spdlog::level::level_enum>(logLevel));
+		log->flush_on(static_cast<spdlog::level::level_enum>(logFlush));
+	}
 
 	const auto serialization = F4SE::GetSerializationInterface();
 	if (!serialization) {
@@ -152,6 +161,12 @@ extern "C" DLLEXPORT bool F4SEAPI F4SEPlugin_Load(const F4SE::LoadInterface* a_f
 		logger::critical("Starting...");
 	}
 
+	// Install FaceGen null pointer guard (prevents CTD at Fallout4.exe+0x6E0887 when actor head data is null)
+	patches::InstallFaceGenNullGuard();
+
+	// Install FMIN Fix: normalizes Facial Morph Intensity to 1.0f fleet-wide (prevents collapsed/distorted faces on NPCs like Doctor Sun, Solomon, Vadim)
+	patches::InstallFacialMorphIntensityFix();
+
 	return true;
 }
 
@@ -162,6 +177,12 @@ void MessageHandler(F4SE::MessagingInterface::Message* a_msg)
 	}
 
 	switch (a_msg->type) {
+	case F4SE::MessagingInterface::kPostLoad: {
+		if (!globals::g_ini || globals::g_ini->at("PATCH/bStripClothBodyMorphs", true)) {
+			patches::InstallClothMorphFilter();
+		}
+		break;
+	}
 	case F4SE::MessagingInterface::kPreLoadGame: {
 		PrismaMenu::get().OnGameLoaded();
 		ActorsManager::notifyGameStartLoading();
@@ -218,13 +239,15 @@ void initAfterGameDataWasLoaded() {
 	if (!looksMenuHooks::initializeHookActorUpdateManagerTESInitScriptEvent()) 		
 		logger::critical("Failed to install ActorUpdateManagerTESInitScriptEventHook");
 
-	if (!looksMenuHooks::initializeHookActorUpdateManagerFlush())
-		logger::critical("Failed to install ActorUpdateManagerFlushHook");
+	if (ini.at("PATCH/bHookActorUpdateManagerFlush", false)) {
+		if (!looksMenuHooks::initializeHookActorUpdateManagerFlush())
+			logger::critical("Failed to install ActorUpdateManagerFlushHook");
+	}
 
 	/*if (!looksMenuHooks::initializeF4EEUpdateOverlaysRun()) 
 		logger::critical("Failed to install F4EEUpdateOverlaysRunHook");*/
 
-	if (ini.at("PATCH/bLooksMenuRemoveOverlayHook", true)) {
+	if (ini.at("PATCH/bLooksMenuRemoveOverlayHook", false)) {
 		if (!looksMenuHooks::initializeHookRemoveOverlay())
 			logger::critical("Failed to install RemoveOverlayHook");
 	}
@@ -265,19 +288,27 @@ void initAfterGameDataWasLoaded() {
 	// (см. PrewarmClothTlsGuard() в Patches.cpp) и физика ткани пропадёт целиком.
 	patches::PrewarmClothTlsGuard();
 
+	// Critical Havok cloth crash guards & simulation handlers:
+	// SetTransformSet, SetTransformSet2, SetSettleOnTransitionToSim, and SetWorld
+	// guard against null transformSet in hclClothInstance and BSClothExtraData.
+	// In vanilla Fallout4.exe, physics hair (Dragonfly, KS Hairdos, AzarPonytails) or cloth meshes with missing bones pass
+	// transformSet = nullptr, causing crashes at:
+	// 1. 0x18C85FF (SetTransformSet2: cmp word ptr [r8+0xA], 0)
+	// 2. 0x18A1B90 (SetSettleOnTransitionToSim: mov [rcx+0x1B7], r9b)
+	// 3. 0x18A79F0 (SetWorld -> QClothSupportsLOD: cmp dword ptr [rcx+0x19C], 0xFFFFFFFF)
+	// Both SetSettleOnTransitionToSim and SetWorld are implemented as clean native C++ handlers without GetOriginal(),
+	// safely skipping null transformSets while properly attaching valid cloth (skirts, dresses, labcoats) to the Havok world
+	// and enabling seamless cloth simulation without freezing or detached meshes.
 	patches::SetTransformSet_Handler.Install();
 	patches::SetTransformSet2_Handler.Install();
 	patches::BSClothExtraData__SetSettleOnTransitionToSim_Bool_Handler.Install();
-	patches::BSClothUtils_BSTransformSet_QClothSupportsLOD_Handler.Install();
-	patches::BSClothUtils_BSTransformSet_ResetPrediction_void_Handler.Install();
-	// BSClothExtraData::SetWorld (0x18A0DA0) starts with a RIP-relative instruction:
-	// "mov r8d, [rip + 0x25d2267]" (loads _tls_index). DetourXS cannot relocate RIP-relative
-	// instructions when copying them into the trampoline buffer on the heap. This corrupted
-	// r8d with arbitrary heap garbage, causing out-of-bounds TLS array access and crash at
-	// Fallout4.exe+0x18A0DCC (0xC0000005). When SetWorld was suppressed by guards, Havok cloth
-	// transforms remained at (0,0,0), blowing up meshes across the sky.
-	// Leaving SetWorld unhooked allows Fallout4.exe's clean native implementation to run.
-	// patches::BSClothExtraData_SetWorld_Handler.Install();
+	patches::BSClothExtraData_SetWorld_Handler.Install();
+
+	// Simulation sub-hooks that remain unhooked:
+	// QClothSupportsLOD and ResetPrediction are safely handled inside the native SetWorld implementation above.
+	// Hooking them directly is unsafe because ResetPrediction (0x18A6070) is only 10 bytes long, and QClothSupportsLOD has RIP branches.
+	// patches::BSClothUtils_BSTransformSet_QClothSupportsLOD_Handler.Install();
+	// patches::BSClothUtils_BSTransformSet_ResetPrediction_void_Handler.Install();
 
 	if (ini.at("PATCH/bHeadDataGuard", false)) {
 		patches::PendingActorHeadData_Process.Install();
@@ -285,6 +316,9 @@ void initAfterGameDataWasLoaded() {
 	if (ini.at("PATCH/bChangeHeadPart", true)) {
 		patches::ChangeHeadPart.Install();
 		patches::ChangeHeadPartRemovePart.Install();
+	}
+	if (ini.at("PATCH/bStripClothBodyMorphs", true)) {
+		patches::InstallClothMorphFilter();
 	}
 
 	xcell_patch::getInstance().reinitialize();
