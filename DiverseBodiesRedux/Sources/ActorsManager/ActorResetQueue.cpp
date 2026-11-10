@@ -394,7 +394,7 @@ void ActorResetQueue::DoDetachOverlays(RE::Actor* actor)
 			if (!IsNodeMorphable(slotNode.get())) continue;
 			++morphableSlots;
 
-			RE::NiPointer<RE::NiNode> parent(slotNode->parent);
+			RE::NiNode* parent = slotNode->parent;
 			if (!parent) continue;
 
 			RE::NiNode* rootNode = GetRootNode(actor, slotNode.get());

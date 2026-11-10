@@ -406,7 +406,7 @@ void ResetBodyMorphs::Run() {
 					if (slotNode)
 					{
 						if (IsNodeMorphable(slotNode.get())) {
-							RE::NiPointer<RE::NiNode> parent(slotNode->parent);
+							RE::NiNode* parent = slotNode->parent;
 
 							auto overlayInterface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
 							if (!bodyMorphInterface) {

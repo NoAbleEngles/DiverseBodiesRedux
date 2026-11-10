@@ -1,4 +1,5 @@
 #include "LooksMenuInterfaces.h"
+#include "Patches/PatchesMemUtils.h"
 
 // Отключаем временно ошибку 4100
 #pragma warning(push)
@@ -74,16 +75,25 @@ bool BodyMorphInterface::UpdateMorphs(RE::Actor* actor) { return false; }
 
 bool VisitObjects(RE::NiAVObject* parent, std::function<bool(RE::NiAVObject*)> functor)
 {
+	if (!parent || !patches::IsReadableFast(parent, sizeof(void*)))
+		return false;
+
 	if (functor(parent))
 		return true;
 
-	RE::NiPointer<RE::NiNode> node(parent->IsNode());
-	if (node) {
-		for (uint32_t i = 0; i < node->children.size(); i++) {
-			RE::NiPointer<RE::NiAVObject> object(node->children[i]);
-			if (object) {
-				if (VisitObjects(object.get(), functor))
-					return true;
+	if (RE::NiNode* node = parent->IsNode()) {
+		if (!patches::IsReadableFast(node, sizeof(RE::NiNode))) {
+			return false;
+		}
+		const auto* childData = node->children.data();
+		const std::uint16_t sz = node->children.size();
+		if (childData && sz > 0 && patches::IsReadableFast(childData, static_cast<std::size_t>(sz) * sizeof(void*))) {
+			for (std::uint16_t i = 0; i < sz; ++i) {
+				RE::NiAVObject* child = childData[i].get();
+				if (child && patches::IsReadableFast(child, sizeof(void*))) {
+					if (VisitObjects(child, functor))
+						return true;
+				}
 			}
 		}
 	}
@@ -92,16 +102,22 @@ bool VisitObjects(RE::NiAVObject* parent, std::function<bool(RE::NiAVObject*)> f
 }
 
 bool IsNodeMorphable(RE::NiAVObject* rootNode) {
-	
+	if (!rootNode || !patches::IsReadableFast(rootNode, sizeof(void*))) {
+		return false;
+	}
 	return VisitObjects(rootNode, [&](RE::NiAVObject* node) {
-		RE::BSTriShape* trishape = node->IsTriShape();
-		if (trishape)
-		{
-			RE::NiPointer<RE::NiExtraData> bodyMorph(trishape->GetExtraData("MORPH_SHAPE"));
+		if (!node || !patches::IsReadableFast(node, sizeof(void*))) {
+			return false;
+		}
+		if (RE::BSTriShape* trishape = node->IsTriShape()) {
+			if (!patches::IsReadableFast(trishape, sizeof(void*))) {
+				return false;
+			}
+			RE::NiExtraData* bodyMorph = trishape->GetExtraData("MORPH_SHAPE");
 			if (!bodyMorph)
 				return false;
 
-			RE::NiPointer<RE::NiExtraData> morphPath(trishape->GetExtraData("MORPH_FILE"));
+			RE::NiExtraData* morphPath = trishape->GetExtraData("MORPH_FILE");
 			if (!morphPath)
 				return false;
 
