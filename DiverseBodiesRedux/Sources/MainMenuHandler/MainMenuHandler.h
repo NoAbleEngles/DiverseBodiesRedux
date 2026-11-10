@@ -3,7 +3,7 @@
 
 class MenuLoaderListener {
 public:
-	using MainMenuLoaderHandler = void(__fastcall*)(void* instance);
+	using MainMenuLoaderHandler = void*(__fastcall*)(void* instance);
 
 	static MenuLoaderListener& get();
 
@@ -13,7 +13,7 @@ public:
 private:
 	MenuLoaderListener();
 
-	static void Hooked_MainMenuLoaderHandler(void* instance);
+	static void* Hooked_MainMenuLoaderHandler(void* instance);
 	static Hooks<MainMenuLoaderHandler> mainMenuLoaderHandler;
 	static std::vector<std::pair<std::string, std::function<void()>>> HookedMainMenuLoaderActions;
 };

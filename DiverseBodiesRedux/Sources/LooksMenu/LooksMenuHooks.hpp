@@ -261,8 +261,11 @@ namespace looksMenuHooks {
     Hooks<ActorUpdateManagerFlushHandler> ActorUpdateManagerFlushHook;
 
     void HookedActorUpdateManagerFlush(ActorUpdateManager* m) {
-		logger::critical("HookedActorUpdateManagerFlush called");
-		//ActorUpdateManagerFlushHook.GetOriginal()(m);
+		logger::info("HookedActorUpdateManagerFlush called");
+		auto orig = ActorUpdateManagerFlushHook.GetOriginal();
+		if (orig) {
+			orig(m);
+		}
     }
 
     bool initializeHookActorUpdateManagerFlush() {

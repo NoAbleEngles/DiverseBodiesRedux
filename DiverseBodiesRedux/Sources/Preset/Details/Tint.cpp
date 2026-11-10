@@ -368,12 +368,13 @@ bool Tint::loadFromJsonObject(uint32_t uniqueID, const boost::json::object& obj)
             auto val = it->value().as_double();
             logger::info("Tint::loadFromLMPresetObject: uniqueID {}: Percent value (double): {}", uniqueID, val);
             
-            auto scaledVal = val * 255;
-            if (scaledVal < 0 || scaledVal > 255) {
-                logger::error("Tint::loadFromLMPresetObject: uniqueID {}: 'Percent' field (scaled) is not in range (0.0 - 1.0): {} -> {}", uniqueID, val, scaledVal);
+            // BGSCharacterTint::Entry::percent хранится в диапазоне 0..100 (движок умножает на 2.55f в GetBodyTintColor).
+            auto scaledVal = (val >= 0.0 && val <= 1.0) ? (val * 100.0) : val;
+            if (scaledVal < 0.0 || scaledVal > 255.0) {
+                logger::error("Tint::loadFromLMPresetObject: uniqueID {}: 'Percent' field (scaled) is out of range: {} -> {}", uniqueID, val, scaledVal);
                 return false;
             }
-            m_percent = static_cast<uint8_t>(scaledVal);
+            m_percent = static_cast<uint8_t>(scaledVal + 0.5);
         } else {
             logger::error("Tint::loadFromLMPresetObject: uniqueID {}: 'Percent' field is not a valid number, type: {}", uniqueID, static_cast<int>(it->value().kind()));
             return false;

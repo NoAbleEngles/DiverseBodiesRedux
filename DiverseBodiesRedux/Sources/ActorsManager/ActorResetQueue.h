@@ -67,15 +67,19 @@ public:
 	 */
 	void Clear() noexcept;
 
-	// Вспомогательный: синхронизация цвета кожи тела/ладоней с тинтами лица (см. .cpp)
+	// Вспомогательный: синхронизация кэша TESNPC::bodyTintColor (можно звать сразу после applyTints)
+	static bool SyncNPCSkinTintCache(RE::Actor* actor, RE::NiColorA* outColor = nullptr);
+
+	// Вспомогательный: синхронизация цвета кожи тела/ладоней с тинтами лица + покраска шейдеров 3D (см. .cpp)
 	static void DoRefreshSkinTint(RE::Actor* actor);
 
 private:
 	void StartWorker();
 	void WorkerLoop();
 
-	// Выполнить сброс для актёра (вызывается на игровом потоке через F4SE AddTask)
-	void ExecuteReset(uint32_t formID);
+	// Выполнить сброс для актёра (вызывается на игровом потоке через F4SE AddTask).
+	// Возвращает true, если реально был вызван Reset3D (требует 200мс паузы).
+	bool ExecuteReset(uint32_t formID);
 
 	// Вспомогательный: DetachOverlays для актёра
 	static void DoDetachOverlays(RE::Actor* actor);

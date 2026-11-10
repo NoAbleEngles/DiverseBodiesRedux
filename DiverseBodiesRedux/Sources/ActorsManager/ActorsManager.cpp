@@ -178,6 +178,32 @@ bool ActorsManager::applyByActorPtr(RE::Actor* actor, bool reset3d) {
 	if (!actor)
 		return false;
 	if (auto it = m_presets.find(actor->formID); it != m_presets.end() && !isStaleEntry(actor)) {
+		// If a higher-priority preset specifically targeting this actor's FormID exists,
+		// upgrade and override any generic preset previously stored in co-save.
+		auto candidatePresets = PresetsGenerator{ actor }.getRandomPresets();
+		bool hasExactOverride = false;
+		if (!candidatePresets.second.empty()) {
+			for (const auto& p : candidatePresets.second) {
+				if (p && p->check(actor) == CoincidenceLevel::FULL) {
+					bool alreadyHas = false;
+					for (const auto& curP : it->second) {
+						if (curP && curP->id() == p->id()) {
+							alreadyHas = true;
+							break;
+						}
+					}
+					if (!alreadyHas) {
+						hasExactOverride = true;
+						break;
+					}
+				}
+			}
+		}
+		if (hasExactOverride) {
+			logger::info("ActorsManager: Upgrading actor 0x{:x} to exact FormID preset.", actor->formID);
+			updateActorPresetsInStorage(candidatePresets);
+			return applyActorPresets(candidatePresets, reset3d);
+		}
 		return applyActorPresets(*it, reset3d);
 	}
 	else {
@@ -206,6 +232,23 @@ RE::BSEventNotifyControl ActorsManager::ProcessEvent(const RE::TESObjectLoadedEv
 
 	if (a_event.loaded) {
 		handleActorLoading(actor);
+		// Если пресет головы был применён раньше (например на TESInitScriptEvent до загрузки 3D),
+		// убеждаемся, что только что собранные меши тела/рук покрашены в актуальный скин-тон лица.
+		bool hasHeadPreset = false;
+		{
+			std::lock_guard lock(m_mutex);
+			if (auto it = m_presets.find(actor->formID); it != m_presets.end()) {
+				for (const auto& p : it->second) {
+					if (p && p->type() == PresetType::HEAD) {
+						hasHeadPreset = true;
+						break;
+					}
+				}
+			}
+		}
+		if (hasHeadPreset) {
+			m_resetQueue.Schedule(actor, ActorResetQueue::ResetEntry{ .needsSkinTintRefresh = true });
+		}
 	} else {
 		// Актёр выгружен — убираем из кэша, чтобы следующая загрузка этого же актёра
 		// прошла через handleActorLoading и получила свежие пресеты.
@@ -798,10 +841,14 @@ bool ActorsManager::applyActorPresets(const ActorsManagerDefs::ActorPreset& acto
 		// Reset3D нужен только если 3D уже загружена. Если Get3D=false — движок
 		// построит геометрию сам из уже записанных данных TESNPC. Планировать
 		// Reset3D в этом случае бесполезно и порождает лишние таски в очереди.
-		if (!actor->GetFullyLoaded3D()) {
-			logger::info("applyActorPresets: actor={:#x} HEAD applied but Get3D=false — "
-				"skip Reset3D (engine will build geometry from TESNPC data)",
-				actor->formID);
+		// Также пропускаем HEAD Reset3D для StartsDead/LOW-process трупов (middleHigh == nullptr),
+		// так как AIProcess::DoUpdate3DModel(0x20) при завершении PendingActorHeadData требует middleHigh != nullptr.
+		const auto* procBytes = actor->currentProcess ? reinterpret_cast<const std::uint8_t*>(actor->currentProcess) : nullptr;
+		const bool hasMiddleHigh = procBytes && (*reinterpret_cast<void* const*>(procBytes + 0x08) != nullptr);
+		if (!actor->GetFullyLoaded3D() || !hasMiddleHigh) {
+			logger::info("applyActorPresets: actor={:#x} HEAD applied but Get3D={} hasMiddleHigh={} — "
+				"skip HEAD Reset3D",
+				actor->formID, actor->GetFullyLoaded3D() != nullptr, hasMiddleHigh);
 		} else if (needsDeferredHeadReset) {
 			// HEAD + BODYMORPHS: Reset3D делается через ResetActor — F4SE-таск,
 			// который будет добавлен в конце ResetBodyMorphs::Run через m_doAfterAll.
@@ -854,6 +901,13 @@ void ActorsManager::doReset3D(RE::Actor* actor, const std::set<PresetType>& appl
 	// Проверяем что у актёра вообще есть загруженная 3D-модель.
 	// Без 3D сбрасывать нечего, а движок может упасть.
 	if (!actor->Get3D()) {
+		return;
+	}
+
+	const auto* procBytes = actor->currentProcess ? reinterpret_cast<const std::uint8_t*>(actor->currentProcess) : nullptr;
+	const bool hasMiddleHigh = procBytes && (*reinterpret_cast<void* const*>(procBytes + 0x08) != nullptr);
+	if (!hasMiddleHigh && appliedTypes.contains(PresetType::HEAD) && !appliedTypes.contains(PresetType::BODYMORPHS)) {
+		logger::info("doReset3D: actor={:#x} has no middleHigh process (StartsDead/LOW) — skipping HEAD Reset3D", actor->formID);
 		return;
 	}
 
@@ -920,7 +974,12 @@ void ActorsManager::doReset3D(RE::Actor* actor, const std::set<PresetType>& appl
 
 	// currentProcess и extraList обязательны: без них Reset3D вызывает краш.
 	if (actor->currentProcess && actor->extraList) {
-		actor->Reset3D(false, flags, true, RE::RESET_3D_FLAGS::kNone);
+		using R3D = RE::RESET_3D_FLAGS;
+		auto excludeFlags = containsBodyMorphs ? R3D::kNone : (R3D::kModel | R3D::kSkin | R3D::kSkeleton | R3D::kScale);
+		actor->Reset3D(false, flags, true, excludeFlags);
+	}
+	if (containsHead) {
+		ActorResetQueue::DoRefreshSkinTint(actor);
 	}
 }
 

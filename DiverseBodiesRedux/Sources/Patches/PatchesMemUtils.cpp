@@ -7,65 +7,15 @@ namespace patches
 	bool IsReadableFast(const void* p, std::size_t minSize)
 	{
 		if (!p) return false;
-
-		MEMORY_BASIC_INFORMATION mbi{};
-		if (!VirtualQuery(p, &mbi, sizeof(mbi)))
-			return false;
-
-		if ((mbi.State & MEM_COMMIT) == 0)
-			return false;
-
-		if (mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS))
-			return false;
-
-		const DWORD prot = mbi.Protect & 0xFF;
-		switch (prot) {
-		case PAGE_READONLY:
-		case PAGE_READWRITE:
-		case PAGE_WRITECOPY:
-		case PAGE_EXECUTE_READ:
-		case PAGE_EXECUTE_READWRITE_:
-		case PAGE_EXECUTE_WRITECOPY:
-			break;
-		default:
-			return false;
-		}
-
-		const auto start = reinterpret_cast<std::uintptr_t>(p);
-		const auto base = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress);
-		const auto off = start - base;
-		return (off + minSize) <= mbi.RegionSize;
+		const auto u = reinterpret_cast<std::uintptr_t>(p);
+		return (u >= 0x10000ULL && u < 0x00007FFFFFFE0000ULL);
 	}
 
 	bool IsWritableFast(void* p, std::size_t minSize)
 	{
 		if (!p) return false;
-
-		MEMORY_BASIC_INFORMATION mbi{};
-		if (!VirtualQuery(p, &mbi, sizeof(mbi)))
-			return false;
-
-		if ((mbi.State & MEM_COMMIT) == 0)
-			return false;
-
-		if (mbi.Protect & (PAGE_GUARD | PAGE_NOACCESS))
-			return false;
-
-		const DWORD prot = mbi.Protect & 0xFF;
-		switch (prot) {
-		case PAGE_READWRITE:
-		case PAGE_WRITECOPY:
-		case PAGE_EXECUTE_READWRITE_:
-		case PAGE_EXECUTE_WRITECOPY:
-			break;
-		default:
-			return false;
-		}
-
-		const auto start = reinterpret_cast<std::uintptr_t>(p);
-		const auto base = reinterpret_cast<std::uintptr_t>(mbi.BaseAddress);
-		const auto off = start - base;
-		return (off + minSize) <= mbi.RegionSize;
+		const auto u = reinterpret_cast<std::uintptr_t>(p);
+		return (u >= 0x10000ULL && u < 0x00007FFFFFFE0000ULL);
 	}
 
 	static const std::uint32_t* s_gameTlsIndexPtr = nullptr;

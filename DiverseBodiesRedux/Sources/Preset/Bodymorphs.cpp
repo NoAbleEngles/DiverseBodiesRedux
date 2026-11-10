@@ -120,6 +120,10 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		Interface->SetMorph(actor, true, "ChubbyArms", globals::kwd_diversed, 0.0f);
 		Interface->SetMorph(actor, true, "ForearmSize", globals::kwd_diversed, 0.0f);
 		Interface->SetMorph(actor, true, "MuscularArms", globals::kwd_diversed, 0.0f);
+		Interface->SetMorph(actor, true, "Arms", nullptr, 0.0f);
+		Interface->SetMorph(actor, true, "ChubbyArms", nullptr, 0.0f);
+		Interface->SetMorph(actor, true, "ForearmSize", nullptr, 0.0f);
+		Interface->SetMorph(actor, true, "MuscularArms", nullptr, 0.0f);
 	}
 
 	for (const auto& [morphName, morphValue] : m_morphs) {
@@ -130,6 +134,9 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 			}
 		}
 		Interface->SetMorph(actor, isFemale, morphName, globals::kwd_diversed, morphValue);
+		// Also populate base morph (keyword=nullptr) so physics engines (OCBP / cbp.dll)
+		// querying GetMorph(actor, isFemale, slider, nullptr) read true breast & body dimensions:
+		Interface->SetMorph(actor, isFemale, morphName, nullptr, morphValue);
 	}
 
 	// UpdateMorphs применяет записанные значения к геометрии 3D-нода.
@@ -187,7 +194,9 @@ bool BodymorphsPreset::remove(RE::Actor* actor) const
 		return false;
 	}
 
-	Interface->RemoveMorphsByKeyword(actor, actor->GetSex() == RE::Actor::Sex::Female, globals::kwd_diversed);
+	const bool isFemale = (actor->GetSex() == RE::Actor::Sex::Female);
+	Interface->RemoveMorphsByKeyword(actor, isFemale, globals::kwd_diversed);
+	Interface->RemoveMorphsByKeyword(actor, isFemale, nullptr);
 
 	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 	return true;

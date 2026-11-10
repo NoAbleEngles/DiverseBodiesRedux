@@ -23,9 +23,10 @@ void MenuLoaderListener::AddFunction(const std::string& id, const std::function<
     AddFunction(std::make_pair(id, func));
 }
 
-void MenuLoaderListener::Hooked_MainMenuLoaderHandler(void* instance) {
-    mainMenuLoaderHandler.GetOriginal()(instance);
+void* MenuLoaderListener::Hooked_MainMenuLoaderHandler(void* instance) {
+    void* result = mainMenuLoaderHandler.GetOriginal()(instance);
     for (const auto& action : HookedMainMenuLoaderActions) {
         action.second();
     }
+    return result ? result : instance;
 }

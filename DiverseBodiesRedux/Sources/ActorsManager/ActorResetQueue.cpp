@@ -16,12 +16,28 @@ namespace
 	// 5-й аргумент (байт на стеке) во всех вызовах движка равен 0.
 	using GetBodyTintColor_t = void* (*)(RE::TESNPC*, RE::NiColorA*, void*, bool, bool);
 
+	// BSVisit::VisitSkinTint (Fallout4.exe 1.11.240.0 RVA 0x6EF070) и
+	// BSVisit::RefreshFaceAndSkinRenderState (RVA 0x6E1140) — нативная пара из TESNPC::UpdateSkinTint (RVA 0x6E31F0),
+	// которая обходит граф 3D, записывает skinTintColor (material + 0xC0) во все BSLightingShaderMaterialSkinTint
+	// (feature == 5) и обновляет константные буферы геометрии (0x1421C8CA0) без пересборки мешей/физики ткани.
+	using VisitSkinTint_t = void (*)(RE::NiAVObject*, const RE::NiColorA*);
+	using RefreshFaceAndSkinRenderState_t = std::uint32_t (*)(RE::NiAVObject*, bool*);
+
 	inline bool getBodyTintColor(RE::TESNPC* npc, RE::NiColorA& out, bool force) {
 		if (!npc) return false;
 		REL::Relocation<GetBodyTintColor_t> func{ REL::Module::get().base() + 0x655910 };
 		out = RE::NiColorA{};
 		func(npc, &out, nullptr, force, false);
 		return true;
+	}
+
+	inline void paintNodeSkinTint(RE::NiAVObject* root, const RE::NiColorA& color) {
+		if (!root) return;
+		REL::Relocation<VisitSkinTint_t> visitSkinTint{ REL::Module::get().base() + 0x6EF070 };
+		REL::Relocation<RefreshFaceAndSkinRenderState_t> refreshRenderState{ REL::Module::get().base() + 0x6E1140 };
+		visitSkinTint(root, &color);
+		bool flag = false;
+		refreshRenderState(root, &flag);
 	}
 
 	inline uint32_t packBodyTint(const RE::TESNPC* npc) {
@@ -77,8 +93,9 @@ void ActorResetQueue::WorkerLoop()
 		}
 
 		auto done = std::make_shared<std::atomic<bool>>(false);
-		F4SE::GetTaskInterface()->AddTask([this, formID, done]() {
-			ExecuteReset(formID);
+		auto didReset3D = std::make_shared<std::atomic<bool>>(false);
+		F4SE::GetTaskInterface()->AddTask([this, formID, done, didReset3D]() {
+			didReset3D->store(ExecuteReset(formID));
 			done->store(true);
 		});
 
@@ -89,11 +106,11 @@ void ActorResetQueue::WorkerLoop()
 
 		if (m_stop) break;
 
-		// Задержка между сбросами: 200 миллисекунд (~12 кадров при 60 FPS).
-		// Это гарантирует, что движок закончит асинхронную загрузку текстур и мешей
-		// для текущего актёра и Vulkan освободит временные буферы памяти перед
-		// тем, как начнётся сброс следующего актёра.
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		// Задержка 200 мс нужна только тогда, когда реально запускался асинхронный Reset3D.
+		// Для быстрой перекраски скин-тинта (5 мкс) или пропущенных Get3D=false записей пауза не нужна.
+		if (didReset3D->load()) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		}
 	}
 }
 
@@ -154,7 +171,7 @@ void ActorResetQueue::Clear() noexcept
 // ExecuteReset — вызывается из ProcessNext на игровом потоке
 // ---------------------------------------------------------------------------
 
-void ActorResetQueue::ExecuteReset(uint32_t formID)
+bool ActorResetQueue::ExecuteReset(uint32_t formID)
 {
 	ResetEntry entry{};
 	{
@@ -162,7 +179,7 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 		auto it = m_pending.find(formID);
 		if (it == m_pending.end()) {
 			logger::info("[ActorResetQueue] ExecuteReset: actor={:#x} — no pending entry (cleared), skip", formID);
-			return;
+			return false;
 		}
 		entry = it->second;
 		m_pending.erase(it);
@@ -176,22 +193,24 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 
 	if (!actor) {
 		logger::warn("[ActorResetQueue] ExecuteReset: actor {:#x} not found (unloaded), skip", formID);
-		return;
+		return false;
 	}
 
-	// --- Цвет кожи тела/ладоней: синхронизируем кэш bodyTintColor и шейдеры ---
+	// --- Цвет кожи тела/ладоней: синхронизируем кэш bodyTintColor и красим шейдеры 3D ---
 	DoRefreshSkinTint(actor);
+
+	if (!entry.needsBodyReset && !entry.needsHeadReset && !entry.needsDetach && !entry.needsOverlayUpdate) {
+		return false;
+	}
 
 	if (!actor->GetFullyLoaded3D()) {
 		// Get3D=false: движок ещё строит геометрию для этого актёра.
 		// Reset3D здесь не нужен — движок сам прочитает уже обновлённые данные TESNPC
 		// и построит правильную геометрию. Это нормальный путь при загрузке ячейки.
-		// (Если таск всё-таки попал сюда — значит Schedule был вызван без проверки
-		// GetFullyLoaded3D в вызывающем коде. Это баг там, а не здесь.)
 		logger::warn("[ActorResetQueue] ExecuteReset: actor={:#x} Get3D=false — skip Reset3D "
 			"(engine builds geometry from TESNPC data directly)",
 			formID);
-		return;
+		return false;
 	}
 
 	logger::info("[ActorResetQueue] ExecuteReset START: actor={:#x} name='{}' "
@@ -219,10 +238,30 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 	}
 
 	// --- Reset3D execution: ровно один вызов Reset3D на актёра ---
+	auto* procBytes = actor->currentProcess ? reinterpret_cast<std::uint8_t*>(actor->currentProcess) : nullptr;
+	const bool hasMiddleHigh = procBytes && (*reinterpret_cast<void* const*>(procBytes + 0x08) != nullptr);
+	const bool hasHigh       = procBytes && (*reinterpret_cast<void* const*>(procBytes + 0x10) != nullptr);
+
+	if (entry.needsHeadReset && !hasMiddleHigh) {
+		logger::info("[ActorResetQueue] actor={:#x} has no middleHigh process (StartsDead/LOW) — suppressing head reset", formID);
+		entry.needsHeadReset = false;
+	}
+
+	bool resetCalled = false;
+
 	if (entry.needsBodyReset && !entry.needsHeadReset) {
 		// Только тело: исключаем голову (excludeFlags = kHead | kFace)
-		logger::info("[ActorResetQueue] Body Reset3D: actor={:#x}", formID);
+		logger::info("[ActorResetQueue] Body Reset3D: actor={:#x} hasHigh={}", formID, hasHigh);
+		if (procBytes && !hasHigh) {
+			// Для StartsDead / LOW-process трупов (high == nullptr) движок игнорирует Update3DModel,
+			// пока не взведён флаг currentProcess->unkE4 (+0xE4), как это делает Actor::EquipObject.
+			procBytes[0xE4] = 1;
+		}
 		actor->Reset3D(false, R3D::kNone, true, R3D::kHead | R3D::kFace);
+		if (procBytes && !hasHigh) {
+			procBytes[0xE4] = 0;
+		}
+		resetCalled = true;
 		logger::info("[ActorResetQueue] Body Reset3D called: actor={:#x} flags3D=0x{:x}",
 			formID,
 			actor->currentProcess ? static_cast<uint32_t>(actor->currentProcess->GetAll3DUpdateFlags()) : 0u);
@@ -238,33 +277,36 @@ void ActorResetQueue::ExecuteReset(uint32_t formID)
 			}
 		}
 		logger::info("[ActorResetQueue] {}Reset3D: actor={:#x}", entry.needsBodyReset ? "Head+Body " : "Head ", formID);
-		actor->Reset3D(false, entry.needsBodyReset ? R3D::kNone : (R3D::kHead | R3D::kFace), true, R3D::kNone);
+		const auto excludeFlags = entry.needsBodyReset ? R3D::kNone : (R3D::kModel | R3D::kSkin | R3D::kSkeleton | R3D::kScale);
+		actor->Reset3D(false, entry.needsBodyReset ? R3D::kNone : (R3D::kHead | R3D::kFace), true, excludeFlags);
+		resetCalled = true;
 	}
 
-	if (entry.needsHeadReset || entry.needsBodyReset) {
+	if (resetCalled) {
 		DoRefreshSkinTint(actor);
 	}
 
 	logger::info("[ActorResetQueue] ExecuteReset DONE: actor={:#x}", formID);
+	return resetCalled;
 }
 
 // ---------------------------------------------------------------------------
-// DoRefreshSkinTint
+// SyncNPCSkinTintCache & DoRefreshSkinTint
 //
 // HEAD-пресет перезаписывает tintingData у faceNPC (в т.ч. тинт kSkinTone), и голова,
 // которую движок собирает с force=true, получает новый цвет кожи. Тело и ладони читают
 // кэш TESNPC::bodyTintColor, который никто не обновлял, — отсюда разный цвет кожи.
 // Пересчитываем цвет из тинтов faceNPC, переносим в кэш базового NPC актёра и красим
-// skin-tint шейдеры уже загруженного 3D (если Reset3D позже пересоберёт тело, оно
-// прочитает уже обновлённый кэш).
+// skin-tint шейдеры уже загруженного 3D (BSVisit::VisitSkinTint + RefreshFaceAndSkinRenderState,
+// идентично нативной TESNPC::UpdateSkinTint @ RVA 0x6E31F0 без пересборки тела/физики ткани).
 // ---------------------------------------------------------------------------
 
-void ActorResetQueue::DoRefreshSkinTint(RE::Actor* actor)
+bool ActorResetQueue::SyncNPCSkinTintCache(RE::Actor* actor, RE::NiColorA* outColor)
 {
-	if (!actor) return;
+	if (!actor) return false;
 
 	auto* npc = actor->GetNPC();
-	if (!npc) return;
+	if (!npc) return false;
 	auto* face = npc->GetRootFaceNPC();
 	auto* source = face ? face : npc;
 
@@ -272,7 +314,7 @@ void ActorResetQueue::DoRefreshSkinTint(RE::Actor* actor)
 	const uint32_t faceBefore = packBodyTint(source);
 
 	RE::NiColorA color{};
-	if (!getBodyTintColor(source, color, true)) return;
+	if (!getBodyTintColor(source, color, true)) return false;
 
 	// Распространяем пересчитанный кэш цвета и данные тинтов по всей цепочке шаблонов:
 	for (auto* cur = npc; cur; cur = cur->faceNPC) {
@@ -285,10 +327,43 @@ void ActorResetQueue::DoRefreshSkinTint(RE::Actor* actor)
 		}
 	}
 
+	if (outColor) {
+		*outColor = color;
+	}
+
 	logger::info("[SkinTint] actor={:#x} npc={:#x} face={:#x} cache npc 0x{:08x}->0x{:08x}, face 0x{:08x}->0x{:08x}, color=({:.3f},{:.3f},{:.3f},{:.3f})",
 		actor->GetFormID(), npc->GetFormID(), source->GetFormID(),
 		npcBefore, packBodyTint(npc), faceBefore, packBodyTint(source),
 		color.r, color.g, color.b, color.a);
+	return true;
+}
+
+void ActorResetQueue::DoRefreshSkinTint(RE::Actor* actor)
+{
+	RE::NiColorA color{};
+	if (!SyncNPCSkinTintCache(actor, &color)) return;
+
+	// Красим все BSLightingShaderMaterialSkinTint (feature == 5) уже загруженного 3D
+	// (торс, руки, кисти, ноги, открытые участки кожи на одежде) без вызова Reset3D тела.
+	auto* root3D = actor->Get3D(false);
+	if (root3D) {
+		paintNodeSkinTint(root3D, color);
+	}
+
+	if (const auto& biped = actor->GetBiped(false); biped && biped->root && biped->root != root3D) {
+		paintNodeSkinTint(biped->root, color);
+	}
+
+	if (actor == RE::PlayerCharacter::GetSingleton()) {
+		auto* root1P = actor->Get3D(true);
+		if (root1P && root1P != root3D) {
+			paintNodeSkinTint(root1P, color);
+		}
+		if (const auto& biped1P = RE::PlayerCharacter::GetSingleton()->GetBiped(true);
+			biped1P && biped1P->root && biped1P->root != root1P && biped1P->root != root3D) {
+			paintNodeSkinTint(biped1P->root, color);
+		}
+	}
 }
 
 // ---------------------------------------------------------------------------

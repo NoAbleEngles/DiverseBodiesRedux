@@ -911,9 +911,13 @@ bool NPCPreset::applyImpl(RE::Actor* actor, bool reset3d, bool checkAlreadyAppli
 		if (tintsApplied) {
 		 flags |= RE::RESET_3D_FLAGS::kFace;
 		 success = true;
-		 // Скин-тон мог измениться: голова возьмёт его из tintingData, а тело и ладони — из кэша
-		 // TESNPC::bodyTintColor. Синхронизируем на игровом потоке через ActorResetQueue.
-		 ActorResetQueue::GetSingleton().Schedule(actor, ActorResetQueue::ResetEntry{ .needsSkinTintRefresh = true });
+		 // Немедленно обновляем кэш TESNPC::bodyTintColor, чтобы фоновая сборка тела/рук
+		 // (QueuedCharacter -> GetBodyTintColor с force=false) сразу брала новый цвет кожи,
+		 // и планируем покраску шейдеров уже загруженного 3D на игровом потоке.
+		 ActorResetQueue::SyncNPCSkinTintCache(actor);
+		 if (actor->Get3D()) {
+			 ActorResetQueue::GetSingleton().Schedule(actor, ActorResetQueue::ResetEntry{ .needsSkinTintRefresh = true });
+		 }
 		}
 	}
 
