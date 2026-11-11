@@ -6,13 +6,13 @@ namespace patches
 {
 	// ========= Memory checks (faster than IsBadReadPtr/IsBadWritePtr) =========
 
-	// Быстрая проверка: адрес в коммитнутом регионе с правами чтения и размером не меньше minSize
+	// Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРІРµСЂРєР°: Р°РґСЂРµСЃ РІ РєРѕРјРјРёС‚РЅСѓС‚РѕРј СЂРµРіРёРѕРЅРµ СЃ РїСЂР°РІР°РјРё С‡С‚РµРЅРёСЏ Рё СЂР°Р·РјРµСЂРѕРј РЅРµ РјРµРЅСЊС€Рµ minSize
 	bool IsReadableFast(const void* p, std::size_t minSize = sizeof(void*));
 
-	// Быстрая проверка: адрес в коммитнутом регионе с правами записи и размером не меньше minSize
+	// Р‘С‹СЃС‚СЂР°СЏ РїСЂРѕРІРµСЂРєР°: Р°РґСЂРµСЃ РІ РєРѕРјРјРёС‚РЅСѓС‚РѕРј СЂРµРіРёРѕРЅРµ СЃ РїСЂР°РІР°РјРё Р·Р°РїРёСЃРё Рё СЂР°Р·РјРµСЂРѕРј РЅРµ РјРµРЅСЊС€Рµ minSize
 	bool IsWritableFast(void* p, std::size_t minSize = sizeof(void*));
 
-	// Легкая “проба” чтения с SEH — используйте только как редкую страховку
+	// Р›РµРіРєР°СЏ вЂњРїСЂРѕР±Р°вЂќ С‡С‚РµРЅРёСЏ СЃ SEH вЂ” РёСЃРїРѕР»СЊР·СѓР№С‚Рµ С‚РѕР»СЊРєРѕ РєР°Рє СЂРµРґРєСѓСЋ СЃС‚СЂР°С…РѕРІРєСѓ
 	template <class T>
 	inline bool SafeProbeRead(const T* p, T& out)
 	{
@@ -34,7 +34,7 @@ namespace patches
 #endif
 	}
 
-	// Легкая “проба” записи с SEH — используйте только как редкую страховку
+	// Р›РµРіРєР°СЏ вЂњРїСЂРѕР±Р°вЂќ Р·Р°РїРёСЃРё СЃ SEH вЂ” РёСЃРїРѕР»СЊР·СѓР№С‚Рµ С‚РѕР»СЊРєРѕ РєР°Рє СЂРµРґРєСѓСЋ СЃС‚СЂР°С…РѕРІРєСѓ
 	template <class T>
 	inline bool SafeProbeWrite(T* p, const T& val)
 	{
@@ -59,16 +59,19 @@ namespace patches
 	// ========= Game TLS guard (Fallout4.exe TLS[TlsIndex] slot) =========
 
 	// RVA BSClothExtraData::SetWorld(hclBSWorld*)
-	static constexpr std::uintptr_t kBSClothExtraData_SetWorld_RVA = 0x1DA6C30;
+	static constexpr std::uintptr_t kBSClothExtraData_SetWorld_RVA = 0x18A0DA0; // 1.10.163: 0x1DA6C30
 
-	// В первых ~0x80 байтах функции есть: 44 8B 05 xx xx xx xx  (mov r8d, dword ptr [rip+disp32]) -> cs:TlsIndex
+	// РђРґСЂРµСЃ РїРµСЂРµРјРµРЅРЅРѕР№ _tls_index РІ Fallout4.exe
+	const std::uint32_t* GetGameTlsIndexPtr();
+
+	// Р’ РїРµСЂРІС‹С… ~0x80 Р±Р°Р№С‚Р°С… С„СѓРЅРєС†РёРё РµСЃС‚СЊ: 44 8B 05 xx xx xx xx  (mov r8d, dword ptr [rip+disp32]) -> cs:TlsIndex
 	bool ResolveGameTlsIndex(std::uint32_t& outIdx);
 
-	// Проверяет, что TLS[TlsIndex] != nullptr для текущего потока (как в игре).
-	// Это главный сторож от падения на Fallout4.exe+1DA6C5C.
+	// РџСЂРѕРІРµСЂСЏРµС‚, С‡С‚Рѕ TLS[TlsIndex] != nullptr РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕС‚РѕРєР° (РєР°Рє РІ РёРіСЂРµ).
+	// Р­С‚Рѕ РіР»Р°РІРЅС‹Р№ СЃС‚РѕСЂРѕР¶ РѕС‚ РїР°РґРµРЅРёСЏ РЅР° Fallout4.exe+18A0DCC.
 	bool HasGameTLSGuardSlot();
 
-	// Безопасный вызов оригинала с перехватом AV (не даем упасть процессу).
+	// Р‘РµР·РѕРїР°СЃРЅС‹Р№ РІС‹Р·РѕРІ РѕСЂРёРіРёРЅР°Р»Р° СЃ РїРµСЂРµС…РІР°С‚РѕРј AV (РЅРµ РґР°РµРј СѓРїР°СЃС‚СЊ РїСЂРѕС†РµСЃСЃСѓ).
 	template <class TFunc, class... Args>
 	inline void CallOriginalSafe(TFunc fn, Args... args)
 	{
@@ -79,7 +82,7 @@ namespace patches
 		__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION
 			? EXCEPTION_EXECUTE_HANDLER
 			: EXCEPTION_CONTINUE_SEARCH) {
-			// проглатываем, чтобы не уронить процесс
+			// РїСЂРѕРіР»Р°С‚С‹РІР°РµРј, С‡С‚РѕР±С‹ РЅРµ СѓСЂРѕРЅРёС‚СЊ РїСЂРѕС†РµСЃСЃ
 		}
 #else
 		fn(args...);

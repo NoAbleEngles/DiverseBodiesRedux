@@ -67,7 +67,7 @@ Filter getFilterFromString(const std::string& filterString) noexcept;
  * @param filter Фильтр, для которого нужно получить строку.
  * @return Строковое представление фильтра.
  */
-constexpr std::string_view getFilterString(Filter filter) noexcept;
+std::string_view getFilterString(Filter filter) noexcept;
 
 /**
  * @brief Выполняет функцию для каждого значения Filter.

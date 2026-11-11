@@ -1,7 +1,7 @@
 #include "Bodymorphs.h"
 #include "PugiXML/pugixml.hpp"
 #include "LooksMenu/LooksMenuInterfaces.h"
-#include "Ini/ini.h"
+#include "Ini/Ini.h"
 #include "Details/ProcessingGuard.hpp"
 #include "ActorsManager/ActorResetQueue.h"
 
@@ -105,13 +105,38 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		return false;
 	}
 
+	auto Interface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
+	if (!Interface) {
+		logger::critical("BodyMorphInterface is nullptr!");
+		return false;
+	}
+
+	const bool isFemale = (actor->GetSex() == RE::Actor::Sex::Female);
+
+	if (isFemale) {
+		// Hands have static wrist circumference in CBBE/TWB.
+		// Explicitly zero arm-widening sliders to prevent wrist seam step / normal separation:
+		Interface->SetMorph(actor, true, "Arms", globals::kwd_diversed, 0.0f);
+		Interface->SetMorph(actor, true, "ChubbyArms", globals::kwd_diversed, 0.0f);
+		Interface->SetMorph(actor, true, "ForearmSize", globals::kwd_diversed, 0.0f);
+		Interface->SetMorph(actor, true, "MuscularArms", globals::kwd_diversed, 0.0f);
+		Interface->SetMorph(actor, true, "Arms", nullptr, 0.0f);
+		Interface->SetMorph(actor, true, "ChubbyArms", nullptr, 0.0f);
+		Interface->SetMorph(actor, true, "ForearmSize", nullptr, 0.0f);
+		Interface->SetMorph(actor, true, "MuscularArms", nullptr, 0.0f);
+	}
+
 	for (const auto& [morphName, morphValue] : m_morphs) {
-		auto Interface = LooksMenuInterfaces<BodyMorphInterface>::GetInterface();
-		if (!Interface) {
-			logger::critical("BodyMorphInterface is nullptr!");
-			return false;
+		if (isFemale) {
+			if (morphName == "Arms" || morphName == "ChubbyArms" ||
+			    morphName == "ForearmSize" || morphName == "MuscularArms") {
+				continue;
+			}
 		}
-		Interface->SetMorph(actor, actor->GetSex() == RE::Actor::Sex::Female, morphName, globals::kwd_diversed, morphValue);
+		Interface->SetMorph(actor, isFemale, morphName, globals::kwd_diversed, morphValue);
+		// Also populate base morph (keyword=nullptr) so physics engines (OCBP / cbp.dll)
+		// querying GetMorph(actor, isFemale, slider, nullptr) read true breast & body dimensions:
+		Interface->SetMorph(actor, isFemale, morphName, nullptr, morphValue);
 	}
 
 	// UpdateMorphs применяет записанные значения к геометрии 3D-нода.
@@ -140,19 +165,11 @@ bool BodymorphsPreset::apply(RE::Actor* actor, bool reset3d) const
 		return true;
 	}
 
-	if (reset3d) {
-		// Планируем DetachOverlays + body Reset3D через единую очередь.
-		// needsBodyReset=true: Reset3D(excludeFlags=kHead|kFace) — голова не трогается.
-		// needsDetach=true: DetachOverlays перед reset.
-		logger::info("[BM] apply: schedule ActorResetQueue actor={:#x}", actor->formID);
-		ActorResetQueue::GetSingleton().Schedule(actor, ActorResetQueue::ResetEntry{
-			.needsBodyReset = true,
-			.needsHeadReset = false,
-			.needsDetach    = true,
-			.needsHeadFix   = false,
-		});
-	}
-
+	// Morphs already applied directly to loaded 3D via UpdateMorphs(actor) above.
+	// We do NOT call Reset3D or DetachOverlays here:
+	// DetachOverlays destroys the body armor/skin slot in LooksMenu, which made pants/thighs invisible,
+	// and Reset3D triggers unnecessary mesh reloads.
+	logger::info("[BM] apply: actor={:#x} morphs applied directly via UpdateMorphs", actor->formID);
 	return true;
 }
 
@@ -177,7 +194,9 @@ bool BodymorphsPreset::remove(RE::Actor* actor) const
 		return false;
 	}
 
-	Interface->RemoveMorphsByKeyword(actor, actor->GetSex() == RE::Actor::Sex::Female, globals::kwd_diversed);
+	const bool isFemale = (actor->GetSex() == RE::Actor::Sex::Female);
+	Interface->RemoveMorphsByKeyword(actor, isFemale, globals::kwd_diversed);
+	Interface->RemoveMorphsByKeyword(actor, isFemale, nullptr);
 
 	processingActors.erase(actor); // Удаляем актёра из списка обрабатываемых
 	return true;
@@ -387,7 +406,7 @@ void ResetBodyMorphs::Run() {
 					if (slotNode)
 					{
 						if (IsNodeMorphable(slotNode.get())) {
-							RE::NiPointer<RE::NiNode> parent(slotNode->parent);
+							RE::NiNode* parent = slotNode->parent;
 
 							auto overlayInterface = LooksMenuInterfaces<OverlayInterface>::GetInterface();
 							if (!bodyMorphInterface) {
@@ -412,9 +431,6 @@ void ResetBodyMorphs::Run() {
 		}
 
 		if (m_doReset && m_actor->GetFullyLoaded3D()) {
-			if (auto npc = m_actor->GetNPC(); npc) {
-				npc->AddChange(0x4000);
-			}
 			logger::info("[BM] ResetBodyMorphs::Run: calling Reset3D for actor={:#x}", m_actor->formID);
 			using R3D = RE::RESET_3D_FLAGS;
 			// excludeFlags = kHead|kFace: не трогаем голову при сбросе тела.

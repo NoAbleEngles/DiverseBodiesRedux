@@ -250,7 +250,7 @@ namespace ini
 	inline T map::getAt(const std::string& key, const std::string& section) const
 	{
 		if (contains(key, section)) {
-			std::string value_str = std::string(m_inimap[section][key]);  // Получаем значение как строку
+			std::string value_str = std::string(m_inimap.at(section).at(key));  // Получаем значение как строку
 			std::istringstream iss(value_str);                          // Создаем поток для преобразования
 			T value;
 			if (!(iss >> value)) {  // Пробуем считать значение
@@ -306,7 +306,7 @@ namespace ini
 		oss << val;
 		std::string value_str = oss.str();
 
-		m_inimap[section][key] = value_str;  // Обновляем значение в памяти
+		m_inimap.at(section).at(key) = value_str;  // Обновляем значение в памяти
 
 		// Читаем весь файл в память
 		std::ifstream in_file(m_path);

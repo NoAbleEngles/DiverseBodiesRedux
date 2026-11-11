@@ -20,6 +20,10 @@ namespace logger = F4SE::log;
 #	define LOOKSMENU_1_6_20_CHECKSUM 0x59F7081
 #endif  // !LOOKSMENU_1_6_20_CHECKSUM
 
+#ifndef LOOKSMENU_1_7_0_4_CHECKSUM
+#	define LOOKSMENU_1_7_0_4_CHECKSUM 0x600771d
+#endif  // !LOOKSMENU_1_7_0_4_CHECKSUM
+
 class OverlayInterface;
 typedef uint32_t UniqueID;
 
@@ -490,10 +494,15 @@ RETURN_PTR:
 		// Инициализация происходит только один раз
 		if (!isInitialized_) {
 			std::unique_lock<std::mutex> lock(mutex_);
-			if (!isInitialized_)
+			if (!isInitialized_) {
 				InitializeInterfaces();
+				if (!isInitialized_) {
+					return nullptr;
+				}
+			}
+			goto RETURN_PTR;
 		}
-		goto RETURN_PTR;
+		return nullptr;
 	}
 
 private:
@@ -503,16 +512,33 @@ private:
 			return;
 
 		// Проверяем, установлен ли LooksMenu, только один раз
-		if (F4SE::GetPluginInfo("F4EE").has_value() && !LooksMenu_isInstalled) {
+		// LooksMenu 1.7.0.4 (AE) registers as "Fallout 4 Engine Extender" instead of "F4EE"
+		if ((F4SE::GetPluginInfo("F4EE").has_value() || F4SE::GetPluginInfo("Fallout 4 Engine Extender").has_value() || GetModuleHandleA("f4ee.dll") != nullptr) && !LooksMenu_isInstalled) {
 			// Получаем контрольную сумму
 			if (auto sum = checksum("Data/F4SE/Plugins/f4ee.dll"); sum > 0) {
 				LooksMenu_isInstalled = true;
 				std::string verStr = "";
 
 				switch (sum) {
+				case LOOKSMENU_1_7_0_4_CHECKSUM:
+					version = k1_7_0_4;
+					verStr = "1.7.0.4";
+					offset_g_CharGenInterface = 0x10DBD0;
+					offset_g_BodygenInterface = 0x10DC60;
+					offset_g_bodyMorphInterface = 0x10DD30;
+					offset_g_OverlayInterface = 0x10DEA0;
+					offset_g_SkinInterface = 0x10E020;
+					offset_g_ActorUpdateManager = 0xFD6D0;
+					break;
 				case LOOKSMENU_1_6_20_CHECKSUM:
 					version = k1_6_20;
 					verStr = "1.6.20";
+					offset_g_CharGenInterface = 0xF4BC0;
+					offset_g_BodygenInterface = 0xF4D20;
+					offset_g_bodyMorphInterface = 0xF4DF0;
+					offset_g_OverlayInterface = 0xF5040;
+					offset_g_SkinInterface = 0xF4F60;
+					offset_g_ActorUpdateManager = 0xF4C70;
 					break;
 				default:
 					LooksMenu_isInstalled = false;
@@ -600,14 +626,15 @@ private:
 	inline static bool LooksMenu_isInstalled = false;
 	inline static std::string version;
 	inline static const std::string k1_6_20 = "1.6.20";
+	inline static const std::string k1_7_0_4 = "1.7.0.4";
 
-	// Смещения для интерфейсов
-	inline constinit static uint32_t offset_g_CharGenInterface = 0xF4BC0;
-	inline constinit static uint32_t offset_g_BodygenInterface = 0xF4D20;
-	inline constinit static uint32_t offset_g_bodyMorphInterface = 0xF4DF0;
-	inline constinit static uint32_t offset_g_OverlayInterface = 0xF5040;
-	inline constinit static uint32_t offset_g_SkinInterface = 0xF4F60;
-	inline constinit static uint32_t offset_g_ActorUpdateManager = 0xF4C70; 
+	// Смещения для интерфейсов (по умолчанию LooksMenu 1.7.0.4 для Fallout 4 1.11.240.0)
+	inline constinit static uint32_t offset_g_CharGenInterface = 0x10DBD0;
+	inline constinit static uint32_t offset_g_BodygenInterface = 0x10DC60;
+	inline constinit static uint32_t offset_g_bodyMorphInterface = 0x10DD30;
+	inline constinit static uint32_t offset_g_OverlayInterface = 0x10DEA0;
+	inline constinit static uint32_t offset_g_SkinInterface = 0x10E020;
+	inline constinit static uint32_t offset_g_ActorUpdateManager = 0xFD6D0; 
 };
 
 bool IsNodeMorphable(RE::NiAVObject* rootNode);

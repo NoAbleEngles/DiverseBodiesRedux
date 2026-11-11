@@ -1,5 +1,5 @@
 #include "PresetsManager.h"
-#include "Ini/ini.h"
+#include "Ini/Ini.h"
 #include "MainMenuHandler/MainMenuHandler.h"
 #include <sstream>
 
@@ -101,7 +101,7 @@ bool PresetsManager::unsubscribeFromValidated(CallbackId id) {
     return true;
 }
 
-inline std::shared_ptr<Preset> PresetsManager::getPreset(const std::string& id) const noexcept {
+std::shared_ptr<Preset> PresetsManager::getPreset(const std::string& id) const noexcept {
     auto it = std::find_if(m_presets.begin(), m_presets.end(),
         [&id](const std::shared_ptr<Preset>& preset) {
             return preset && preset->id() == id;

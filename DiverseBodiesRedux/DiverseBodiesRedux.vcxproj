@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -119,10 +119,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32;_WINDOWS;_UNICODE;BOOST_STL_INTERFACES_DISABLE_CONCEPTS;WINVER=0x0601;_WIN32_WINNT=0x0601;FMT_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;WIN32;_WINDOWS;_UNICODE;F4_GAME_VERSION_AE;BOOST_STL_INTERFACES_DISABLE_CONCEPTS;WINVER=0x0601;_WIN32_WINNT=0x0601;FMT_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\spdlog\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\mmio\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\fmt\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\include;$(BOOST);C:\cpp\CommonLibF4\CommonLibF4\include;.\Sources</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\spdlog\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\mmio\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\fmt\include;C:\cpp\DiverseBodiesRedux\DiverseBodiesRedux\Sources\zlib\include;$(BOOST);..\CommonLibF4\include;C:\cpp\CommonLibF4\CommonLibF4\include;.\Sources</AdditionalIncludeDirectories>
       <TreatWarningAsError>false</TreatWarningAsError>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -493,7 +493,10 @@
     <ClInclude Include="Sources\LooksMenu\LooksMenuInterfaces.h" />
     <ClInclude Include="Sources\LooksMenu\ParseLooksMenuPreset.h" />
     <ClInclude Include="Sources\MainMenuHandler\MainMenuHandler.h" />
+    <ClInclude Include="Sources\Patches\ClothMorphFilter.h" />
     <ClInclude Include="Sources\Patches\ClothWorldFix.h" />
+    <ClInclude Include="Sources\Patches\FaceGenNullGuard.h" />
+    <ClInclude Include="Sources\Patches\FacialMorphIntensityFix.h" />
     <ClInclude Include="Sources\Patches\Patches.h" />
     <ClInclude Include="Sources\Patches\PatchesMemUtils.h" />
     <ClInclude Include="Sources\Patches\x-cell_patch.h" />
@@ -583,7 +586,10 @@
     <ClCompile Include="Sources\LooksMenu\ParseLooksMenuPreset.cpp" />
     <ClCompile Include="Sources\main.cpp" />
     <ClCompile Include="Sources\MainMenuHandler\MainMenuHandler.cpp" />
+    <ClCompile Include="Sources\Patches\ClothMorphFilter.cpp" />
     <ClCompile Include="Sources\Patches\ClothWorldFix.cpp" />
+    <ClCompile Include="Sources\Patches\FaceGenNullGuard.cpp" />
+    <ClCompile Include="Sources\Patches\FacialMorphIntensityFix.cpp" />
     <ClCompile Include="Sources\Patches\Patches.cpp" />
     <ClCompile Include="Sources\Patches\PatchesMemUtils.cpp" />
     <ClCompile Include="Sources\Patches\x-cell_patch.cpp" />

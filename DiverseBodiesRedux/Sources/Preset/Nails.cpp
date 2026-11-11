@@ -1,4 +1,4 @@
-#include "Ini/ini.h"
+#include "Ini/Ini.h"
 #include "Nails.h"
 #include <PugiXML/pugixml.hpp>
 #include <thread>

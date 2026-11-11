@@ -54,18 +54,13 @@ namespace patches
             local.swap(ClothDetachQueue::_queue);
         }
 
-        auto orig = BSClothExtraData_SetWorld_Handler.GetOriginal();
-        if (!orig) {
-            return;
-        }
-
         for (void* p : local) {
             auto* cloth = static_cast<RE::BSClothExtraData*>(p);
             if (!cloth) {
                 continue;
             }
-            // Единожды мягко отсоединяем world
-            CallOriginalSafe(orig, cloth, nullptr);
+            // Единожды мягко отсоединяем world через безопасную нативную реализацию
+            Hooked_BSClothExtraData_SetWorld(cloth, nullptr);
             ClothGuard::MarkDetached(p);
         }
     }
@@ -96,33 +91,19 @@ namespace patches
 
     void ClothGuard::Quarantine(void* key)
     {
-        std::scoped_lock lk(ClothGuard::_mtx);
-        ClothGuard::_map[key].quarantined = true;
     }
 
     bool ClothGuard::IsQuarantined(void* key)
     {
-        std::scoped_lock lk(ClothGuard::_mtx);
-        return ClothGuard::_map[key].quarantined;
+        return false;
     }
 
     bool ClothGuard::MarkPendingDetach(void* key)
     {
-        std::scoped_lock lk(ClothGuard::_mtx);
-        auto& e = ClothGuard::_map[key];
-        if (e.pendingDetach || e.detached) {
-            return false;
-        }
-        e.pendingDetach = true;
         return true;
     }
 
     void ClothGuard::MarkDetached(void* key)
     {
-        std::scoped_lock lk(ClothGuard::_mtx);
-        auto& e = ClothGuard::_map[key];
-        e.pendingDetach = false;
-        e.detached = true;
-        e.quarantined = true;
     }
 }
